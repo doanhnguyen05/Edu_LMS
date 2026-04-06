@@ -1,0 +1,27 @@
+Test run for /Users/doanhnguyen/Documents/tài liệu/phầm mềm/WEB nâng cao/EcduLMS.Web.Tests/bin/Debug/net9.0/EcduLMS.Web.Tests.dll (.NETCoreApp,Version=v9.0)
+VSTest version 17.14.1 (arm64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+/Users/doanhnguyen/Documents/tài liệu/phầm mềm/WEB nâng cao/EcduLMS.Web.Tests/bin/Debug/net9.0/EcduLMS.Web.Tests.dll
+[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v2.8.2+699d445a1a (64-bit .NET 9.0.8)
+[xUnit.net 00:00:00.03]   Discovering: EcduLMS.Web.Tests
+[xUnit.net 00:00:00.05]   Discovered:  EcduLMS.Web.Tests
+[xUnit.net 00:00:00.06]   Starting:    EcduLMS.Web.Tests
+  Passed EcduLMS.Web.Tests.Account.LoginViewModelTests.LoginViewModel_WithEmptyEmail_ShouldContainRequiredError [7 ms]
+  Passed EcduLMS.Web.Tests.Account.LoginViewModelTests.LoginViewModel_WithInvalidEmailFormat_ShouldContainEmailFormatError [< 1 ms]
+  Passed EcduLMS.Web.Tests.Account.LoginViewModelTests.LoginViewModel_WithEmptyPassword_ShouldContainRequiredError [< 1 ms]
+  Passed EcduLMS.Web.Tests.Account.LoginViewModelTests.LoginViewModel_WithValidEmailAndPassword_ShouldBeValid [< 1 ms]
+  Passed EcduLMS.Web.Tests.Learner.LessonControllerProgressTests.MarkComplete_SecondLessonWithoutFirstCompleted_ShouldRedirectToPreviousLesson [750 ms]
+  Passed EcduLMS.Web.Tests.Instructor.GradingControllerScoreValidationTests.SubmitGrade_WhenScoreValid_ShouldPersistGradeAndMarkSubmissionAsGraded [775 ms]
+  Passed EcduLMS.Web.Tests.Controllers.WebhookControllerPaymentTests.SePay_WhenPayloadMatchesPendingPayment_ShouldCompletePaymentAndCreateEnrollment [776 ms]
+[xUnit.net 00:00:00.89]   Finished:    EcduLMS.Web.Tests
+  Passed EcduLMS.Web.Tests.Controllers.WebhookControllerPaymentTests.SePay_WhenTransferAmountIsLowerThanPaymentAmount_ShouldNotCompletePayment [8 ms]
+  Passed EcduLMS.Web.Tests.Instructor.GradingControllerScoreValidationTests.SubmitGrade_WhenScoreOutOfRange_ShouldReturnBadRequestAndNotPersistGrade [10 ms]
+  Passed EcduLMS.Web.Tests.Learner.LessonControllerProgressTests.MarkComplete_LastLesson_ShouldCompleteEnrollmentAt100Percent [49 ms]
+  Passed EcduLMS.Web.Tests.Learner.LessonControllerProgressTests.MarkComplete_FirstLesson_ShouldCreateProgressAndIncreaseEnrollmentPercent [8 ms]
+
+Test Run Successful.
+Total tests: 11
+     Passed: 11
+ Total time: 1.2530 Seconds

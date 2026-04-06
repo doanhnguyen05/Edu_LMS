@@ -1,0 +1,612 @@
+@model CatalogViewModel
+@{
+    ViewData["Title"] = "Danh mục Khóa học";
+}
+
+<style>
+    .catalog-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+    .catalog-header h4 { font-weight: 700; color: #1E293B; margin: 0; }
+    .search-bar {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .search-bar input {
+        border: 1px solid #E2E8F0;
+        border-radius: 8px;
+        padding: 8px 16px;
+        font-size: 14px;
+        width: 280px;
+        outline: none;
+    }
+    .search-bar input:focus { border-color: #2563EB; }
+    .btn-filter-adv {
+        background: #fff;
+        border: 1px solid #E2E8F0;
+        border-radius: 8px;
+        padding: 8px 16px;
+        font-size: 14px;
+        color: #64748B;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .btn-filter-adv:hover { border-color: #2563EB; color: #2563EB; }
+    .filter-row {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 16px;
+        flex-wrap: wrap;
+    }
+    .filter-row select {
+        border: 1px solid #E2E8F0;
+        border-radius: 8px;
+        padding: 8px 16px;
+        font-size: 13px;
+        color: #475569;
+        outline: none;
+        background: #fff;
+        min-width: 160px;
+    }
+    .filter-row select:focus { border-color: #2563EB; }
+    .category-pills {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+    }
+    .category-pill {
+        padding: 8px 20px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.2s;
+        border: 1px solid #E2E8F0;
+        color: #64748B;
+        background: #fff;
+    }
+    .category-pill:hover { border-color: #2563EB; color: #2563EB; }
+    .category-pill.active {
+        background: #2563EB;
+        color: #fff;
+        border-color: #2563EB;
+    }
+    .catalog-card {
+        background: #fff;
+        border-radius: 12px;
+        border: 1px solid #E2E8F0;
+        overflow: hidden;
+        transition: box-shadow 0.2s;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+    .catalog-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+    .catalog-thumb {
+        height: 160px;
+        background: linear-gradient(135deg, #667EEA 0%, #764BA2 100%);
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .catalog-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .catalog-thumb .cat-badge {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        background: rgba(0,0,0,0.6);
+        color: #fff;
+        font-size: 11px;
+        font-weight: 600;
+        padding: 4px 10px;
+        border-radius: 6px;
+    }
+    .enrolled-overlay {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        background: #16A34A;
+        color: #fff;
+        font-size: 11px;
+        font-weight: 600;
+        padding: 4px 10px;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .btn-enrolled {
+        background: #F0FDF4;
+        color: #16A34A;
+        border: 1.5px solid #86EFAC;
+        border-radius: 8px;
+        padding: 8px 16px;
+        font-size: 13px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: background 0.2s;
+    }
+    .btn-enrolled:hover { background: #DCFCE7; color: #15803D; }
+    .catalog-body {
+        padding: 16px;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    .rating-row {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        margin-bottom: 8px;
+    }
+    .rating-stars { color: #F59E0B; font-size: 13px; }
+    .rating-num { font-size: 13px; font-weight: 600; color: #334155; }
+    .rating-count { font-size: 12px; color: #94A3B8; }
+    .catalog-body h6 {
+        font-weight: 600;
+        color: #1E293B;
+        margin-bottom: 8px;
+        font-size: 15px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    .catalog-instructor { font-size: 13px; color: #64748B; margin-bottom: 8px; }
+    .catalog-meta {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        font-size: 12px;
+        color: #94A3B8;
+        margin-bottom: 12px;
+    }
+    .catalog-meta i { margin-right: 3px; }
+    .level-badge {
+        font-size: 11px;
+        font-weight: 600;
+        padding: 3px 10px;
+        border-radius: 4px;
+    }
+    .level-beginner { background: #DCFCE7; color: #16A34A; }
+    .level-intermediate { background: #DBEAFE; color: #2563EB; }
+    .level-advanced { background: #FEE2E2; color: #DC2626; }
+    .catalog-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: auto;
+        padding-top: 12px;
+        border-top: 1px solid #F1F5F9;
+    }
+    .catalog-price { font-size: 18px; font-weight: 700; color: #DC2626; }
+    .catalog-price.free { color: #16A34A; }
+    .btn-enroll {
+        background: #2563EB;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        padding: 8px 16px;
+        font-size: 13px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: background 0.2s;
+    }
+    .btn-enroll:hover { background: #1D4ED8; color: #fff; }
+
+    /* ── Course Detail Modal ── */
+    .course-modal-overlay {
+        display: none; position: fixed; inset: 0;
+        background: rgba(15,23,42,0.55); z-index: 9990;
+        align-items: center; justify-content: center;
+        padding: 16px;
+    }
+    .course-modal-overlay.show { display: flex; }
+    .course-modal {
+        background: #fff; border-radius: 16px; overflow: hidden;
+        width: 860px; max-width: 98vw; max-height: 92vh;
+        display: flex; box-shadow: 0 24px 60px rgba(0,0,0,0.22);
+    }
+    .course-modal-left {
+        width: 340px; flex-shrink: 0; position: relative;
+        background: linear-gradient(135deg, #1e3a5f 0%, #2563EB 100%);
+        display: flex; flex-direction: column; justify-content: flex-end;
+        overflow: hidden; min-height: 420px;
+    }
+    .course-modal-left img {
+        position: absolute; inset: 0; width: 100%; height: 100%;
+        object-fit: cover; opacity: 0.55;
+    }
+    .course-modal-left-content {
+        position: relative; z-index: 2; padding: 24px;
+        background: linear-gradient(to top, rgba(0,0,0,0.75) 0%, transparent 100%);
+    }
+    .modal-cat-badge {
+        display: inline-block; background: #2563EB; color: #fff;
+        font-size: 11px; font-weight: 700; padding: 4px 12px;
+        border-radius: 6px; margin-bottom: 10px;
+    }
+    .modal-course-title {
+        font-size: 20px; font-weight: 800; color: #fff;
+        line-height: 1.3; margin-bottom: 10px;
+    }
+    .modal-instructor { font-size: 13px; color: rgba(255,255,255,0.8); margin-bottom: 12px; }
+    .modal-meta-row {
+        display: flex; align-items: center; gap: 14px;
+        font-size: 12px; color: rgba(255,255,255,0.85);
+    }
+    .modal-meta-row i { margin-right: 3px; }
+    .modal-stars { color: #FBBF24; font-size: 12px; }
+
+    .course-modal-right {
+        flex: 1; padding: 28px; overflow-y: auto; display: flex;
+        flex-direction: column; gap: 0;
+    }
+    .modal-close-btn {
+        position: absolute; top: 14px; right: 14px; z-index: 10;
+        background: rgba(255,255,255,0.15); border: none; color: #fff;
+        width: 30px; height: 30px; border-radius: 50%; cursor: pointer;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 14px; backdrop-filter: blur(4px);
+        transition: background 0.15s;
+    }
+    .modal-close-btn:hover { background: rgba(255,255,255,0.3); }
+    .modal-section-title {
+        font-size: 11px; font-weight: 700; color: #94A3B8;
+        text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px;
+        display: flex; align-items: center; gap: 6px;
+    }
+    .modal-section-title i { font-size: 14px; }
+    .modal-desc {
+        font-size: 14px; color: #475569; line-height: 1.65;
+        margin-bottom: 20px;
+    }
+    .modal-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+    .modal-list { list-style: none; padding: 0; margin: 0; }
+    .modal-list li {
+        display: flex; align-items: flex-start; gap: 8px;
+        font-size: 13px; color: #334155; padding: 4px 0;
+    }
+    .modal-list li i { font-size: 13px; margin-top: 1px; flex-shrink: 0; }
+    .modal-list.content li i { color: #94A3B8; }
+    .modal-list.benefits li i { color: #16A34A; }
+    .modal-footer-row {
+        margin-top: auto; padding-top: 20px;
+        border-top: 1px solid #F1F5F9;
+        display: flex; align-items: center; justify-content: space-between;
+        flex-wrap: wrap; gap: 12px;
+    }
+    .modal-price-label { font-size: 12px; color: #94A3B8; margin-bottom: 2px; }
+    .modal-price { font-size: 26px; font-weight: 800; color: #DC2626; }
+    .modal-price.free { color: #16A34A; }
+    .btn-modal-enroll {
+        background: #2563EB; color: #fff; border: none; border-radius: 10px;
+        padding: 12px 28px; font-size: 14px; font-weight: 700;
+        cursor: pointer; text-decoration: none; display: inline-flex;
+        align-items: center; gap: 8px; transition: background 0.15s;
+    }
+    .btn-modal-enroll:hover { background: #1D4ED8; color: #fff; }
+    .btn-modal-enrolled {
+        background: #F0FDF4; color: #16A34A; border: 1.5px solid #86EFAC;
+        border-radius: 10px; padding: 12px 28px; font-size: 14px; font-weight: 700;
+        cursor: pointer; text-decoration: none; display: inline-flex;
+        align-items: center; gap: 8px; transition: background 0.15s;
+    }
+    .btn-modal-enrolled:hover { background: #DCFCE7; color: #15803D; }
+    .modal-skeleton { animation: pulse 1.4s infinite; }
+    @@keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.4; }
+    }
+    .catalog-card { cursor: pointer; }
+</style>
+
+<div class="catalog-header">
+    <h4>Danh mục Khóa học</h4>
+    <div class="search-bar">
+        <form method="get" asp-area="Learner" asp-controller="Catalog" asp-action="Index" class="d-flex gap-2">
+            <input type="text" name="search" placeholder="Tìm kiếm khóa học..." value="@Model.SearchQuery" />
+            <button type="submit" class="btn-filter-adv">
+                <i class="bi bi-search"></i>
+            </button>
+        </form>
+        <button class="btn-filter-adv" id="toggleFilters">
+            <i class="bi bi-sliders"></i> Bộ lọc chuyên sâu
+        </button>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="filter-row" id="filterRow" style="display: none;">
+    <select id="levelFilter">
+        <option value="">Trình độ</option>
+        <option value="Beginner">Cơ bản</option>
+        <option value="Intermediate">Trung bình</option>
+        <option value="Advanced">Nâng cao</option>
+    </select>
+    <select id="durationFilter">
+        <option value="">Thời lượng</option>
+        <option value="short">Dưới 20 giờ</option>
+        <option value="medium">20-40 giờ</option>
+        <option value="long">Trên 40 giờ</option>
+    </select>
+    <select id="ratingFilter">
+        <option value="">Đánh giá</option>
+        <option value="4.5">Trên 4.5 sao</option>
+        <option value="4.0">Trên 4.0 sao</option>
+        <option value="3.5">Trên 3.5 sao</option>
+    </select>
+</div>
+
+<!-- Category Pills -->
+<div class="category-pills">
+    <a href="@Url.Action("Index", "Catalog", new { area = "Learner" })" class="category-pill @(string.IsNullOrEmpty(Model.SelectedCategory) ? "active" : "")">Tất cả</a>
+    @foreach (var cat in Model.Categories)
+    {
+        <a href="@Url.Action("Index", "Catalog", new { area = "Learner", category = cat.Slug })"
+           class="category-pill @(Model.SelectedCategory == cat.Slug ? "active" : "")">@cat.Name</a>
+    }
+</div>
+
+<!-- Course Grid -->
+<div class="row" id="courseGrid">
+    @foreach (var course in Model.Courses)
+    {
+        var levelClass = course.Level.ToLower() switch
+        {
+            "beginner" => "level-beginner",
+            "intermediate" => "level-intermediate",
+            "advanced" => "level-advanced",
+            _ => "level-beginner"
+        };
+        var levelText = course.Level.ToLower() switch
+        {
+            "beginner" => "Cơ bản",
+            "intermediate" => "Trung bình",
+            "advanced" => "Nâng cao",
+            _ => course.Level
+        };
+
+        <div class="col-lg-3 col-md-6 mb-4 catalog-item"
+             data-level="@course.Level"
+             data-duration="@course.DurationHours"
+             data-rating="@course.Rating"
+             data-name="@course.Name.ToLower()">
+            <div class="catalog-card" onclick="openCourseModal(@course.Id, event)">
+                <div class="catalog-thumb">
+                    @if (!string.IsNullOrEmpty(course.CoverImageUrl))
+                    {
+                        <img src="@course.CoverImageUrl" alt="@course.Name" />
+                    }
+                    else
+                    {
+                        <i class="bi bi-journal-code" style="font-size: 40px; color: rgba(255,255,255,0.5);"></i>
+                    }
+                    <span class="cat-badge">@course.CategoryName</span>
+                    @if (course.IsEnrolled)
+                    {
+                        <span class="enrolled-overlay"><i class="bi bi-check-circle-fill"></i> Đã đăng ký</span>
+                    }
+                </div>
+                <div class="catalog-body">
+                    <div class="rating-row">
+                        <span class="rating-stars">
+                            @for (int i = 0; i < 5; i++)
+                            {
+                                if (i < (int)course.Rating)
+                                {
+                                    <i class="bi bi-star-fill"></i>
+                                }
+                                else
+                                {
+                                    <i class="bi bi-star"></i>
+                                }
+                            }
+                        </span>
+                        <span class="rating-num">@course.Rating.ToString("F1")</span>
+                        <span class="rating-count">(@course.RatingCount)</span>
+                    </div>
+                    <h6>@course.Name</h6>
+                    <div class="catalog-instructor"><i class="bi bi-person me-1"></i> @course.InstructorName</div>
+                    <div class="catalog-meta">
+                        <span><i class="bi bi-clock"></i> @course.DurationHours giờ</span>
+                        <span class="level-badge @levelClass">@levelText</span>
+                    </div>
+                    <div class="catalog-footer">
+                        <span class="catalog-price @(course.PriceValue == 0 ? "free" : "")">@course.Price</span>
+                        @if (course.IsEnrolled)
+                        {
+                            <a asp-area="Learner" asp-controller="Training" asp-action="Index" class="btn-enrolled" onclick="event.stopPropagation()">
+                                <i class="bi bi-play-fill me-1"></i>Tiếp tục học
+                            </a>
+                        }
+                        else
+                        {
+                            <a asp-area="Learner" asp-controller="Payment" asp-action="Checkout" asp-route-id="@course.Id" class="btn-enroll" onclick="event.stopPropagation()">
+                                Đăng ký ngay
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Course Detail Modal -->
+<div class="course-modal-overlay" id="courseModalOverlay" onclick="closeCourseModal(event)">
+    <div class="course-modal" id="courseModal">
+        <!-- Left panel -->
+        <div class="course-modal-left" id="modalLeft">
+            <button class="modal-close-btn" onclick="closeCourseModal()"><i class="bi bi-x-lg"></i></button>
+            <img id="modalImg" src="" alt="" style="display:none;" />
+            <div class="course-modal-left-content">
+                <span class="modal-cat-badge" id="modalCat"></span>
+                <div class="modal-course-title" id="modalTitle"></div>
+                <div class="modal-instructor"><i class="bi bi-person me-1"></i><span id="modalInstructor"></span></div>
+                <div class="modal-meta-row">
+                    <span><span class="modal-stars" id="modalStars"></span> <span id="modalRating"></span> (<span id="modalRatingCount"></span>)</span>
+                    <span><i class="bi bi-clock"></i> <span id="modalDuration"></span> giờ</span>
+                </div>
+            </div>
+        </div>
+        <!-- Right panel -->
+        <div class="course-modal-right">
+            <h5 style="font-weight:800; color:#1E293B; margin-bottom:16px;">Giới thiệu khóa học</h5>
+            <p class="modal-desc" id="modalDesc"></p>
+            <div class="modal-cols">
+                <div>
+                    <div class="modal-section-title"><i class="bi bi-journal-text" style="color:#2563EB;"></i> Nội dung chính</div>
+                    <ul class="modal-list content" id="modalChapters"></ul>
+                </div>
+                <div>
+                    <div class="modal-section-title"><i class="bi bi-patch-check" style="color:#16A34A;"></i> Quyền lợi</div>
+                    <ul class="modal-list benefits">
+                        <li><i class="bi bi-check-circle-fill"></i> Truy cập trọn đời</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Chứng chỉ hoàn thành</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Hỗ trợ Q&A 24/7</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Bài tập thực hành thực tế</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="modal-footer-row">
+                <div>
+                    <div class="modal-price-label">Giá đăng ký</div>
+                    <div class="modal-price" id="modalPrice"></div>
+                </div>
+                <a id="modalActionBtn" href="#" class="btn-modal-enroll">
+                    <i class="bi bi-lightning-charge-fill"></i> Đăng ký ngay
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    document.getElementById('toggleFilters').addEventListener('click', function() {
+        var row = document.getElementById('filterRow');
+        row.style.display = row.style.display === 'none' ? 'flex' : 'none';
+    });
+
+    function applyFilters() {
+        var level = document.getElementById('levelFilter').value;
+        var duration = document.getElementById('durationFilter').value;
+        var rating = document.getElementById('ratingFilter').value;
+
+        document.querySelectorAll('.catalog-item').forEach(function(item) {
+            var show = true;
+            if (level && item.dataset.level !== level) show = false;
+            if (rating && parseFloat(item.dataset.rating) < parseFloat(rating)) show = false;
+            if (duration) {
+                var d = parseFloat(item.dataset.duration);
+                if (duration === 'short' && d >= 20) show = false;
+                if (duration === 'medium' && (d < 20 || d > 40)) show = false;
+                if (duration === 'long' && d <= 40) show = false;
+            }
+            item.style.display = show ? '' : 'none';
+        });
+    }
+
+    document.getElementById('levelFilter').addEventListener('change', applyFilters);
+    document.getElementById('durationFilter').addEventListener('change', applyFilters);
+    document.getElementById('ratingFilter').addEventListener('change', applyFilters);
+
+    // ── Course Detail Modal ──────────────────────────────────────────────
+    const DETAIL_URL = '@Url.Action("GetDetail", "Catalog", new { area = "Learner" })';
+
+    function openCourseModal(courseId, e) {
+        if (e) e.stopPropagation();
+        const overlay = document.getElementById('courseModalOverlay');
+        overlay.classList.add('show');
+        document.body.style.overflow = 'hidden';
+
+        // Show skeleton while loading
+        document.getElementById('modalTitle').textContent = '...';
+        document.getElementById('modalDesc').textContent = '';
+        document.getElementById('modalChapters').innerHTML = '<li><i class="bi bi-circle"></i><span class="modal-skeleton" style="background:#e2e8f0;height:14px;width:160px;border-radius:4px;display:inline-block;"></span></li>'.repeat(3);
+
+        fetch(`${DETAIL_URL}?id=${courseId}`)
+            .then(r => r.json())
+            .then(d => {
+                // Left panel
+                const img = document.getElementById('modalImg');
+                if (d.coverImageUrl) {
+                    img.src = d.coverImageUrl;
+                    img.style.display = 'block';
+                } else {
+                    img.style.display = 'none';
+                }
+                document.getElementById('modalCat').textContent = d.categoryName;
+                document.getElementById('modalTitle').textContent = d.name;
+                document.getElementById('modalInstructor').textContent = d.instructorName;
+                document.getElementById('modalRating').textContent = d.rating;
+                document.getElementById('modalRatingCount').textContent = d.ratingCount;
+                document.getElementById('modalDuration').textContent = d.durationHours;
+
+                const starsEl = document.getElementById('modalStars');
+                const ratingNum = parseFloat(d.rating);
+                starsEl.innerHTML = Array.from({length: 5}, (_, i) =>
+                    `<i class="bi bi-star${i < Math.round(ratingNum) ? '-fill' : ''}"></i>`
+                ).join('');
+
+                // Right panel
+                document.getElementById('modalDesc').textContent = d.description;
+
+                const chaptersEl = document.getElementById('modalChapters');
+                if (d.chapters && d.chapters.length) {
+                    chaptersEl.innerHTML = d.chapters.map(ch =>
+                        `<li><i class="bi bi-play-circle"></i>${escHtml(ch)}</li>`
+                    ).join('');
+                    if (d.totalChapters > d.chapters.length) {
+                        chaptersEl.innerHTML += `<li style="color:#94A3B8;font-style:italic;"><i class="bi bi-three-dots"></i>và ${d.totalChapters - d.chapters.length} chương khác</li>`;
+                    }
+                } else {
+                    chaptersEl.innerHTML = '<li style="color:#94A3B8;">Chưa có nội dung</li>';
+                }
+
+                const priceEl = document.getElementById('modalPrice');
+                priceEl.textContent = d.price;
+                priceEl.className = 'modal-price' + (d.isFree ? ' free' : '');
+
+                const btn = document.getElementById('modalActionBtn');
+                if (d.isEnrolled) {
+                    btn.href = d.trainingUrl;
+                    btn.className = 'btn-modal-enrolled';
+                    btn.innerHTML = '<i class="bi bi-play-fill"></i> Tiếp tục học';
+                } else {
+                    btn.href = d.checkoutUrl;
+                    btn.className = 'btn-modal-enroll';
+                    btn.innerHTML = '<i class="bi bi-lightning-charge-fill"></i> Đăng ký ngay';
+                }
+            })
+            .catch(() => {
+                document.getElementById('modalTitle').textContent = 'Không thể tải thông tin';
+            });
+    }
+
+    function closeCourseModal(e) {
+        if (e && e.target !== document.getElementById('courseModalOverlay')) return;
+        document.getElementById('courseModalOverlay').classList.remove('show');
+        document.body.style.overflow = '';
+    }
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeCourseModal();
+    });
+
+    function escHtml(s) {
+        return (s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+</script>
+}

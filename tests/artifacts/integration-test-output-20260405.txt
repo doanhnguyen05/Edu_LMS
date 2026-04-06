@@ -1,0 +1,20 @@
+Test run for /Users/doanhnguyen/Documents/tài liệu/phầm mềm/WEB nâng cao/EcduLMS.Web.Tests/bin/Debug/net9.0/EcduLMS.Web.Tests.dll (.NETCoreApp,Version=v9.0)
+VSTest version 17.14.1 (arm64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+/Users/doanhnguyen/Documents/tài liệu/phầm mềm/WEB nâng cao/EcduLMS.Web.Tests/bin/Debug/net9.0/EcduLMS.Web.Tests.dll
+[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v2.8.2+699d445a1a (64-bit .NET 9.0.8)
+[xUnit.net 00:00:00.05]   Discovering: EcduLMS.Web.Tests
+[xUnit.net 00:00:00.08]   Discovered:  EcduLMS.Web.Tests
+[xUnit.net 00:00:00.08]   Starting:    EcduLMS.Web.Tests
+[xUnit.net 00:00:01.26]   Finished:    EcduLMS.Web.Tests
+  Passed EcduLMS.Web.Tests.Integration.PaymentEnrollmentIntegrationTests.PaymentWorkflow_WhenWebhookCompletesPayment_ShouldShowCourseInLearnerMyTraining [884 ms]
+  Passed EcduLMS.Web.Tests.Integration.LearnerWorkflowIntegrationTests.AssignmentFlow_SubmitThenGrade_ShouldAppearAsPassInLearnerGrades [1 s]
+  Passed EcduLMS.Web.Tests.Integration.LearnerWorkflowIntegrationTests.LearningPath_WhenPrerequisiteIncomplete_ShouldLockLessonAndBlockAssignment [60 ms]
+  Passed EcduLMS.Web.Tests.Integration.LearnerWorkflowIntegrationTests.LearningPath_WhenLearnerCompletesLessons_ShouldUnlockAssignmentInTrainingAndGrades [9 ms]
+
+Test Run Successful.
+Total tests: 4
+     Passed: 4
+ Total time: 1.6384 Seconds

@@ -1,0 +1,266 @@
+@model EduLMS.Web.ViewModels.Home.HomeViewModel
+@{
+    ViewData["Title"] = "Trang chủ";
+}
+
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-6">
+                <h1>Hệ thống hỗ trợ học tập trực tuyến thông minh</h1>
+                <p class="mt-3">Nền tảng học tập hiện đại giúp bạn tiếp cận kiến thức mọi lúc, mọi nơi. Theo dõi tiến độ, tương tác với giảng viên và hoàn thành khóa học một cách hiệu quả nhất.</p>
+                <div class="d-flex gap-3 mt-4">
+                    <a asp-controller="Courses" asp-action="Index" class="btn btn-primary btn-lg px-4">Khám phá khóa học</a>
+                    <a asp-controller="About" asp-action="Index" class="btn btn-outline-primary btn-lg px-4">Tìm hiểu thêm</a>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="hero-img-wrapper">
+                    <img src="~/images/home/home.jpg" alt="EduLMS Hero" />
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Bar -->
+<section class="stats-bar">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-6 col-md-3">
+                <div class="stat-item">
+                    <div class="stat-number">10,000+</div>
+                    <div class="stat-label">Học viên</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-item">
+                    <div class="stat-number">500+</div>
+                    <div class="stat-label">Khóa học</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-item">
+                    <div class="stat-number">100+</div>
+                    <div class="stat-label">Giảng viên</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-item">
+                    <div class="stat-number">4.8/5</div>
+                    <div class="stat-label">Đánh giá</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Features -->
+<section class="section-light">
+    <div class="container">
+        <h2 class="section-title">Tính năng nổi bật</h2>
+        <p class="section-subtitle">Những tính năng giúp trải nghiệm học tập của bạn trở nên hiệu quả hơn</p>
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="bi bi-book"></i></div>
+                    <h5>Quản lý khóa học trực tuyến</h5>
+                    <p>Dễ dàng truy cập và quản lý các khóa học trực tuyến với giao diện thân thiện, trực quan.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="bi bi-graph-up"></i></div>
+                    <h5>Theo dõi tiến độ học tập</h5>
+                    <p>Theo dõi chi tiết tiến độ học tập của bạn qua các biểu đồ và báo cáo trực quan.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="bi bi-check2-circle"></i></div>
+                    <h5>Chấm điểm tự động</h5>
+                    <p>Hệ thống chấm điểm tự động giúp bạn nhận kết quả nhanh chóng và chính xác.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="bi bi-calendar-event"></i></div>
+                    <h5>Quản lý lịch học</h5>
+                    <p>Lên kế hoạch và quản lý lịch học cá nhân một cách khoa học, hiệu quả.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="bi bi-bell"></i></div>
+                    <h5>Thông báo thông minh</h5>
+                    <p>Nhận thông báo kịp thời về lịch học, bài tập và các hoạt động quan trọng.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="bi bi-people"></i></div>
+                    <h5>Cộng đồng học tập</h5>
+                    <p>Kết nối và trao đổi với cộng đồng học viên và giảng viên trên nền tảng.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Courses -->
+<section class="section-white">
+    <div class="container">
+        <h2 class="section-title">Các khóa học nổi bật</h2>
+        <p class="section-subtitle">Những khóa học được đánh giá cao nhất từ đội ngũ giảng viên chất lượng</p>
+        <div class="row g-4">
+            @if (Model.FeaturedCourses != null && Model.FeaturedCourses.Any())
+            {
+                @foreach (var course in Model.FeaturedCourses.Take(3))
+                {
+                    <div class="col-md-6 col-lg-4">
+                        <div class="course-card">
+                            <div class="course-image">
+                                @if (!string.IsNullOrEmpty(course.CoverImageUrl))
+                                {
+                                    <img src="@course.CoverImageUrl" alt="@course.Name" />
+                                }
+                                else
+                                {
+                                    <i class="bi bi-play-circle"></i>
+                                }
+                            </div>
+                            <div class="course-body">
+                                <div class="course-rating">
+                                    @for (int i = 1; i <= 5; i++)
+                                    {
+                                        if (i <= (int)course.AverageRating)
+                                        {
+                                            <i class="bi bi-star-fill"></i>
+                                        }
+                                        else if (i - 0.5m <= course.AverageRating)
+                                        {
+                                            <i class="bi bi-star-half"></i>
+                                        }
+                                        else
+                                        {
+                                            <i class="bi bi-star"></i>
+                                        }
+                                    }
+                                    <span class="text-muted ms-1">(@course.RatingCount)</span>
+                                </div>
+                                <h6 class="course-title">@course.Name</h6>
+                                <p class="course-instructor"><i class="bi bi-person me-1"></i>@course.Instructor?.FullName</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="course-price">
+                                        @if (course.PromoPrice.HasValue && course.PromoPrice < course.OriginalPrice)
+                                        {
+                                            @course.PromoPrice.Value.ToString("N0") <text>₫</text>
+                                            <span class="original-price">@course.OriginalPrice.ToString("N0")₫</span>
+                                        }
+                                        else if (course.OriginalPrice == 0)
+                                        {
+                                            <text>Miễn phí</text>
+                                        }
+                                        else
+                                        {
+                                            @course.OriginalPrice.ToString("N0") <text>₫</text>
+                                        }
+                                    </span>
+                                    <a href="#" class="btn btn-sm btn-outline-primary">Xem chi tiết</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <!-- Placeholder courses when no data -->
+                @for (int c = 0; c < 3; c++)
+                {
+                    var placeholderNames = new[] { "Lập trình Web với ASP.NET Core", "Cơ sở dữ liệu nâng cao", "Phát triển ứng dụng di động" };
+                    var placeholderInstructors = new[] { "TS. Nguyễn Văn A", "ThS. Trần Thị B", "TS. Lê Văn C" };
+                    var placeholderPrices = new[] { "1,200,000₫", "Miễn phí", "800,000₫" };
+                    <div class="col-md-6 col-lg-4">
+                        <div class="course-card">
+                            <div class="course-image">
+                                <i class="bi bi-play-circle"></i>
+                            </div>
+                            <div class="course-body">
+                                <div class="course-rating">
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-half"></i>
+                                    <span class="text-muted ms-1">(128)</span>
+                                </div>
+                                <h6 class="course-title">@placeholderNames[c]</h6>
+                                <p class="course-instructor"><i class="bi bi-person me-1"></i>@placeholderInstructors[c]</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="course-price">@placeholderPrices[c]</span>
+                                    <a href="#" class="btn btn-sm btn-outline-primary">Xem chi tiết</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</section>
+
+<!-- Instructors -->
+<section class="section-light">
+    <div class="container">
+        <h2 class="section-title">Đội ngũ giảng viên</h2>
+        <p class="section-subtitle">Những giảng viên giàu kinh nghiệm, tận tâm với sự nghiệp giáo dục</p>
+        <div class="row g-4 justify-content-center">
+            @if (Model.Instructors != null && Model.Instructors.Any())
+            {
+                @foreach (var instructor in Model.Instructors.Take(4))
+                {
+                    <div class="col-6 col-md-4 col-lg-3">
+                        <div class="instructor-card">
+                            <div class="instructor-avatar">
+                                @if (!string.IsNullOrEmpty(instructor.AvatarUrl))
+                                {
+                                    <img src="@instructor.AvatarUrl" alt="@instructor.FullName" />
+                                }
+                                else
+                                {
+                                    @instructor.FullName.Substring(0, 1).ToUpper()
+                                }
+                            </div>
+                            <h6>@instructor.FullName</h6>
+                            <p class="instructor-title">@(instructor.Bio ?? "Giảng viên")</p>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <!-- Placeholder instructors -->
+                var placeholderData = new[] {
+                    new { Name = "TS. Nguyễn Văn A", Title = "Chuyên gia Công nghệ phần mềm" },
+                    new { Name = "ThS. Trần Thị B", Title = "Chuyên gia Cơ sở dữ liệu" },
+                    new { Name = "TS. Lê Văn C", Title = "Chuyên gia Trí tuệ nhân tạo" },
+                    new { Name = "PGS.TS. Phạm Văn D", Title = "Chuyên gia Mạng máy tính" }
+                };
+                @foreach (var item in placeholderData)
+                {
+                    <div class="col-6 col-md-4 col-lg-3">
+                        <div class="instructor-card">
+                            <div class="instructor-avatar">
+                                @item.Name.Substring(0, 1)
+                            </div>
+                            <h6>@item.Name</h6>
+                            <p class="instructor-title">@item.Title</p>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</section>

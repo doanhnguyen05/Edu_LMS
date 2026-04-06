@@ -1,0 +1,57 @@
+{
+  "startedAt": "2026-04-05T07:59:32.517Z",
+  "endedAt": "2026-04-05T07:59:35.803Z",
+  "durationMs": 3286,
+  "config": {
+    "baseUrl": "http://localhost:5000",
+    "loginPath": "/Account/Login",
+    "loginUrl": "http://localhost:5000/Account/Login",
+    "timeoutMs": 15000,
+    "headless": true,
+    "browsers": [
+      "coccoc"
+    ]
+  },
+  "total": 1,
+  "passCount": 1,
+  "failCount": 0,
+  "infraFailCount": 0,
+  "nonPassCount": 0,
+  "browserSummaries": [
+    {
+      "browser": "coccoc",
+      "startedAt": "2026-04-05T07:59:32.519Z",
+      "endedAt": "2026-04-05T07:59:35.801Z",
+      "durationMs": 3282,
+      "total": 1,
+      "passCount": 1,
+      "nonPassCount": 0,
+      "failCount": 0,
+      "infraFailCount": 0,
+      "results": [
+        {
+          "id": "AT_LOGIN_01",
+          "group": "PASS - role learner",
+          "name": "Dang nhap thanh cong voi learner",
+          "browser": "coccoc",
+          "status": "PASS",
+          "durationMs": 3282,
+          "observedUrl": "http://localhost:5000/Learner",
+          "expectedType": "success",
+          "expectedTexts": [],
+          "expectedUrlContains": "/Learner/Dashboard",
+          "expectedUrlContainsAny": [
+            "/Learner/Dashboard",
+            "/Learner"
+          ],
+          "expectedValidationField": "",
+          "observedValidationMessage": "",
+          "observedBodySnippet": " EduLMS\nMAIN MENU\nDashboard\nMy Training\nCourse Catalog\nCalendar\nGrades\nSign Out\n3\nAL\nAlex Learner\nLearner\nChào mừng trở lại, Alex Learner! 👋\nTiếp tục hành trình học tập của bạn.\nCấp độ: Trung bình\n3\nTổng số khóa học\n0\nSố khóa hoàn thành\nĐa",
+          "screenshotFile": "/Users/doanhnguyen/Documents/tài liệu/phầm mềm/WEB nâng cao/tests/1-kiem-thu-tu-dong/login-selenium/artifacts/screenshots/20260405-145935_coccoc_AT_LOGIN_01_PASS.png",
+          "errorType": "",
+          "errorMessage": ""
+        }
+      ]
+    }
+  ]
+}

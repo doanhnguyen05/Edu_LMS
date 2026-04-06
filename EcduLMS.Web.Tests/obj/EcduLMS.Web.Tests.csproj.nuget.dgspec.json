@@ -1,0 +1,199 @@
+{
+  "format": 1,
+  "restore": {
+    "/Users/doanhnguyen/Documents/tài liệu/phầm mềm/WEB nâng cao/EcduLMS.Web.Tests/EcduLMS.Web.Tests.csproj": {}
+  },
+  "projects": {
+    "/Users/doanhnguyen/Documents/tài liệu/phầm mềm/WEB nâng cao/EcduLMS.Web.Tests/EcduLMS.Web.Tests.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/Users/doanhnguyen/Documents/tài liệu/phầm mềm/WEB nâng cao/EcduLMS.Web.Tests/EcduLMS.Web.Tests.csproj",
+        "projectName": "EcduLMS.Web.Tests",
+        "projectPath": "/Users/doanhnguyen/Documents/tài liệu/phầm mềm/WEB nâng cao/EcduLMS.Web.Tests/EcduLMS.Web.Tests.csproj",
+        "packagesPath": "/Users/doanhnguyen/.nuget/packages/",
+        "outputPath": "/Users/doanhnguyen/Documents/tài liệu/phầm mềm/WEB nâng cao/EcduLMS.Web.Tests/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/Users/doanhnguyen/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net9.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net9.0": {
+            "targetAlias": "net9.0",
+            "projectReferences": {
+              "/Users/doanhnguyen/Documents/tài liệu/phầm mềm/WEB nâng cao/EcduLMS.Web/EduLMS.Web.csproj": {
+                "projectPath": "/Users/doanhnguyen/Documents/tài liệu/phầm mềm/WEB nâng cao/EcduLMS.Web/EduLMS.Web.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "9.0.300"
+      },
+      "frameworks": {
+        "net9.0": {
+          "targetAlias": "net9.0",
+          "dependencies": {
+            "Microsoft.EntityFrameworkCore.InMemory": {
+              "target": "Package",
+              "version": "[8.0.11, )"
+            },
+            "Microsoft.NET.Test.Sdk": {
+              "target": "Package",
+              "version": "[17.11.1, )"
+            },
+            "Moq": {
+              "target": "Package",
+              "version": "[4.20.70, )"
+            },
+            "coverlet.collector": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[6.0.2, )"
+            },
+            "xunit": {
+              "target": "Package",
+              "version": "[2.9.2, )"
+            },
+            "xunit.runner.visualstudio": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[2.8.2, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/9.0.304/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "/Users/doanhnguyen/Documents/tài liệu/phầm mềm/WEB nâng cao/EcduLMS.Web/EduLMS.Web.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/Users/doanhnguyen/Documents/tài liệu/phầm mềm/WEB nâng cao/EcduLMS.Web/EduLMS.Web.csproj",
+        "projectName": "EduLMS.Web",
+        "projectPath": "/Users/doanhnguyen/Documents/tài liệu/phầm mềm/WEB nâng cao/EcduLMS.Web/EduLMS.Web.csproj",
+        "packagesPath": "/Users/doanhnguyen/.nuget/packages/",
+        "outputPath": "/Users/doanhnguyen/Documents/tài liệu/phầm mềm/WEB nâng cao/EcduLMS.Web/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/Users/doanhnguyen/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net9.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net9.0": {
+            "targetAlias": "net9.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "9.0.300"
+      },
+      "frameworks": {
+        "net9.0": {
+          "targetAlias": "net9.0",
+          "dependencies": {
+            "AutoMapper.Extensions.Microsoft.DependencyInjection": {
+              "target": "Package",
+              "version": "[12.0.1, )"
+            },
+            "ClosedXML": {
+              "target": "Package",
+              "version": "[0.104.2, )"
+            },
+            "Ical.Net": {
+              "target": "Package",
+              "version": "[4.3.1, )"
+            },
+            "MailKit": {
+              "target": "Package",
+              "version": "[4.9.0, )"
+            },
+            "Microsoft.AspNetCore.Identity.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[8.0.11, )"
+            },
+            "Microsoft.EntityFrameworkCore.Tools": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[8.0.11, )"
+            },
+            "Pomelo.EntityFrameworkCore.MySql": {
+              "target": "Package",
+              "version": "[8.0.2, )"
+            },
+            "X.PagedList.Mvc.Core": {
+              "target": "Package",
+              "version": "[10.0.7, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.AspNetCore.App": {
+              "privateAssets": "none"
+            },
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/9.0.304/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}

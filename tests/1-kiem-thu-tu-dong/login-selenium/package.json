@@ -1,0 +1,18 @@
+{
+  "name": "edulms-login-automation",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Selenium automation tests for EduLMS login",
+  "scripts": {
+    "test:login": "ASK_BROWSER_ON_START=true node scripts/login-automation.js",
+    "test:login:choose": "ASK_BROWSER_ON_START=true node scripts/login-automation.js",
+    "test:login:coccoc": "ASK_BROWSER_ON_START=false BROWSERS=coccoc node scripts/login-automation.js",
+    "test:login:safari": "ASK_BROWSER_ON_START=false BROWSERS=safari node scripts/login-automation.js",
+    "test:login:chrome": "ASK_BROWSER_ON_START=false BROWSERS=chrome node scripts/login-automation.js",
+    "test:login:all": "ASK_BROWSER_ON_START=false BROWSERS=coccoc,safari,chrome node scripts/login-automation.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "selenium-webdriver": "^4.31.0"
+  }
+}

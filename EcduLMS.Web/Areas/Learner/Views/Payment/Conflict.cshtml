@@ -1,0 +1,174 @@
+@model EduLMS.Web.ViewModels.Learner.CheckoutViewModel
+@{
+    ViewData["Title"] = "Xung đột lịch học";
+}
+
+@section Styles {
+<style>
+    .conflict-wrap { max-width: 760px; margin: 0 auto; }
+    .conflict-hero {
+        background: linear-gradient(135deg, #FEF2F2 0%, #FFF7ED 100%);
+        border: 1px solid #FECACA;
+        border-radius: 16px;
+        padding: 36px 40px;
+        text-align: center;
+        margin-bottom: 28px;
+    }
+    .conflict-icon {
+        width: 72px; height: 72px;
+        background: #FEE2E2;
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        margin: 0 auto 16px;
+        font-size: 32px; color: #DC2626;
+    }
+    .conflict-hero h2 { font-size: 22px; font-weight: 700; color: #991B1B; margin-bottom: 8px; }
+    .conflict-hero p { font-size: 14px; color: #B45309; margin: 0; }
+
+    .course-badge {
+        display: inline-flex; align-items: center; gap: 8px;
+        background: #fff; border: 1px solid #E2E8F0; border-radius: 10px;
+        padding: 10px 16px; margin-bottom: 24px;
+    }
+    .course-badge img { width: 40px; height: 40px; border-radius: 6px; object-fit: cover; }
+    .course-badge-placeholder { width: 40px; height: 40px; border-radius: 6px; background: #EFF6FF; display:flex; align-items:center; justify-content:center; color: #93C5FD; font-size: 18px; }
+    .course-badge-info .name { font-weight: 600; font-size: 14px; color: #1E293B; }
+    .course-badge-info .sub { font-size: 12px; color: #64748B; }
+
+    .conflict-section { margin-bottom: 24px; }
+    .conflict-section-title {
+        font-size: 13px; font-weight: 700; color: #64748B;
+        text-transform: uppercase; letter-spacing: 0.06em;
+        margin-bottom: 12px;
+    }
+    .conflict-card {
+        background: #fff; border: 1px solid #E2E8F0; border-radius: 12px;
+        overflow: hidden; margin-bottom: 10px;
+    }
+    .conflict-card-header {
+        background: #FEF2F2; border-bottom: 1px solid #FECACA;
+        padding: 12px 16px; font-size: 12px; font-weight: 600; color: #991B1B;
+        display: flex; align-items: center; gap: 6px;
+    }
+    .conflict-rows { display: flex; }
+    .conflict-row {
+        flex: 1; padding: 14px 16px; font-size: 13px;
+    }
+    .conflict-row + .conflict-row { border-left: 1px solid #F1F5F9; }
+    .conflict-row .label { font-size: 11px; font-weight: 600; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 4px; }
+    .conflict-row .value { font-weight: 600; color: #1E293B; margin-bottom: 3px; }
+    .conflict-row .time { font-size: 12px; color: #64748B; }
+    .conflict-row .time i { color: #94A3B8; }
+    .pill-new { display: inline-block; background: #FEE2E2; color: #DC2626; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 20px; }
+    .pill-existing { display: inline-block; background: #EFF6FF; color: #2563EB; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 20px; }
+    .vs-divider { display: flex; align-items: center; justify-content: center; padding: 0 4px; }
+    .vs-badge { width: 28px; height: 28px; border-radius: 50%; background: #F1F5F9; display:flex; align-items:center; justify-content:center; font-size: 10px; font-weight: 700; color: #94A3B8; }
+
+    .action-bar {
+        display: flex; gap: 12px; justify-content: center;
+        padding: 24px; background: #fff; border: 1px solid #E2E8F0;
+        border-radius: 12px;
+    }
+    .btn-back {
+        display: inline-flex; align-items: center; gap: 8px;
+        background: #F1F5F9; color: #334155; border: none;
+        border-radius: 10px; padding: 12px 24px; font-size: 14px; font-weight: 600;
+        cursor: pointer; text-decoration: none;
+    }
+    .btn-back:hover { background: #E2E8F0; color: #1E293B; }
+    .btn-calendar {
+        display: inline-flex; align-items: center; gap: 8px;
+        background: #2563EB; color: #fff; border: none;
+        border-radius: 10px; padding: 12px 24px; font-size: 14px; font-weight: 600;
+        cursor: pointer; text-decoration: none;
+    }
+    .btn-calendar:hover { background: #1D4ED8; color: #fff; }
+</style>
+}
+
+<div class="conflict-wrap">
+    <!-- Hero -->
+    <div class="conflict-hero">
+        <div class="conflict-icon"><i class="bi bi-calendar-x-fill"></i></div>
+        <h2>Lịch học bị xung đột</h2>
+        <p>Khoá học này có buổi học trùng thời gian với khoá học bạn đã đăng ký.<br>Vui lòng giải quyết xung đột trước khi tiếp tục.</p>
+    </div>
+
+    <!-- Course info -->
+    <div style="text-align: center;">
+        <div class="course-badge">
+            @if (!string.IsNullOrEmpty(Model.CoverImageUrl))
+            {
+                <img src="@Model.CoverImageUrl" alt="" />
+            }
+            else
+            {
+                <div class="course-badge-placeholder"><i class="bi bi-book"></i></div>
+            }
+            <div class="course-badge-info">
+                <div class="name">@Model.CourseName</div>
+                <div class="sub">@Model.InstructorName</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Conflicts list -->
+    <div class="conflict-section">
+        <div class="conflict-section-title">
+            <i class="bi bi-exclamation-triangle me-1"></i>
+            @Model.Conflicts.Count buổi học bị trùng
+        </div>
+
+        @foreach (var c in Model.Conflicts)
+        {
+            <div class="conflict-card">
+                <div class="conflict-card-header">
+                    <i class="bi bi-x-circle-fill"></i>
+                    Trùng vào @c.NewScheduleStart.ToString("HH:mm") - @c.NewScheduleEnd.ToString("HH:mm"),
+                    @c.NewScheduleStart.ToString("dddd, dd/MM/yyyy")
+                </div>
+                <div class="conflict-rows">
+                    <div class="conflict-row">
+                        <div class="label">Khoá học muốn đăng ký</div>
+                        <span class="pill-new">Mới</span>
+                        <div class="value mt-1">@c.NewScheduleTitle</div>
+                        <div class="time">
+                            <i class="bi bi-clock"></i>
+                            @c.NewScheduleStart.ToString("HH:mm") – @c.NewScheduleEnd.ToString("HH:mm")
+                        </div>
+                        <div class="time">
+                            <i class="bi bi-calendar3"></i>
+                            @c.NewScheduleStart.ToString("dd/MM/yyyy")
+                        </div>
+                    </div>
+                    <div class="vs-divider">
+                        <div class="vs-badge">VS</div>
+                    </div>
+                    <div class="conflict-row">
+                        <div class="label">Khoá học đã đăng ký</div>
+                        <span class="pill-existing">Đã có</span>
+                        <div class="value mt-1">@c.ConflictingScheduleTitle</div>
+                        <div class="time">
+                            <i class="bi bi-clock"></i>
+                            @c.ConflictingScheduleStart.ToString("HH:mm") – @c.ConflictingScheduleEnd.ToString("HH:mm")
+                        </div>
+                        <div class="time">
+                            <i class="bi bi-book"></i>
+                            @c.ConflictingCourseName
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Actions -->
+    <div class="action-bar">
+        <a asp-area="Learner" asp-controller="Catalog" asp-action="Index" class="btn-back">
+            <i class="bi bi-arrow-left"></i> Quay lại danh mục
+        </a>
+        <a asp-area="Learner" asp-controller="Calendar" asp-action="Index" class="btn-calendar">
+            <i class="bi bi-calendar-week"></i> Xem lịch học của tôi
+        </a>
+    </div>
+</div>

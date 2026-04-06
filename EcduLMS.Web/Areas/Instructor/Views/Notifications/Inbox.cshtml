@@ -1,0 +1,71 @@
+@model List<EduLMS.Web.Models.Notification>
+@{
+    ViewData["Title"] = "Thông báo nhận được";
+    Layout = "_InstructorLayout";
+}
+
+<div style="max-width: 760px;">
+    <div style="margin-bottom: 24px;">
+        <h4 style="font-weight: 700; color: #1E293B; margin-bottom: 4px;">Thông báo</h4>
+        <p style="color: #64748B; font-size: 14px; margin: 0;">Tất cả thông báo bạn đã nhận</p>
+    </div>
+
+    <div style="background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; overflow: hidden;">
+        @if (!Model.Any())
+        {
+            <div style="padding: 48px; text-align: center; color: #94A3B8;">
+                <i class="bi bi-bell-slash" style="font-size: 40px; display: block; margin-bottom: 12px;"></i>
+                <p style="margin: 0; font-size: 14px;">Chưa có thông báo nào</p>
+            </div>
+        }
+        else
+        {
+            foreach (var n in Model)
+            {
+                string icon, color;
+                switch (n.Type)
+                {
+                    case "course_approved":            icon = "bi-check-circle-fill"; color = "#16A34A"; break;
+                    case "course_rejected":            icon = "bi-x-circle-fill";     color = "#DC2626"; break;
+                    case "assignment_submitted":       icon = "bi-clipboard-check-fill"; color = "#2563EB"; break;
+                    case "admin_broadcast_all":
+                    case "admin_broadcast_instructor": icon = "bi-broadcast";         color = "#DC2626"; break;
+                    default:                           icon = "bi-bell-fill";         color = "#F59E0B"; break;
+                }
+                <div style="display:flex; gap:14px; align-items:flex-start; padding:16px 20px;
+                            border-bottom:1px solid #F1F5F9; background:@(!n.IsRead ? "#FAFBFF" : "#fff");">
+                    <div style="flex-shrink:0; width:36px; height:36px; border-radius:50%;
+                                display:flex; align-items:center; justify-content:center;
+                                background:@(color)1A;">
+                        <i class="bi @icon" style="color:@color; font-size:16px;"></i>
+                    </div>
+                    <div style="flex:1; min-width:0;">
+                        <div style="font-size:14px; color:#1E293B; font-weight:@(!n.IsRead ? "600" : "500"); margin-bottom:4px;">
+                            @n.Title
+                        </div>
+                        @if (!string.IsNullOrWhiteSpace(n.Message))
+                        {
+                            <div style="font-size:13px; color:#475569; margin-bottom:6px; line-height:1.5;">
+                                @Html.Raw(n.Message)
+                            </div>
+                        }
+                        <div style="font-size:12px; color:#94A3B8;">
+                            @n.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")
+                        </div>
+                    </div>
+                    @if (!n.IsRead)
+                    {
+                        <div style="flex-shrink:0; width:8px; height:8px; border-radius:50%; background:#2563EB; margin-top:6px;"></div>
+                    }
+                </div>
+            }
+        }
+    </div>
+
+    <div style="margin-top: 16px;">
+        <a asp-area="Instructor" asp-controller="Notifications" asp-action="Index"
+           style="font-size:13px; color:#2563EB; text-decoration:none;">
+            ← Quay lại trang gửi thông báo
+        </a>
+    </div>
+</div>

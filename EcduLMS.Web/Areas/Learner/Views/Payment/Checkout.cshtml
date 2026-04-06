@@ -1,0 +1,354 @@
+@model CheckoutViewModel
+@{
+    ViewData["Title"] = "Thanh toán khóa học";
+}
+
+<style>
+    .checkout-container {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+    .checkout-header {
+        text-align: center;
+        margin-bottom: 32px;
+    }
+    .checkout-header h4 {
+        font-weight: 700;
+        color: #1E293B;
+    }
+    .checkout-card {
+        background: #fff;
+        border-radius: 12px;
+        border: 1px solid #E2E8F0;
+        padding: 24px;
+        margin-bottom: 24px;
+    }
+    .checkout-card h5 {
+        font-weight: 700;
+        color: #1E293B;
+        margin-bottom: 16px;
+        font-size: 16px;
+    }
+    .order-info {
+        display: flex;
+        gap: 16px;
+        align-items: center;
+        padding-bottom: 16px;
+        border-bottom: 1px solid #F1F5F9;
+        margin-bottom: 16px;
+    }
+    .order-thumb {
+        width: 100px;
+        height: 70px;
+        border-radius: 8px;
+        background: linear-gradient(135deg, #667EEA 0%, #764BA2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        overflow: hidden;
+    }
+    .order-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .order-details h6 { font-weight: 600; color: #1E293B; margin-bottom: 4px; font-size: 14px; }
+    .order-details p { font-size: 13px; color: #64748B; margin: 0; }
+    .price-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        font-size: 14px;
+    }
+    .price-row .label { color: #64748B; }
+    .price-row .value { color: #334155; font-weight: 500; }
+    .price-row.original .value { text-decoration: line-through; color: #94A3B8; }
+    .price-row.total {
+        border-top: 1px solid #E2E8F0;
+        padding-top: 12px;
+        margin-top: 8px;
+    }
+    .price-row.total .label { font-weight: 700; color: #1E293B; font-size: 16px; }
+    .price-row.total .value { font-weight: 700; color: #DC2626; font-size: 18px; }
+    .payment-method {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+    .method-option {
+        flex: 1;
+        border: 2px solid #E2E8F0;
+        border-radius: 10px;
+        padding: 16px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .method-option:hover { border-color: #93C5FD; }
+    .method-option.active { border-color: #2563EB; background: #EFF6FF; }
+    .method-option i { font-size: 28px; color: #2563EB; display: block; margin-bottom: 8px; }
+    .method-option .method-name { font-size: 13px; font-weight: 600; color: #334155; }
+    .qr-section { text-align: center; padding: 20px; }
+    .qr-image {
+        width: 220px;
+        height: auto;
+        border-radius: 12px;
+        margin: 0 auto 16px;
+        display: block;
+    }
+    .qr-timer {
+        font-size: 24px;
+        font-weight: 700;
+        color: #DC2626;
+        margin-bottom: 8px;
+    }
+    .order-code {
+        display: inline-block;
+        background: #FEF3C7;
+        color: #92400E;
+        padding: 6px 14px;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 14px;
+        margin-bottom: 12px;
+        letter-spacing: 0.5px;
+    }
+    .bank-info {
+        background: #F8FAFC;
+        border-radius: 10px;
+        padding: 20px;
+    }
+    .bank-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px solid #E2E8F0;
+        font-size: 14px;
+    }
+    .bank-row:last-child { border-bottom: none; }
+    .bank-row .bank-label { color: #64748B; }
+    .bank-row .bank-value { color: #1E293B; font-weight: 600; }
+    .bank-row .bank-value .copy-btn {
+        background: none;
+        border: none;
+        color: #2563EB;
+        cursor: pointer;
+        font-size: 14px;
+        margin-left: 8px;
+    }
+    .payment-status-banner {
+        text-align: center;
+        padding: 16px;
+        border-radius: 10px;
+        margin-top: 16px;
+        display: none;
+    }
+    .payment-status-banner.checking {
+        background: #FEF3C7;
+        color: #92400E;
+        display: block;
+    }
+    .payment-status-banner.success {
+        background: #DCFCE7;
+        color: #166534;
+        display: block;
+    }
+</style>
+
+<div class="checkout-container">
+    <div class="checkout-header">
+        <h4><i class="bi bi-credit-card me-2"></i>Thanh toán khóa học</h4>
+    </div>
+
+    <div class="row">
+        <!-- Left Column -->
+        <div class="col-lg-7">
+            <!-- Order Info -->
+            <div class="checkout-card">
+                <h5><i class="bi bi-bag me-2"></i>Thông tin đơn hàng</h5>
+                <div class="order-info">
+                    <div class="order-thumb">
+                        @if (!string.IsNullOrEmpty(Model.CoverImageUrl))
+                        {
+                            <img src="@Model.CoverImageUrl" alt="@Model.CourseName" />
+                        }
+                        else
+                        {
+                            <i class="bi bi-journal-code" style="font-size: 28px; color: rgba(255,255,255,0.5);"></i>
+                        }
+                    </div>
+                    <div class="order-details">
+                        <h6>@Model.CourseName</h6>
+                        <p><i class="bi bi-person me-1"></i> @Model.InstructorName</p>
+                    </div>
+                </div>
+                @if (Model.PromoPrice.HasValue && Model.PromoPrice < Model.OriginalPrice)
+                {
+                    <div class="price-row original">
+                        <span class="label">Giá gốc</span>
+                        <span class="value">@Model.OriginalPrice.ToString("N0")đ</span>
+                    </div>
+                    <div class="price-row">
+                        <span class="label">Giảm giá</span>
+                        <span class="value" style="color: #16A34A;">-@((Model.OriginalPrice - Model.FinalPrice).ToString("N0"))đ</span>
+                    </div>
+                }
+                <div class="price-row total">
+                    <span class="label">Tổng thanh toán</span>
+                    <span class="value">@Model.FinalPrice.ToString("N0")đ</span>
+                </div>
+            </div>
+
+            <!-- Payment Method -->
+            <div class="checkout-card">
+                <h5><i class="bi bi-wallet2 me-2"></i>Phương thức thanh toán</h5>
+                <div class="payment-method">
+                    <div class="method-option active" data-method="qr" onclick="selectMethod('qr', this)">
+                        <i class="bi bi-qr-code"></i>
+                        <div class="method-name">Quét mã QR</div>
+                    </div>
+                    <div class="method-option" data-method="bank" onclick="selectMethod('bank', this)">
+                        <i class="bi bi-bank"></i>
+                        <div class="method-name">Chuyển khoản ngân hàng</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column -->
+        <div class="col-lg-5">
+            <!-- QR Section -->
+            <div class="checkout-card" id="qrSection">
+                <div class="qr-section">
+                    <p style="font-size: 13px; color: #64748B; margin-bottom: 8px;">Quét mã QR bằng app ngân hàng để thanh toán</p>
+                    <img src="@Model.QrImageUrl" alt="QR Code thanh toán" class="qr-image" />
+                    <div class="order-code">
+                        <i class="bi bi-hash"></i> Nội dung CK: @Model.OrderCode
+                    </div>
+                    <div class="qr-timer" id="qrTimer">14:59</div>
+                    <p style="font-size: 12px; color: #94A3B8; margin-bottom: 12px;">Mã QR sẽ hết hạn sau thời gian trên</p>
+                    <div id="statusBanner" class="payment-status-banner checking">
+                        <i class="bi bi-hourglass-split me-1"></i> Đang chờ thanh toán... Hệ thống sẽ tự động xác nhận khi nhận được tiền.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bank Transfer Section -->
+            <div class="checkout-card" id="bankSection" style="display: none;">
+                <h5>Thông tin chuyển khoản</h5>
+                <div class="bank-info">
+                    <div class="bank-row">
+                        <span class="bank-label">Ngân hàng</span>
+                        <span class="bank-value">@Model.BankName</span>
+                    </div>
+                    <div class="bank-row">
+                        <span class="bank-label">Số tài khoản</span>
+                        <span class="bank-value">
+                            @Model.AccountNo
+                            <button class="copy-btn" onclick="copyText('@Model.AccountNo')"><i class="bi bi-clipboard"></i></button>
+                        </span>
+                    </div>
+                    <div class="bank-row">
+                        <span class="bank-label">Chủ tài khoản</span>
+                        <span class="bank-value">@Model.AccountName</span>
+                    </div>
+                    <div class="bank-row">
+                        <span class="bank-label">Số tiền</span>
+                        <span class="bank-value" style="color: #DC2626;">
+                            @Model.FinalPrice.ToString("N0")đ
+                            <button class="copy-btn" onclick="copyText('@((int)Model.FinalPrice)')"><i class="bi bi-clipboard"></i></button>
+                        </span>
+                    </div>
+                    <div class="bank-row">
+                        <span class="bank-label">Nội dung CK</span>
+                        <span class="bank-value">
+                            @Model.OrderCode
+                            <button class="copy-btn" onclick="copyText('@Model.OrderCode')"><i class="bi bi-clipboard"></i></button>
+                        </span>
+                    </div>
+                </div>
+                <div class="alert alert-warning mt-3 mb-0" style="font-size: 13px; border-radius: 8px;">
+                    <i class="bi bi-exclamation-triangle me-1"></i>
+                    <strong>Quan trọng:</strong> Nhập đúng nội dung chuyển khoản <strong>@Model.OrderCode</strong> để hệ thống tự động xác nhận.
+                </div>
+                <div id="statusBannerBank" class="payment-status-banner checking" style="margin-top: 12px;">
+                    <i class="bi bi-hourglass-split me-1"></i> Đang chờ thanh toán...
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    var paymentId = @Model.PaymentId;
+    var pollInterval;
+    var timeLeft = 899; // 14:59
+
+    function selectMethod(method, el) {
+        document.querySelectorAll('.method-option').forEach(o => o.classList.remove('active'));
+        el.classList.add('active');
+        document.getElementById('qrSection').style.display = method === 'qr' ? 'block' : 'none';
+        document.getElementById('bankSection').style.display = method === 'bank' ? 'block' : 'none';
+    }
+
+    function copyText(text) {
+        navigator.clipboard.writeText(text).then(function () {
+            var toast = document.createElement('div');
+            toast.textContent = 'Đã sao chép!';
+            toast.style.cssText = 'position:fixed;bottom:20px;right:20px;background:#16A34A;color:#fff;padding:10px 20px;border-radius:8px;font-size:14px;z-index:9999;';
+            document.body.appendChild(toast);
+            setTimeout(function () { toast.remove(); }, 2000);
+        });
+    }
+
+    // Countdown timer
+    var timerEl = document.getElementById('qrTimer');
+    var timerInterval = setInterval(function () {
+        timeLeft--;
+        if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            clearInterval(pollInterval);
+            timerEl.textContent = '00:00';
+            timerEl.style.color = '#94A3B8';
+            document.getElementById('statusBanner').innerHTML = '<i class="bi bi-x-circle me-1"></i> Mã QR đã hết hạn. Vui lòng tải lại trang.';
+            return;
+        }
+        var min = Math.floor(timeLeft / 60);
+        var sec = timeLeft % 60;
+        timerEl.textContent = (min < 10 ? '0' : '') + min + ':' + (sec < 10 ? '0' : '') + sec;
+    }, 1000);
+
+    // Poll payment status every 3 seconds
+    function checkPaymentStatus() {
+        fetch('/Learner/Payment/CheckStatus?paymentId=' + paymentId)
+            .then(function (res) { return res.json(); })
+            .then(function (data) {
+                if (data.status === 'completed') {
+                    clearInterval(pollInterval);
+                    clearInterval(timerInterval);
+
+                    // Show success on both sections
+                    var banners = [document.getElementById('statusBanner'), document.getElementById('statusBannerBank')];
+                    banners.forEach(function (b) {
+                        if (b) {
+                            b.className = 'payment-status-banner success';
+                            b.style.display = 'block';
+                            b.innerHTML = '<i class="bi bi-check-circle-fill me-1" style="font-size:20px;"></i> Thanh toán thành công! Đang chuyển hướng...';
+                        }
+                    });
+
+                    // Redirect to success page after 2 seconds
+                    setTimeout(function () {
+                        window.location.href = '/Learner/Payment/Success/' + paymentId;
+                    }, 2000);
+                }
+            })
+            .catch(function (err) {
+                console.log('Poll error:', err);
+            });
+    }
+
+    // Start polling
+    pollInterval = setInterval(checkPaymentStatus, 3000);
+    // Also check immediately
+    checkPaymentStatus();
+</script>
+}

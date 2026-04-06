@@ -1,0 +1,600 @@
+@model EduLMS.Web.ViewModels.Admin.CoursesViewModel
+@using EduLMS.Web.Models.Enums
+@{
+    ViewData["Title"] = "Quản lý Khoá học";
+    var activeTab = Context.Request.Query["tab"].ToString();
+    if (string.IsNullOrEmpty(activeTab)) activeTab = "courses";
+}
+
+@section Styles {
+<style>
+    .stat-card {
+        background: #fff;
+        border: 1px solid #E2E8F0;
+        border-radius: 12px;
+        padding: 20px 24px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+    .stat-icon {
+        width: 48px; height: 48px;
+        border-radius: 12px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 22px;
+        flex-shrink: 0;
+    }
+    .stat-value { font-size: 24px; font-weight: 700; color: #1E293B; line-height: 1; }
+    .stat-label { font-size: 13px; color: #64748B; margin-top: 4px; }
+
+    .tab-nav { display: flex; gap: 4px; border-bottom: 2px solid #E2E8F0; margin-bottom: 24px; }
+    .tab-btn {
+        padding: 10px 20px; font-size: 14px; font-weight: 500;
+        color: #64748B; border: none; background: none; cursor: pointer;
+        border-bottom: 2px solid transparent; margin-bottom: -2px;
+        border-radius: 6px 6px 0 0; transition: all 0.2s;
+    }
+    .tab-btn:hover { color: #334155; background: #F8FAFC; }
+    .tab-btn.active { color: #2563EB; border-bottom-color: #2563EB; font-weight: 600; }
+
+    .filter-bar {
+        background: #fff; border: 1px solid #E2E8F0; border-radius: 12px;
+        padding: 16px 20px; margin-bottom: 20px;
+        display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+    }
+    .filter-bar input, .filter-bar select {
+        border: 1px solid #E2E8F0; border-radius: 8px;
+        padding: 8px 12px; font-size: 13px; color: #334155;
+        outline: none; background: #F8FAFC;
+    }
+    .filter-bar input:focus, .filter-bar select:focus {
+        border-color: #2563EB; background: #fff;
+    }
+    .filter-bar input { min-width: 220px; }
+
+    .courses-table {
+        background: #fff; border: 1px solid #E2E8F0; border-radius: 12px;
+        overflow: hidden;
+    }
+    .courses-table table { width: 100%; border-collapse: collapse; }
+    .courses-table thead th {
+        padding: 12px 16px; font-size: 12px; font-weight: 600;
+        color: #94A3B8; text-transform: uppercase; letter-spacing: 0.04em;
+        background: #F8FAFC; border-bottom: 1px solid #E2E8F0; white-space: nowrap;
+    }
+    .courses-table tbody tr { border-bottom: 1px solid #F1F5F9; transition: background 0.15s; }
+    .courses-table tbody tr:last-child { border-bottom: none; }
+    .courses-table tbody tr:hover { background: #F8FAFC; }
+    .courses-table td { padding: 14px 16px; font-size: 13px; color: #334155; vertical-align: middle; }
+
+    .course-thumb {
+        width: 56px; height: 40px; border-radius: 6px;
+        object-fit: cover; background: #E2E8F0; flex-shrink: 0;
+    }
+    .course-thumb-placeholder {
+        width: 56px; height: 40px; border-radius: 6px;
+        background: #EFF6FF; display: flex; align-items: center; justify-content: center;
+        color: #93C5FD; font-size: 18px;
+    }
+
+    .badge-status {
+        display: inline-flex; align-items: center; gap: 5px;
+        padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600;
+    }
+    .badge-published { background: #DCFCE7; color: #15803D; }
+    .badge-draft { background: #F1F5F9; color: #64748B; }
+    .badge-pending { background: #FEF9C3; color: #A16207; }
+    .badge-disabled { background: #FEE2E2; color: #DC2626; }
+
+    .badge-free { background: #EFF6FF; color: #2563EB; font-size: 11px; padding: 3px 8px; border-radius: 20px; font-weight: 600; }
+    .badge-paid { background: #F0FDF4; color: #16A34A; font-size: 11px; padding: 3px 8px; border-radius: 20px; font-weight: 600; }
+
+    .btn-toggle {
+        border: none; border-radius: 8px; padding: 6px 14px;
+        font-size: 12px; font-weight: 600; cursor: pointer;
+        transition: all 0.2s; white-space: nowrap;
+    }
+    .btn-toggle-hide { background: #FEE2E2; color: #DC2626; }
+    .btn-toggle-hide:hover { background: #FECACA; }
+    .btn-toggle-show { background: #DCFCE7; color: #15803D; }
+    .btn-toggle-show:hover { background: #BBF7D0; }
+    .btn-approve { background: #DCFCE7; color: #15803D; }
+    .btn-approve:hover { background: #BBF7D0; }
+    .btn-reject { background: #FEE2E2; color: #DC2626; }
+    .btn-reject:hover { background: #FECACA; }
+    .btn-review { background: #EFF6FF; color: #2563EB; }
+    .btn-review:hover { background: #DBEAFE; }
+
+    .cat-table {
+        background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; overflow: hidden;
+    }
+    .cat-table table { width: 100%; border-collapse: collapse; }
+    .cat-table thead th {
+        padding: 12px 16px; font-size: 12px; font-weight: 600;
+        color: #94A3B8; text-transform: uppercase; letter-spacing: 0.04em;
+        background: #F8FAFC; border-bottom: 1px solid #E2E8F0;
+    }
+    .cat-table tbody tr { border-bottom: 1px solid #F1F5F9; transition: background 0.15s; }
+    .cat-table tbody tr:last-child { border-bottom: none; }
+    .cat-table tbody tr:hover { background: #F8FAFC; }
+    .cat-table td { padding: 12px 16px; font-size: 13px; color: #334155; vertical-align: middle; }
+
+    .add-cat-form {
+        background: #F8FAFC; border: 1px dashed #CBD5E1; border-radius: 12px;
+        padding: 20px 24px; margin-bottom: 20px;
+    }
+    .add-cat-form h6 { font-weight: 600; color: #334155; margin-bottom: 14px; }
+    .form-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; }
+    .form-group { display: flex; flex-direction: column; gap: 4px; }
+    .form-group label { font-size: 12px; font-weight: 600; color: #64748B; }
+    .form-group input {
+        border: 1px solid #E2E8F0; border-radius: 8px; padding: 8px 12px;
+        font-size: 13px; color: #334155; background: #fff;
+    }
+    .form-group input:focus { outline: none; border-color: #2563EB; }
+
+    .stars { color: #F59E0B; font-size: 12px; }
+
+    .empty-state {
+        text-align: center; padding: 48px 24px; color: #94A3B8;
+    }
+    .empty-state i { font-size: 40px; margin-bottom: 12px; display: block; }
+
+    .alert-toast {
+        position: fixed; top: 80px; right: 24px; z-index: 9999;
+        padding: 12px 20px; border-radius: 10px; font-size: 14px; font-weight: 500;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1); animation: slideIn 0.3s ease;
+    }
+    .alert-toast.success { background: #DCFCE7; color: #15803D; border: 1px solid #BBF7D0; }
+    .alert-toast.error { background: #FEE2E2; color: #DC2626; border: 1px solid #FECACA; }
+    @@keyframes slideIn { from { transform: translateX(100px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+</style>
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert-toast success" id="toastMsg">
+        <i class="bi bi-check-circle-fill me-2"></i>@TempData["Success"]
+    </div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert-toast error" id="toastMsg">
+        <i class="bi bi-exclamation-circle-fill me-2"></i>@TempData["Error"]
+    </div>
+}
+
+<div style="margin-bottom: 24px;">
+    <h1 style="font-size: 22px; font-weight: 700; color: #1E293B; margin-bottom: 4px;">Quản lý Khoá học</h1>
+    <p style="font-size: 14px; color: #64748B; margin: 0;">Kiểm duyệt khoá học và quản lý danh mục</p>
+</div>
+
+<!-- Stats -->
+<div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 28px;">
+    <div class="stat-card">
+        <div class="stat-icon" style="background: #EFF6FF; color: #2563EB;"><i class="bi bi-book"></i></div>
+        <div>
+            <div class="stat-value">@Model.TotalCourses</div>
+            <div class="stat-label">Tổng khoá học</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon" style="background: #DCFCE7; color: #15803D;"><i class="bi bi-check-circle"></i></div>
+        <div>
+            <div class="stat-value">@Model.PublishedCourses</div>
+            <div class="stat-label">Đang hiển thị</div>
+        </div>
+    </div>
+    <div class="stat-card" style="cursor:pointer;" onclick="document.querySelector('select[name=status]').value='3'; document.getElementById('filterForm').submit()">
+        <div class="stat-icon" style="background: #FEF9C3; color: #A16207;"><i class="bi bi-hourglass-split"></i></div>
+        <div>
+            <div class="stat-value">@Model.PendingReviewCourses</div>
+            <div class="stat-label">Chờ duyệt</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon" style="background: #F1F5F9; color: #64748B;"><i class="bi bi-pencil-square"></i></div>
+        <div>
+            <div class="stat-value">@Model.DraftCourses</div>
+            <div class="stat-label">Bản nháp</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon" style="background: #FEE2E2; color: #DC2626;"><i class="bi bi-eye-slash"></i></div>
+        <div>
+            <div class="stat-value">@Model.DisabledCourses</div>
+            <div class="stat-label">Đã ẩn</div>
+        </div>
+    </div>
+</div>
+
+<!-- Tabs -->
+<div class="tab-nav">
+    <button class="tab-btn @(activeTab == "courses" ? "active" : "")" onclick="switchTab('courses')">
+        <i class="bi bi-book me-1"></i> Khoá học (@Model.TotalCourses)
+    </button>
+    <button class="tab-btn @(activeTab == "categories" ? "active" : "")" onclick="switchTab('categories')">
+        <i class="bi bi-tags me-1"></i> Danh mục (@Model.Categories.Count)
+    </button>
+</div>
+
+<!-- Tab: Courses -->
+<div id="tab-courses" style="display: @(activeTab == "courses" ? "block" : "none")">
+    <form method="get" action="" id="filterForm">
+        <input type="hidden" name="tab" value="courses" />
+        <div class="filter-bar">
+            <input type="text" name="search" placeholder="Tìm tên, mã khoá học..." value="@Model.SearchQuery" />
+            <select name="status" onchange="document.getElementById('filterForm').submit()">
+                <option value="">Tất cả trạng thái</option>
+                <option value="1" selected="@(Model.StatusFilter == CourseStatus.Published ? "selected" : null)">Đang hiển thị</option>
+                <option value="3" selected="@(Model.StatusFilter == CourseStatus.PendingReview ? "selected" : null)">Chờ duyệt</option>
+                <option value="0" selected="@(Model.StatusFilter == CourseStatus.Draft ? "selected" : null)">Bản nháp</option>
+                <option value="2" selected="@(Model.StatusFilter == CourseStatus.Disabled ? "selected" : null)">Đã ẩn</option>
+            </select>
+            <select name="categoryId" onchange="document.getElementById('filterForm').submit()">
+                <option value="">Tất cả danh mục</option>
+                @foreach (var cat in Model.Categories)
+                {
+                    <option value="@cat.Id" selected="@(Model.CategoryFilter == cat.Id ? "selected" : null)">@cat.Name</option>
+                }
+            </select>
+            <input type="text" name="instructor" placeholder="Tìm giảng viên..." value="@Model.InstructorFilter" style="min-width: 180px;" />
+            <button type="submit" style="background: #2563EB; color: #fff; border: none; border-radius: 8px; padding: 8px 16px; font-size: 13px; font-weight: 600; cursor: pointer;">
+                <i class="bi bi-search me-1"></i> Tìm
+            </button>
+            @if (!string.IsNullOrEmpty(Model.SearchQuery) || Model.StatusFilter.HasValue || Model.CategoryFilter.HasValue || !string.IsNullOrEmpty(Model.InstructorFilter))
+            {
+                <a href="@Url.Action("Index", new { tab = "courses" })" style="color: #64748B; font-size: 13px; text-decoration: none;">
+                    <i class="bi bi-x-circle me-1"></i> Xoá bộ lọc
+                </a>
+            }
+        </div>
+    </form>
+
+    <div class="courses-table">
+        @if (!Model.Courses.Any())
+        {
+            <div class="empty-state">
+                <i class="bi bi-book text-muted"></i>
+                <div>Không có khoá học nào</div>
+            </div>
+        }
+        else
+        {
+            <table>
+                <thead>
+                    <tr>
+                        <th>Khoá học</th>
+                        <th>Giảng viên</th>
+                        <th>Danh mục</th>
+                        <th>Loại</th>
+                        <th>Học viên</th>
+                        <th>Đánh giá</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var course in Model.Courses)
+                    {
+                        <tr>
+                            <td>
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    @if (!string.IsNullOrEmpty(course.CoverImageUrl))
+                                    {
+                                        <img src="@course.CoverImageUrl" class="course-thumb" alt="" />
+                                    }
+                                    else
+                                    {
+                                        <div class="course-thumb-placeholder"><i class="bi bi-book"></i></div>
+                                    }
+                                    <div>
+                                        <div style="font-weight: 600; color: #1E293B; max-width: 240px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">@course.Name</div>
+                                        <div style="font-size: 11px; color: #94A3B8; margin-top: 2px;">@course.Code</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td style="color: #475569;">@course.InstructorName</td>
+                            <td style="color: #475569;">@course.CategoryName</td>
+                            <td>
+                                @if (course.CourseType == CourseType.Free)
+                                {
+                                    <span class="badge-free">Miễn phí</span>
+                                }
+                                else
+                                {
+                                    <span class="badge-paid">@course.OriginalPrice.ToString("N0") ₫</span>
+                                }
+                            </td>
+                            <td>
+                                <span style="font-weight: 600;">@course.EnrollmentCount</span>
+                                <span style="color: #94A3B8; font-size: 12px;"> HV</span>
+                            </td>
+                            <td>
+                                @if (course.AverageRating > 0)
+                                {
+                                    <span class="stars"><i class="bi bi-star-fill"></i></span>
+                                    <span style="font-weight: 600; font-size: 13px;">@course.AverageRating.ToString("0.0")</span>
+                                }
+                                else
+                                {
+                                    <span style="color: #CBD5E1; font-size: 12px;">—</span>
+                                }
+                            </td>
+                            <td>
+                                @if (course.Status == CourseStatus.Published)
+                                {
+                                    <span class="badge-status badge-published"><i class="bi bi-circle-fill" style="font-size:7px;"></i> Hiển thị</span>
+                                }
+                                else if (course.Status == CourseStatus.PendingReview)
+                                {
+                                    <span class="badge-status badge-pending"><i class="bi bi-circle-fill" style="font-size:7px;"></i> Chờ duyệt</span>
+                                }
+                                else if (course.Status == CourseStatus.Draft)
+                                {
+                                    <span class="badge-status badge-draft"><i class="bi bi-circle-fill" style="font-size:7px;"></i> Bản nháp</span>
+                                }
+                                else
+                                {
+                                    <span class="badge-status badge-disabled"><i class="bi bi-circle-fill" style="font-size:7px;"></i> Đã ẩn</span>
+                                }
+                            </td>
+                            <td>
+                                @if (course.Status == CourseStatus.PendingReview)
+                                {
+                                    <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                                        <a href="@Url.Action("Review", new { id = course.Id })" class="btn-toggle btn-review">
+                                            <i class="bi bi-eye me-1"></i>Xem nội dung
+                                        </a>
+                                        <form method="post" asp-action="Approve" asp-route-id="@course.Id" style="display:inline;">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn-toggle btn-approve"
+                                                    onclick="return confirm('Duyệt và công bố khoá học này?')">
+                                                <i class="bi bi-check-lg me-1"></i>Duyệt
+                                            </button>
+                                        </form>
+                                        <form method="post" asp-action="Reject" asp-route-id="@course.Id" style="display:inline;">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn-toggle btn-reject"
+                                                    onclick="return confirm('Từ chối khoá học này và trả về bản nháp?')">
+                                                <i class="bi bi-x-lg me-1"></i>Từ chối
+                                            </button>
+                                        </form>
+                                    </div>
+                                }
+                                else if (course.Status == CourseStatus.Published || course.Status == CourseStatus.Disabled)
+                                {
+                                    <div style="display:flex; gap:6px;">
+                                        <a href="@Url.Action("Review", new { id = course.Id })" class="btn-toggle btn-review">
+                                            <i class="bi bi-eye me-1"></i>Xem
+                                        </a>
+                                        <form method="post" asp-action="Toggle" asp-route-id="@course.Id" style="display:inline;">
+                                            @Html.AntiForgeryToken()
+                                            @if (course.Status == CourseStatus.Published)
+                                            {
+                                                <button type="submit" class="btn-toggle btn-toggle-hide"
+                                                        onclick="return confirm('Ẩn khoá học này?')">
+                                                    <i class="bi bi-eye-slash me-1"></i>Ẩn
+                                                </button>
+                                            }
+                                            else
+                                            {
+                                                <button type="submit" class="btn-toggle btn-toggle-show"
+                                                        onclick="return confirm('Hiển thị lại khoá học này?')">
+                                                    <i class="bi bi-eye me-1"></i>Hiện
+                                                </button>
+                                            }
+                                        </form>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <a href="@Url.Action("Review", new { id = course.Id })" class="btn-toggle btn-review">
+                                        <i class="bi bi-eye me-1"></i>Xem
+                                    </a>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>
+
+<!-- Tab: Categories -->
+<div id="tab-categories" style="display: @(activeTab == "categories" ? "block" : "none")">
+    <div class="add-cat-form">
+        <h6><i class="bi bi-plus-circle me-2 text-primary"></i>Thêm danh mục mới</h6>
+        <form method="post" asp-action="CreateCategory">
+            @Html.AntiForgeryToken()
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Tên danh mục *</label>
+                    <input type="text" name="name" placeholder="VD: Lập trình Web" required style="min-width: 200px;" oninput="autoSlug(this)" />
+                </div>
+                <div class="form-group">
+                    <label>Slug *</label>
+                    <input type="text" id="slugInput" name="slug" placeholder="lap-trinh-web" required style="min-width: 180px;" />
+                </div>
+                <div class="form-group">
+                    <label>Thứ tự hiển thị</label>
+                    <input type="number" name="displayOrder" value="0" style="width: 80px;" />
+                </div>
+                <button type="submit" style="background: #2563EB; color: #fff; border: none; border-radius: 8px; padding: 9px 20px; font-size: 13px; font-weight: 600; cursor: pointer; align-self: flex-end;">
+                    <i class="bi bi-plus-lg me-1"></i> Thêm
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="cat-table">
+        @if (!Model.Categories.Any())
+        {
+            <div class="empty-state">
+                <i class="bi bi-tags text-muted"></i>
+                <div>Chưa có danh mục nào</div>
+            </div>
+        }
+        else
+        {
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Tên danh mục</th>
+                        <th>Slug</th>
+                        <th>Số khoá học</th>
+                        <th>Thứ tự</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var cat in Model.Categories)
+                    {
+                        <tr>
+                            <td style="color: #94A3B8; font-size: 12px;">#@cat.Id</td>
+                            <td style="font-weight: 600;">@cat.Name</td>
+                            <td><code style="font-size: 12px; color: #7C3AED; background: #F5F3FF; padding: 2px 6px; border-radius: 4px;">@cat.Slug</code></td>
+                            <td>
+                                <span style="font-weight: 600;">@cat.CourseCount</span>
+                                <span style="color: #94A3B8; font-size: 12px;"> khoá</span>
+                            </td>
+                            <td style="color: #64748B;">@cat.DisplayOrder</td>
+                            <td>
+                                @if (cat.IsActive)
+                                {
+                                    <span class="badge-status badge-published"><i class="bi bi-circle-fill" style="font-size:7px;"></i> Hoạt động</span>
+                                }
+                                else
+                                {
+                                    <span class="badge-status badge-disabled"><i class="bi bi-circle-fill" style="font-size:7px;"></i> Tạm ẩn</span>
+                                }
+                            </td>
+                            <td>
+                                <div style="display: flex; gap: 6px;">
+                                    <!-- Edit button triggers modal -->
+                                    <button type="button"
+                                            class="btn-toggle"
+                                            style="background: #EFF6FF; color: #2563EB;"
+                                            onclick="openEditModal(@cat.Id, '@cat.Name.Replace("'", "\\'")', '@cat.Slug', @cat.DisplayOrder, @cat.IsActive.ToString().ToLower())">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                    @if (cat.CourseCount == 0)
+                                    {
+                                        <form method="post" asp-action="DeleteCategory" asp-route-id="@cat.Id" style="display:inline;">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn-toggle btn-toggle-hide"
+                                                    onclick="return confirm('Xoá danh mục \'@cat.Name\'?')">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <button class="btn-toggle" style="background: #F1F5F9; color: #CBD5E1; cursor: not-allowed;" disabled title="Còn khoá học đang dùng">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>
+
+<!-- Edit Category Modal -->
+<div id="editModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:9999; align-items:center; justify-content:center;">
+    <div style="background:#fff; border-radius:16px; padding:32px; width:480px; max-width:90vw; box-shadow: 0 20px 60px rgba(0,0,0,0.2);">
+        <h5 style="font-weight: 700; color: #1E293B; margin-bottom: 20px;">
+            <i class="bi bi-pencil-square me-2 text-primary"></i>Sửa danh mục
+        </h5>
+        <form method="post" asp-action="EditCategory" id="editCatForm">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="id" id="editId" />
+            <div style="display: flex; flex-direction: column; gap: 14px;">
+                <div class="form-group">
+                    <label>Tên danh mục *</label>
+                    <input type="text" name="name" id="editName" required style="width:100%;" />
+                </div>
+                <div class="form-group">
+                    <label>Slug *</label>
+                    <input type="text" name="slug" id="editSlug" required style="width:100%;" />
+                </div>
+                <div style="display: flex; gap: 12px;">
+                    <div class="form-group" style="flex: 1;">
+                        <label>Thứ tự hiển thị</label>
+                        <input type="number" name="displayOrder" id="editOrder" style="width:100%;" />
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label>Trạng thái</label>
+                        <select name="isActive" id="editActive" style="border: 1px solid #E2E8F0; border-radius: 8px; padding: 8px 12px; width:100%; font-size:13px;">
+                            <option value="true">Hoạt động</option>
+                            <option value="false">Tạm ẩn</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 24px; justify-content: flex-end;">
+                <button type="button" onclick="closeEditModal()"
+                        style="background:#F1F5F9; color:#64748B; border:none; border-radius:8px; padding:10px 20px; font-size:14px; font-weight:600; cursor:pointer;">
+                    Huỷ
+                </button>
+                <button type="submit"
+                        style="background:#2563EB; color:#fff; border:none; border-radius:8px; padding:10px 20px; font-size:14px; font-weight:600; cursor:pointer;">
+                    <i class="bi bi-check-lg me-1"></i>Lưu
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    function switchTab(tab) {
+        document.getElementById('tab-courses').style.display = tab === 'courses' ? 'block' : 'none';
+        document.getElementById('tab-categories').style.display = tab === 'categories' ? 'block' : 'none';
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+        history.replaceState(null, '', '?tab=' + tab);
+    }
+
+    function autoSlug(input) {
+        const slugField = document.getElementById('slugInput');
+        if (!slugField) return;
+        slugField.value = input.value
+            .toLowerCase()
+            .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+            .replace(/đ/g, 'd').replace(/Đ/g, 'd')
+            .replace(/[^a-z0-9\s-]/g, '')
+            .trim().replace(/\s+/g, '-');
+    }
+
+    function openEditModal(id, name, slug, order, isActive) {
+        document.getElementById('editId').value = id;
+        document.getElementById('editName').value = name;
+        document.getElementById('editSlug').value = slug;
+        document.getElementById('editOrder').value = order;
+        document.getElementById('editActive').value = isActive ? 'true' : 'false';
+        document.getElementById('editModal').style.display = 'flex';
+    }
+
+    function closeEditModal() {
+        document.getElementById('editModal').style.display = 'none';
+    }
+
+    document.getElementById('editModal')?.addEventListener('click', function(e) {
+        if (e.target === this) closeEditModal();
+    });
+
+    // Auto-dismiss toast
+    setTimeout(() => {
+        const t = document.getElementById('toastMsg');
+        if (t) t.style.opacity = '0', t.style.transition = 'opacity 0.5s', setTimeout(() => t.remove(), 500);
+    }, 3000);
+</script>
+}

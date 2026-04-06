@@ -1,0 +1,346 @@
+@model NotificationRulesViewModel
+@using EduLMS.Web.ViewModels.Admin
+@{
+    ViewData["Title"] = "Quản lý Thông báo";
+    var activeTab = Context.Request.Query["tab"].ToString();
+    if (string.IsNullOrEmpty(activeTab)) activeTab = "rules";
+}
+
+@section Styles {
+<style>
+    .page-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; }
+    .page-header h1 { font-size:22px; font-weight:700; color:#1E293B; margin:0; }
+
+    /* Tabs */
+    .tab-nav { display:flex; gap:4px; border-bottom:2px solid #E2E8F0; margin-bottom:24px; }
+    .tab-btn {
+        padding:10px 20px; font-size:14px; font-weight:500;
+        color:#64748B; border:none; background:none; cursor:pointer;
+        border-bottom:2px solid transparent; margin-bottom:-2px;
+        border-radius:6px 6px 0 0; transition:all 0.2s;
+    }
+    .tab-btn:hover { color:#334155; background:#F8FAFC; }
+    .tab-btn.active { color:#2563EB; border-bottom-color:#2563EB; font-weight:600; }
+
+    /* Rules tab */
+    .rule-card { background:#fff; border-radius:12px; border:1px solid #E2E8F0; padding:24px; margin-bottom:16px; }
+    .rule-card-header { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:12px; }
+    .rule-title { font-size:16px; font-weight:700; color:#1E293B; }
+    .rule-desc { font-size:14px; color:#64748B; margin-bottom:16px; }
+    .rule-template {
+        background:#1E293B; color:#E2E8F0; border-radius:8px;
+        padding:16px; font-family:'Courier New',monospace; font-size:13px;
+        line-height:1.6; white-space:pre-wrap; word-break:break-word; margin-bottom:0;
+    }
+    .rule-controls { display:flex; flex-direction:column; align-items:flex-end; gap:12px; min-width:160px; }
+    .toggle-row { display:flex; align-items:center; gap:10px; }
+    .toggle-label { font-size:13px; font-weight:600; color:#64748B; }
+    .toggle-switch { position:relative; width:44px; height:24px; }
+    .toggle-switch input { opacity:0; width:0; height:0; }
+    .toggle-slider { position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background:#CBD5E1; border-radius:24px; transition:0.3s; }
+    .toggle-slider::before { content:''; position:absolute; height:18px; width:18px; left:3px; bottom:3px; background:#fff; border-radius:50%; transition:0.3s; }
+    .toggle-switch input:checked + .toggle-slider { background:#2563EB; }
+    .toggle-switch input:checked + .toggle-slider::before { transform:translateX(20px); }
+    .channel-checks { display:flex; gap:16px; }
+    .channel-check { display:flex; align-items:center; gap:6px; font-size:13px; color:#334155; }
+    .channel-check input[type="checkbox"] { width:16px; height:16px; accent-color:#2563EB; }
+
+    /* Broadcast tab */
+    .broadcast-card { background:#fff; border:1px solid #E2E8F0; border-radius:12px; padding:24px 28px; margin-bottom:20px; }
+    .broadcast-card h5 { font-size:16px; font-weight:700; color:#1E293B; margin-bottom:20px; }
+    .form-label-b { font-size:13px; font-weight:600; color:#475569; margin-bottom:6px; display:block; }
+    .form-ctrl { border:1px solid #E2E8F0; border-radius:8px; padding:10px 14px; font-size:14px; color:#1E293B; width:100%; outline:none; transition:border-color 0.15s; background:#fff; }
+    .form-ctrl:focus { border-color:#2563EB; }
+    select.form-ctrl { height:42px; }
+    #courseRow { display:none; }
+
+    .btn-send {
+        background:#2563EB; color:#fff; border:none; border-radius:8px;
+        padding:10px 28px; font-size:14px; font-weight:600; cursor:pointer;
+        display:inline-flex; align-items:center; gap:8px; transition:background 0.2s;
+    }
+    .btn-send:hover { background:#1D4ED8; }
+
+    /* History table */
+    .history-table { width:100%; border-collapse:collapse; }
+    .history-table thead th {
+        padding:10px 16px; font-size:12px; font-weight:600; color:#94A3B8;
+        text-transform:uppercase; letter-spacing:0.04em;
+        background:#F8FAFC; border-bottom:1px solid #E2E8F0; text-align:left;
+    }
+    .history-table tbody tr { border-bottom:1px solid #F1F5F9; transition:background 0.1s; }
+    .history-table tbody tr:last-child { border-bottom:none; }
+    .history-table tbody tr:hover { background:#F8FAFC; }
+    .history-table td { padding:14px 16px; font-size:13px; color:#334155; vertical-align:middle; }
+    .badge-target {
+        font-size:11px; font-weight:600; padding:3px 10px; border-radius:20px; white-space:nowrap;
+        display:inline-flex; align-items:center; gap:4px;
+    }
+    .badge-all     { background:#FEF9C3; color:#A16207; }
+    .badge-learner { background:#EFF6FF; color:#2563EB; }
+    .badge-inst    { background:#F0FDF4; color:#16A34A; }
+    .badge-course  { background:#F5F3FF; color:#7C3AED; }
+    .empty-state { text-align:center; padding:40px 24px; color:#94A3B8; }
+    .empty-state i { font-size:36px; display:block; margin-bottom:10px; }
+
+    .alert-toast { padding:12px 20px; border-radius:10px; font-size:14px; font-weight:500; margin-bottom:20px; display:flex; align-items:center; gap:10px; }
+    .alert-s { background:#DCFCE7; color:#15803D; border:1px solid #BBF7D0; }
+    .alert-e { background:#FEE2E2; color:#DC2626; border:1px solid #FECACA; }
+
+    .tox-tinymce { border-radius:8px !important; border-color:#E2E8F0 !important; }
+</style>
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert-toast alert-s"><i class="bi bi-check-circle-fill"></i> @TempData["Success"]</div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert-toast alert-e"><i class="bi bi-exclamation-circle-fill"></i> @TempData["Error"]</div>
+}
+
+<div class="page-header">
+    <h1>Quản lý Thông báo</h1>
+    @if (activeTab == "rules")
+    {
+        <button class="btn-admin" onclick="document.getElementById('saveRulesForm').submit()">
+            <i class="bi bi-check-lg"></i> Lưu cấu hình
+        </button>
+    }
+</div>
+
+<!-- Tabs -->
+<div class="tab-nav">
+    <button class="tab-btn @(activeTab == "rules" ? "active" : "")" onclick="switchTab('rules')">
+        <i class="bi bi-gear me-1"></i> Quy tắc tự động (@Model.Rules.Count)
+    </button>
+    <button class="tab-btn @(activeTab == "broadcast" ? "active" : "")" onclick="switchTab('broadcast')">
+        <i class="bi bi-megaphone me-1"></i> Gửi thủ công
+        @if (Model.SentBroadcasts.Any())
+        {
+            <span style="background:#EFF6FF;color:#2563EB;font-size:11px;font-weight:700;padding:2px 7px;border-radius:20px;margin-left:4px;">@Model.SentBroadcasts.Count</span>
+        }
+    </button>
+</div>
+
+<!-- Tab: Rules -->
+<div id="tab-rules" style="display:@(activeTab == "rules" ? "block" : "none")">
+    <form id="saveRulesForm">
+        @if (Model.Rules.Any())
+        {
+            @foreach (var rule in Model.Rules)
+            {
+                <div class="rule-card">
+                    <div class="rule-card-header">
+                        <div style="flex:1; margin-right:24px;">
+                            <div class="rule-title">@rule.DisplayName</div>
+                            <div class="rule-desc">@rule.Description</div>
+                            <div class="rule-template">@rule.TemplateBody</div>
+                        </div>
+                        <div class="rule-controls">
+                            <div class="toggle-row">
+                                <span class="toggle-label">Trạng thái</span>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" name="rules[@rule.Id].IsEnabled" @(rule.IsEnabled ? "checked" : "") />
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div>
+                                <div class="toggle-label" style="margin-bottom:8px;">Kênh gửi</div>
+                                <div class="channel-checks">
+                                    <label class="channel-check">
+                                        <input type="checkbox" name="rules[@rule.Id].EmailChannel"
+                                               @(rule.Channel == "Email" || rule.Channel == "Both" ? "checked" : "") />
+                                        Email
+                                    </label>
+                                    <label class="channel-check">
+                                        <input type="checkbox" name="rules[@rule.Id].InAppChannel"
+                                               @(rule.Channel == "InApp" || rule.Channel == "Both" ? "checked" : "") />
+                                        In-App
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="rule-card">
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-bell-slash" style="font-size:48px;"></i>
+                    <p class="mt-3" style="font-size:15px;">Chưa có quy tắc thông báo nào được cấu hình</p>
+                </div>
+            </div>
+        }
+    </form>
+</div>
+
+<!-- Tab: Broadcast -->
+<div id="tab-broadcast" style="display:@(activeTab == "broadcast" ? "block" : "none")">
+
+    <!-- Compose -->
+    <div class="broadcast-card">
+        <h5><i class="bi bi-megaphone me-2 text-primary"></i>Tạo thông báo mới</h5>
+        <form asp-action="Send" method="post" id="broadcastForm">
+            @Html.AntiForgeryToken()
+            <div class="row g-3">
+                <div class="col-md-8">
+                    <label class="form-label-b">Tiêu đề <span class="text-danger">*</span></label>
+                    <input type="text" name="title" class="form-ctrl"
+                           placeholder="Nhập tiêu đề thông báo..." required maxlength="300" />
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label-b">Gửi đến</label>
+                    <select name="target" class="form-ctrl" id="targetSelect" onchange="toggleCourseRow()">
+                        <option value="all">Tất cả người dùng</option>
+                        <option value="learners">Tất cả học viên</option>
+                        <option value="instructors">Tất cả giảng viên</option>
+                        <option value="course">Học viên khoá học...</option>
+                    </select>
+                </div>
+                <div class="col-md-4" id="courseRow">
+                    <label class="form-label-b">Chọn khoá học</label>
+                    <select name="courseId" class="form-ctrl">
+                        <option value="">— Chọn khoá học —</option>
+                        @foreach (var c in Model.Courses)
+                        {
+                            <option value="@c.Id">[@c.Code] @c.Name <span style="color:#94A3B8;">· @c.InstructorName</span></option>
+                        }
+                    </select>
+                </div>
+                <div class="col-12">
+                    <label class="form-label-b">Nội dung <span class="text-danger">*</span></label>
+                    <textarea name="message" id="broadcastMessage" rows="6" class="form-ctrl"></textarea>
+                </div>
+                <div class="col-12 d-flex justify-content-end pt-2">
+                    <button type="submit" class="btn-send" id="broadcastBtn">
+                        <i class="bi bi-send"></i> Gửi thông báo
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- History -->
+    <div class="broadcast-card">
+        <h5><i class="bi bi-clock-history me-2" style="color:#64748B;"></i>Lịch sử đã gửi</h5>
+        @if (!Model.SentBroadcasts.Any())
+        {
+            <div class="empty-state">
+                <i class="bi bi-bell-slash"></i>
+                Chưa có thông báo nào được gửi.
+            </div>
+        }
+        else
+        {
+            <div style="overflow-x:auto;">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>Tiêu đề</th>
+                            <th>Gửi đến</th>
+                            <th>Người nhận</th>
+                            <th>Thời gian</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var b in Model.SentBroadcasts)
+                        {
+                            <tr>
+                                <td>
+                                    <div style="font-weight:600;color:#1E293B;max-width:360px;">@b.Title</div>
+                                    @if (!string.IsNullOrEmpty(b.Message))
+                                    {
+                                        <div style="font-size:12px;color:#94A3B8;margin-top:3px;max-width:360px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+                                            @System.Text.RegularExpressions.Regex.Replace(b.Message, "<.*?>", "")
+                                        </div>
+                                    }
+                                </td>
+                                <td>
+                                    @{
+                                        var (badgeClass, icon) = b.TargetLabel switch
+                                        {
+                                            "Tất cả người dùng" => ("badge-all", "bi-people-fill"),
+                                            "Tất cả học viên" => ("badge-learner", "bi-person-check"),
+                                            "Tất cả giảng viên" => ("badge-inst", "bi-person-workspace"),
+                                            _ => ("badge-course", "bi-journal-bookmark")
+                                        };
+                                    }
+                                    <span class="badge-target @badgeClass">
+                                        <i class="bi @icon"></i>@b.TargetLabel
+                                    </span>
+                                </td>
+                                <td>
+                                    <span style="font-size:12px;font-weight:700;color:#64748B;">
+                                        <i class="bi bi-person-check me-1"></i>@b.RecipientCount
+                                    </span>
+                                </td>
+                                <td style="color:#64748B;white-space:nowrap;">
+                                    @b.SentAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+<script src="https://cdn.tiny.cloud/1/4279ovt8ruxt0xnt8hz1wh1ufaqs04vqlf7sj08zbhkpzict/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+<script>
+    tinymce.init({
+        selector: '#broadcastMessage',
+        language: 'vi',
+        height: 320,
+        menubar: false,
+        plugins: 'lists link code wordcount',
+        toolbar: 'bold italic underline | bullist numlist | link | alignleft aligncenter alignright | code',
+        content_style: 'body { font-family: inherit; font-size: 14px; color: #334155; line-height: 1.6; }',
+        branding: false,
+        promotion: false,
+        placeholder: 'Nhập nội dung thông báo...',
+        setup: function (editor) {
+            editor.on('change input', function () { editor.save(); });
+        }
+    });
+
+    function switchTab(tab) {
+        document.getElementById('tab-rules').style.display = tab === 'rules' ? 'block' : 'none';
+        document.getElementById('tab-broadcast').style.display = tab === 'broadcast' ? 'block' : 'none';
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+        history.replaceState(null, '', '?tab=' + tab);
+    }
+
+    function toggleCourseRow() {
+        const val = document.getElementById('targetSelect').value;
+        document.getElementById('courseRow').style.display = val === 'course' ? 'block' : 'none';
+    }
+
+    document.getElementById('broadcastForm').addEventListener('submit', function (e) {
+        const content = tinymce.get('broadcastMessage').getContent({ format: 'text' }).trim();
+        if (!content) {
+            e.preventDefault();
+            alert('Vui lòng nhập nội dung thông báo.');
+            return;
+        }
+        tinymce.triggerSave();
+        document.getElementById('broadcastBtn').disabled = true;
+        document.getElementById('broadcastBtn').innerHTML = '<i class="bi bi-hourglass-split"></i> Đang gửi...';
+    });
+
+    // Auto-dismiss toast
+    setTimeout(() => {
+        document.querySelectorAll('.alert-toast').forEach(t => {
+            t.style.opacity = '0';
+            t.style.transition = 'opacity 0.5s';
+            setTimeout(() => t.remove(), 500);
+        });
+    }, 3000);
+</script>
+}

@@ -1,0 +1,32 @@
+  Determining projects to restore...
+/Users/doanhnguyen/Documents/tài liệu/phầm mềm/WEB nâng cao/EcduLMS.Web/EduLMS.Web.csproj : warning NU1603: EduLMS.Web depends on X.PagedList.Mvc.Core (>= 10.0.7) but X.PagedList.Mvc.Core 10.0.7 was not found. X.PagedList.Mvc.Core 10.1.1 was resolved instead. [/Users/doanhnguyen/Documents/tài liệu/phầm mềm/WEB nâng cao/EcduLMS.Web.Tests/EcduLMS.Web.Tests.csproj]
+/Users/doanhnguyen/Documents/tài liệu/phầm mềm/WEB nâng cao/EcduLMS.Web.Tests/EcduLMS.Web.Tests.csproj : warning NU1603: EduLMS.Web depends on X.PagedList.Mvc.Core (>= 10.0.7) but X.PagedList.Mvc.Core 10.0.7 was not found. X.PagedList.Mvc.Core 10.1.1 was resolved instead.
+/Users/doanhnguyen/Documents/tài liệu/phầm mềm/WEB nâng cao/EcduLMS.Web/EduLMS.Web.csproj : warning NU1603: X.PagedList.Mvc.Core 10.1.1 depends on X.Web.PagedList (>= 10.1.1) but X.Web.PagedList 10.1.1 was not found. X.Web.PagedList 10.1.2 was resolved instead. [/Users/doanhnguyen/Documents/tài liệu/phầm mềm/WEB nâng cao/EcduLMS.Web.Tests/EcduLMS.Web.Tests.csproj]
+/Users/doanhnguyen/Documents/tài liệu/phầm mềm/WEB nâng cao/EcduLMS.Web.Tests/EcduLMS.Web.Tests.csproj : warning NU1603: X.PagedList.Mvc.Core 10.1.1 depends on X.Web.PagedList (>= 10.1.1) but X.Web.PagedList 10.1.1 was not found. X.Web.PagedList 10.1.2 was resolved instead.
+  All projects are up-to-date for restore.
+/Users/doanhnguyen/Documents/tài liệu/phầm mềm/WEB nâng cao/EcduLMS.Web.Tests/EcduLMS.Web.Tests.csproj : warning NU1603: EduLMS.Web depends on X.PagedList.Mvc.Core (>= 10.0.7) but X.PagedList.Mvc.Core 10.0.7 was not found. X.PagedList.Mvc.Core 10.1.1 was resolved instead.
+/Users/doanhnguyen/Documents/tài liệu/phầm mềm/WEB nâng cao/EcduLMS.Web.Tests/EcduLMS.Web.Tests.csproj : warning NU1603: X.PagedList.Mvc.Core 10.1.1 depends on X.Web.PagedList (>= 10.1.1) but X.Web.PagedList 10.1.1 was not found. X.Web.PagedList 10.1.2 was resolved instead.
+/Users/doanhnguyen/Documents/tài liệu/phầm mềm/WEB nâng cao/EcduLMS.Web/EduLMS.Web.csproj : warning NU1603: EduLMS.Web depends on X.PagedList.Mvc.Core (>= 10.0.7) but X.PagedList.Mvc.Core 10.0.7 was not found. X.PagedList.Mvc.Core 10.1.1 was resolved instead.
+/Users/doanhnguyen/Documents/tài liệu/phầm mềm/WEB nâng cao/EcduLMS.Web/EduLMS.Web.csproj : warning NU1603: X.PagedList.Mvc.Core 10.1.1 depends on X.Web.PagedList (>= 10.1.1) but X.Web.PagedList 10.1.1 was not found. X.Web.PagedList 10.1.2 was resolved instead.
+  EduLMS.Web -> /Users/doanhnguyen/Documents/tài liệu/phầm mềm/WEB nâng cao/EcduLMS.Web/bin/Debug/net9.0/EduLMS.Web.dll
+  EcduLMS.Web.Tests -> /Users/doanhnguyen/Documents/tài liệu/phầm mềm/WEB nâng cao/EcduLMS.Web.Tests/bin/Debug/net9.0/EcduLMS.Web.Tests.dll
+Test run for /Users/doanhnguyen/Documents/tài liệu/phầm mềm/WEB nâng cao/EcduLMS.Web.Tests/bin/Debug/net9.0/EcduLMS.Web.Tests.dll (.NETCoreApp,Version=v9.0)
+VSTest version 17.14.1 (arm64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+/Users/doanhnguyen/Documents/tài liệu/phầm mềm/WEB nâng cao/EcduLMS.Web.Tests/bin/Debug/net9.0/EcduLMS.Web.Tests.dll
+[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v2.8.2+699d445a1a (64-bit .NET 9.0.8)
+[xUnit.net 00:00:00.04]   Discovering: EcduLMS.Web.Tests
+[xUnit.net 00:00:00.05]   Discovered:  EcduLMS.Web.Tests
+[xUnit.net 00:00:00.06]   Starting:    EcduLMS.Web.Tests
+[xUnit.net 00:00:01.08]   Finished:    EcduLMS.Web.Tests
+  Passed EcduLMS.Web.Tests.Integration.PaymentEnrollmentIntegrationTests.PaymentWorkflow_WhenWebhookCompletesPayment_ShouldShowCourseInLearnerMyTraining [701 ms]
+  Passed EcduLMS.Web.Tests.Integration.LearnerWorkflowIntegrationTests.AssignmentFlow_SubmitThenGrade_ShouldAppearAsPassInLearnerGrades [933 ms]
+  Passed EcduLMS.Web.Tests.Integration.LearnerWorkflowIntegrationTests.LearningPath_WhenPrerequisiteIncomplete_ShouldLockLessonAndBlockAssignment [58 ms]
+  Passed EcduLMS.Web.Tests.Integration.LearnerWorkflowIntegrationTests.LearningPath_WhenLearnerCompletesLessons_ShouldUnlockAssignmentInTrainingAndGrades [7 ms]
+
+Test Run Successful.
+Total tests: 4
+     Passed: 4
+ Total time: 1.4061 Seconds

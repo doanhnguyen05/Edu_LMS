@@ -1,0 +1,342 @@
+@model LearnerDashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<style>
+    .stat-card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 24px;
+        border: 1px solid #E2E8F0;
+        transition: box-shadow 0.2s;
+    }
+    .stat-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    .stat-card .stat-value { font-size: 32px; font-weight: 700; color: #1E293B; }
+    .stat-card .stat-label { font-size: 14px; color: #64748B; margin-top: 4px; }
+    .stat-card .stat-icon {
+        width: 48px; height: 48px; border-radius: 12px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 22px;
+    }
+    .resume-card {
+        background: #fff;
+        border-radius: 12px;
+        border: 1px solid #E2E8F0;
+        overflow: hidden;
+    }
+    .resume-thumb {
+        width: 100%;
+        height: 160px;
+        background: linear-gradient(135deg, #667EEA 0%, #764BA2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 48px;
+    }
+    .resume-body { padding: 20px; }
+    .badge-learning {
+        background: #FEE2E2;
+        color: #DC2626;
+        font-size: 12px;
+        font-weight: 600;
+        padding: 4px 10px;
+        border-radius: 20px;
+    }
+    .progress-bar-custom {
+        height: 8px;
+        border-radius: 4px;
+        background: #E2E8F0;
+        overflow: hidden;
+    }
+    .progress-bar-fill {
+        height: 100%;
+        border-radius: 4px;
+        background: #2563EB;
+        transition: width 0.5s ease;
+    }
+    .sidebar-card {
+        background: #fff;
+        border-radius: 12px;
+        border: 1px solid #E2E8F0;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    .sidebar-card h6 {
+        font-size: 15px;
+        font-weight: 700;
+        color: #1E293B;
+        margin-bottom: 16px;
+    }
+    .notif-item {
+        display: flex;
+        gap: 12px;
+        padding: 10px 0;
+        border-bottom: 1px solid #F1F5F9;
+    }
+    .notif-item:last-child { border-bottom: none; }
+    .notif-icon {
+        width: 36px; height: 36px; border-radius: 10px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 16px; flex-shrink: 0;
+    }
+    .notif-msg { font-size: 13px; color: #334155; line-height: 1.4; }
+    .notif-time { font-size: 11px; color: #94A3B8; margin-top: 2px; }
+    .activity-item {
+        display: flex;
+        gap: 12px;
+        padding: 10px 0;
+        border-bottom: 1px solid #F1F5F9;
+    }
+    .activity-item:last-child { border-bottom: none; }
+    .activity-dot {
+        width: 8px; height: 8px; border-radius: 50%; background: #2563EB;
+        margin-top: 6px; flex-shrink: 0;
+    }
+    .activity-title { font-size: 13px; color: #334155; font-weight: 500; }
+    .activity-detail { font-size: 12px; color: #94A3B8; }
+    .chart-card {
+        background: #fff;
+        border-radius: 12px;
+        border: 1px solid #E2E8F0;
+        padding: 20px;
+    }
+    .chart-card h6 {
+        font-size: 15px;
+        font-weight: 700;
+        color: #1E293B;
+        margin-bottom: 16px;
+    }
+    .badge-new {
+        background: #DC2626;
+        color: #fff;
+        font-size: 11px;
+        padding: 2px 8px;
+        border-radius: 10px;
+        margin-left: 8px;
+    }
+</style>
+
+<div class="row">
+    <!-- Main Content -->
+    <div class="col-lg-8">
+        <!-- Welcome -->
+        <div class="mb-4">
+            <h4 style="font-weight: 700; color: #1E293B;">
+                Chào mừng trở lại, @Model.UserName! 👋
+            </h4>
+            <div class="d-flex align-items-center gap-2 mt-1">
+                <span style="font-size: 14px; color: #64748B;">Tiếp tục hành trình học tập của bạn.</span>
+                <span class="badge" style="background: #DBEAFE; color: #2563EB; font-size: 12px; font-weight: 600; padding: 4px 12px; border-radius: 20px;">Cấp độ: Trung bình</span>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="row mb-4">
+            <div class="col-md-6 mb-3 mb-md-0">
+                <div class="stat-card d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="stat-value">@Model.TotalCourses</div>
+                        <div class="stat-label">Tổng số khóa học</div>
+                    </div>
+                    <div class="stat-icon" style="background: #EFF6FF; color: #2563EB;">
+                        <i class="bi bi-journal-bookmark"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="stat-card d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="stat-value">@Model.CompletedCourses</div>
+                        <div class="stat-label">Số khóa hoàn thành</div>
+                    </div>
+                    <div class="stat-icon" style="background: #F0FDF4; color: #16A34A;">
+                        <i class="bi bi-check-circle"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resume Learning -->
+        @if (!string.IsNullOrEmpty(Model.ResumeCourseName))
+        {
+        <div class="resume-card mb-4">
+            <div class="resume-thumb">
+                <i class="bi bi-play-circle"></i>
+            </div>
+            <div class="resume-body">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="badge-learning">@(Model.ResumeProgress > 0 ? "Đang học" : "Chưa bắt đầu")</span>
+                </div>
+                <h5 style="font-weight: 700; color: #1E293B; margin-bottom: 6px;">@Model.ResumeCourseName</h5>
+                @if (!string.IsNullOrEmpty(Model.ResumeLessonTitle))
+                {
+                <p style="font-size: 14px; color: #64748B; margin-bottom: 12px;">
+                    <i class="bi bi-play-circle me-1"></i> @Model.ResumeLessonTitle
+                </p>
+                }
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div class="progress-bar-custom flex-grow-1">
+                        <div class="progress-bar-fill" style="width: @(Model.ResumeProgress)%"></div>
+                    </div>
+                    <span style="font-size: 14px; font-weight: 600; color: #2563EB;">@(Model.ResumeProgress)%</span>
+                </div>
+                <a asp-area="Learner" asp-controller="Training" asp-action="Detail" asp-route-id="@Model.ResumeCourseId"
+                   class="btn btn-primary" style="background: #2563EB; border: none; border-radius: 8px; padding: 10px 24px; font-weight: 600;">
+                    Học tiếp <i class="bi bi-play-fill"></i>
+                </a>
+            </div>
+        </div>
+        }
+        else
+        {
+        <div class="resume-card mb-4 p-4 text-center" style="color: #64748B;">
+            <i class="bi bi-journal-x" style="font-size: 48px; color: #CBD5E1;"></i>
+            <p class="mt-3 mb-3">Bạn chưa đăng ký khóa học nào.</p>
+            <a asp-area="Learner" asp-controller="Catalog" asp-action="Index"
+               class="btn btn-primary" style="background: #2563EB; border: none; border-radius: 8px; padding: 10px 24px; font-weight: 600;">
+                Khám phá khóa học <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+        }
+
+        <!-- Charts -->
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <div class="chart-card">
+                    <h6>Phân bố thời gian học tập (Tuần)</h6>
+                    <div style="position: relative; height: 200px;">
+                        <canvas id="studyTimeChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-3">
+                <div class="chart-card">
+                    <h6>Thống kê điểm số (Tháng)</h6>
+                    <div style="position: relative; height: 200px;">
+                        <canvas id="gradeChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Sidebar -->
+    <div class="col-lg-4">
+        <!-- Notifications -->
+        <div class="sidebar-card">
+            <h6 style="display:flex; justify-content:space-between; align-items:center;">
+                <span>
+                    Thông báo mới
+                    @if (Model.Notifications.Any())
+                    {
+                        <span class="badge-new">@Model.Notifications.Count mới</span>
+                    }
+                </span>
+                <a asp-area="Learner" asp-controller="Notifications" asp-action="Index"
+                   style="font-size:12px; font-weight:500; color:#2563EB; text-decoration:none;">Xem tất cả →</a>
+            </h6>
+            @if (!Model.Notifications.Any())
+            {
+                <p style="font-size: 13px; color: #94A3B8;">Chưa có thông báo nào.</p>
+            }
+            @foreach (var notif in Model.Notifications)
+            {
+                <div class="notif-item">
+                    <div class="notif-icon" style="background: @(notif.IconColor)1A; color: @notif.IconColor;">
+                        <i class="bi @notif.Icon"></i>
+                    </div>
+                    <div>
+                        <div class="notif-msg">@notif.Message</div>
+                        <div class="notif-time">@notif.Time</div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Activity Log -->
+        <div class="sidebar-card">
+            <h6 style="display:flex; justify-content:space-between; align-items:center;">
+                <span>Nhật ký hoạt động</span>
+                <a asp-area="Learner" asp-controller="Training" asp-action="Index"
+                   style="font-size:12px; font-weight:500; color:#2563EB; text-decoration:none;">Xem tất cả →</a>
+            </h6>
+            @if (!Model.Activities.Any())
+            {
+                <p style="font-size: 13px; color: #94A3B8;">Chưa có hoạt động nào.</p>
+            }
+            @foreach (var act in Model.Activities)
+            {
+                <div class="activity-item">
+                    <div class="activity-dot"></div>
+                    <div>
+                        <div class="activity-title">@act.Title</div>
+                        @if (!string.IsNullOrEmpty(act.Detail))
+                        {
+                            <div class="activity-detail">@act.Detail</div>
+                        }
+                        <div class="activity-detail">@act.Time</div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    // Study Activity Chart (Line)
+    new Chart(document.getElementById('studyTimeChart'), {
+        type: 'line',
+        data: {
+            labels: @Json.Serialize(Model.StudyChartLabels),
+            datasets: [{
+                label: 'Bài học hoàn thành',
+                data: @Json.Serialize(Model.StudyChartData),
+                borderColor: '#2563EB',
+                backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: '#2563EB',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointRadius: 5
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, grid: { color: '#F1F5F9' }, ticks: { font: { size: 11 } } },
+                x: { grid: { display: false }, ticks: { font: { size: 11 } } }
+            }
+        }
+    });
+
+    // Grade Chart (Bar)
+    new Chart(document.getElementById('gradeChart'), {
+        type: 'bar',
+        data: {
+            labels: @Json.Serialize(Model.GradeLabels),
+            datasets: [{
+                label: 'Điểm (thang 10)',
+                data: @Json.Serialize(Model.GradeScores),
+                backgroundColor: ['#2563EB', '#3B82F6', '#60A5FA', '#93C5FD'],
+                borderRadius: 6,
+                barThickness: 32
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, max: 10, grid: { color: '#F1F5F9' }, ticks: { font: { size: 11 } } },
+                x: { grid: { display: false }, ticks: { font: { size: 11 } } }
+            }
+        }
+    });
+</script>
+}

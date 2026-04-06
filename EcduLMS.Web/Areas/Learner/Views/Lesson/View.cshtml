@@ -1,0 +1,379 @@
+@model LessonViewModel
+@{
+    ViewData["Title"] = Model.LessonTitle;
+}
+
+<style>
+    .lesson-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+    .lesson-header-left h4 { font-weight: 700; color: #1E293B; margin-bottom: 8px; }
+    .course-badge {
+        display: inline-block;
+        background: #EFF6FF;
+        color: #2563EB;
+        font-size: 12px;
+        font-weight: 600;
+        padding: 4px 12px;
+        border-radius: 20px;
+        margin-bottom: 8px;
+    }
+    .instructor-label {
+        font-size: 14px;
+        color: #64748B;
+    }
+    .instructor-label i { margin-right: 6px; }
+    .header-actions { display: flex; gap: 10px; }
+    .btn-back {
+        background: #F1F5F9;
+        color: #64748B;
+        border: none;
+        border-radius: 8px;
+        padding: 10px 20px;
+        font-size: 14px;
+        font-weight: 600;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .btn-back:hover { background: #E2E8F0; color: #334155; }
+    .btn-join {
+        background: #2563EB;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        padding: 10px 20px;
+        font-size: 14px;
+        font-weight: 600;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .btn-join:hover { background: #1D4ED8; color: #fff; }
+    .video-player {
+        background: #0F172A;
+        border-radius: 12px;
+        aspect-ratio: 16/9;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 24px;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+    }
+    .video-player .play-btn {
+        width: 72px;
+        height: 72px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 32px;
+        color: #fff;
+        backdrop-filter: blur(4px);
+        transition: background 0.2s;
+    }
+    .video-player:hover .play-btn { background: rgba(37, 99, 235, 0.8); }
+    .desc-card {
+        background: #fff;
+        border-radius: 12px;
+        border: 1px solid #E2E8F0;
+        padding: 24px;
+        margin-bottom: 24px;
+    }
+    .desc-card h5 {
+        font-weight: 700;
+        color: #1E293B;
+        margin-bottom: 16px;
+        font-size: 18px;
+    }
+    .desc-card p { font-size: 14px; color: #475569; line-height: 1.7; }
+    .desc-meta {
+        display: flex;
+        gap: 24px;
+        margin-top: 16px;
+        padding-top: 16px;
+        border-top: 1px solid #F1F5F9;
+    }
+    .desc-meta-item {
+        font-size: 13px;
+        color: #64748B;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .desc-meta-item strong { color: #334155; }
+    .sidebar-card {
+        background: #fff;
+        border-radius: 12px;
+        border: 1px solid #E2E8F0;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    .sidebar-card h6 {
+        font-weight: 700;
+        color: #1E293B;
+        margin-bottom: 16px;
+        font-size: 15px;
+    }
+    .resource-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 0;
+        border-bottom: 1px solid #F1F5F9;
+    }
+    .resource-item:last-child { border-bottom: none; }
+    .resource-badge {
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 700;
+        flex-shrink: 0;
+        min-width: 44px;
+        text-align: center;
+    }
+    .badge-pdf { background: #FEE2E2; color: #DC2626; }
+    .badge-zip { background: #FEF3C7; color: #D97706; }
+    .badge-docx { background: #DBEAFE; color: #2563EB; }
+    .badge-default { background: #F1F5F9; color: #64748B; }
+    .resource-name { font-size: 13px; color: #334155; font-weight: 500; flex-grow: 1; }
+    .resource-size { font-size: 12px; color: #94A3B8; }
+    .resource-dl {
+        color: #2563EB;
+        font-size: 16px;
+        text-decoration: none;
+        flex-shrink: 0;
+    }
+    .resource-dl:hover { color: #1D4ED8; }
+    .btn-download-all {
+        display: block;
+        width: 100%;
+        background: #F1F5F9;
+        color: #475569;
+        border: none;
+        border-radius: 8px;
+        padding: 10px;
+        font-size: 13px;
+        font-weight: 600;
+        text-align: center;
+        margin-top: 12px;
+        cursor: pointer;
+    }
+    .btn-download-all:hover { background: #E2E8F0; }
+    .complete-card {
+        background: linear-gradient(135deg, #EFF6FF, #F0FDF4);
+        border-radius: 12px;
+        border: 1px solid #E2E8F0;
+        padding: 24px;
+        text-align: center;
+    }
+    .complete-card h6 {
+        font-weight: 700;
+        color: #1E293B;
+        margin-bottom: 12px;
+    }
+    .btn-complete {
+        background: #16A34A;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        padding: 12px 24px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        width: 100%;
+    }
+    .btn-complete:hover { background: #15803D; }
+    .complete-state {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 13px;
+        font-weight: 700;
+        color: #166534;
+        background: #DCFCE7;
+        border-radius: 999px;
+        padding: 8px 14px;
+    }
+</style>
+
+@if (TempData["LessonAccessError"] != null)
+{
+    <div class="alert alert-warning" style="border-radius:10px;">
+        <i class="bi bi-exclamation-triangle me-1"></i> @TempData["LessonAccessError"]
+    </div>
+}
+@if (TempData["LessonCompleted"] != null)
+{
+    <div class="alert alert-success" style="border-radius:10px;">
+        <i class="bi bi-check-circle me-1"></i> Đã đánh dấu hoàn thành bài học. Tiến độ khóa học đã được cập nhật.
+    </div>
+}
+
+<div class="row">
+    <div class="col-lg-8">
+        <!-- Header -->
+        <div class="lesson-header">
+            <div class="lesson-header-left">
+                <span class="course-badge">@Model.CourseName</span>
+                <div class="instructor-label"><i class="bi bi-person"></i> @Model.InstructorName</div>
+                <h4>@Model.LessonTitle</h4>
+            </div>
+            <div class="header-actions">
+                <a asp-area="Learner" asp-controller="Training" asp-action="Detail" asp-route-id="@Model.CourseId" class="btn-back">
+                    <i class="bi bi-arrow-left"></i> Quay lại khóa học
+                </a>
+                <a href="#" class="btn-join">
+                    <i class="bi bi-camera-video"></i> Tham gia lớp học
+                </a>
+            </div>
+        </div>
+
+        <!-- Video Player -->
+        @{
+            string? youtubeId = null;
+            if (!string.IsNullOrEmpty(Model.VideoUrl))
+            {
+                var vUrl = Model.VideoUrl;
+                if (vUrl.Contains("youtube.com/watch"))
+                {
+                    var uri = new Uri(vUrl);
+                    var qs = System.Web.HttpUtility.ParseQueryString(uri.Query);
+                    youtubeId = qs["v"];
+                }
+                else if (vUrl.Contains("youtu.be/"))
+                {
+                    youtubeId = vUrl.Split("youtu.be/").Last().Split('?').First();
+                }
+                else if (vUrl.Contains("youtube.com/embed/"))
+                {
+                    youtubeId = vUrl.Split("youtube.com/embed/").Last().Split('?').First();
+                }
+            }
+        }
+        <div class="video-player">
+            @if (!string.IsNullOrEmpty(Model.VideoUrl))
+            {
+                if (youtubeId != null)
+                {
+                    <iframe src="https://www.youtube.com/embed/@youtubeId"
+                            style="width:100%;height:100%;border:none;"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowfullscreen></iframe>
+                }
+                else
+                {
+                    <video style="width:100%;height:100%;object-fit:contain;" controls>
+                        <source src="@Model.VideoUrl" type="video/mp4" />
+                    </video>
+                }
+            }
+            else
+            {
+                <div class="play-btn">
+                    <i class="bi bi-play-fill"></i>
+                </div>
+            }
+        </div>
+
+        <!-- Description -->
+        <div class="desc-card">
+            <h5>Mô tả buổi học</h5>
+            <p>@(Model.Description ?? "Chưa có mô tả cho buổi học này.")</p>
+            <div class="desc-meta">
+                <div class="desc-meta-item">
+                    <i class="bi bi-clock"></i>
+                    <span>Thời lượng: <strong>@Model.DurationMinutes phút</strong></span>
+                </div>
+                <div class="desc-meta-item">
+                    @{
+                        var statusText = Model.Status == "completed" ? "Đã hoàn thành"
+                            : Model.Status == "in_progress" ? "Đang học"
+                            : "Chưa bắt đầu";
+                        var statusColor = Model.Status == "completed" ? "#16A34A"
+                            : Model.Status == "in_progress" ? "#2563EB"
+                            : "#94A3B8";
+                    }
+                    <i class="bi bi-circle-fill" style="font-size: 8px; color: @statusColor;"></i>
+                    <span>Trạng thái: <strong style="color: @statusColor;">@statusText</strong></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Sidebar -->
+    <div class="col-lg-4">
+        <!-- Resources -->
+        <div class="sidebar-card">
+            <h6><i class="bi bi-folder2-open me-2"></i>Tài nguyên học tập</h6>
+            @foreach (var res in Model.Resources)
+            {
+                var badgeClass = res.FileType.ToUpper() switch
+                {
+                    "PDF" => "badge-pdf",
+                    "ZIP" => "badge-zip",
+                    "DOCX" or "DOC" => "badge-docx",
+                    _ => "badge-default"
+                };
+                <div class="resource-item">
+                    <span class="resource-badge @badgeClass">@res.FileType</span>
+                    <div class="flex-grow-1">
+                        <div class="resource-name">@res.FileName</div>
+                        <div class="resource-size">@res.FileSize</div>
+                    </div>
+                    <a href="@res.FileUrl" class="resource-dl" title="Tải xuống">
+                        <i class="bi bi-download"></i>
+                    </a>
+                </div>
+            }
+            @if (Model.Resources.Any())
+            {
+                <button class="btn-download-all">
+                    <i class="bi bi-download me-1"></i> Download All Materials
+                </button>
+            }
+            else
+            {
+                <p style="font-size: 13px; color: #94A3B8; text-align: center;">Chưa có tài nguyên nào.</p>
+            }
+        </div>
+
+        <!-- Mark Complete -->
+        <div class="complete-card">
+            @if (Model.Status == "completed")
+            {
+                <h6>Bài học đã hoàn thành</h6>
+                <p style="font-size: 13px; color: #64748B; margin-bottom: 16px;">
+                    Bạn đã hoàn thành bài học này. Có thể xem lại nội dung bất cứ lúc nào.
+                </p>
+                <span class="complete-state">
+                    <i class="bi bi-check-circle-fill"></i> Đã hoàn thành
+                </span>
+            }
+            else
+            {
+                <h6>Hoàn thành bài học?</h6>
+                <p style="font-size: 13px; color: #64748B; margin-bottom: 16px;">
+                    Đánh dấu bài học này là hoàn thành để tiếp tục sang bài tiếp theo.
+                </p>
+                <form method="post" asp-area="Learner" asp-controller="Lesson" asp-action="MarkComplete">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="lessonId" value="@Model.LessonId" />
+                    <button class="btn-complete" type="submit">
+                        <i class="bi bi-check-circle me-1"></i> Xác nhận hoàn thành bài học
+                    </button>
+                </form>
+            }
+        </div>
+    </div>
+</div>

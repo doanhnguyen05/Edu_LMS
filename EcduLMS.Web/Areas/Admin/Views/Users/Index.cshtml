@@ -1,0 +1,427 @@
+@model UserListViewModel
+@{
+    ViewData["Title"] = "Quản lý Người dùng";
+}
+
+<style>
+    .page-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 24px;
+    }
+    .page-header h1 {
+        font-size: 22px;
+        font-weight: 700;
+        color: #1E293B;
+        margin: 0;
+    }
+    .search-bar {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+    .search-bar input {
+        flex: 1;
+        padding: 10px 16px;
+        border: 1px solid #E2E8F0;
+        border-radius: 8px;
+        font-size: 14px;
+        outline: none;
+    }
+    .search-bar input:focus { border-color: #2563EB; }
+    .filter-row {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+    }
+    .filter-group {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .filter-group-label {
+        font-size: 13px;
+        font-weight: 600;
+        color: #64748B;
+        white-space: nowrap;
+    }
+    .chip {
+        display: inline-block;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 13px;
+        cursor: pointer;
+        text-decoration: none;
+        border: 1px solid #E2E8F0;
+        color: #64748B;
+        background: #fff;
+        transition: all 0.2s;
+    }
+    .chip:hover { border-color: #2563EB; color: #2563EB; }
+    .chip.active { background: #2563EB; color: #fff; border-color: #2563EB; }
+    .user-table {
+        width: 100%;
+        background: #fff;
+        border-radius: 12px;
+        border: 1px solid #E2E8F0;
+        overflow: hidden;
+    }
+    .user-table th {
+        background: #F8FAFC;
+        padding: 14px 16px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #64748B;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        border-bottom: 1px solid #E2E8F0;
+        text-align: left;
+    }
+    .user-table td {
+        padding: 14px 16px;
+        font-size: 14px;
+        color: #334155;
+        border-bottom: 1px solid #F1F5F9;
+        vertical-align: middle;
+    }
+    .user-table tr:last-child td { border-bottom: none; }
+    .user-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .user-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-weight: 600;
+        font-size: 15px;
+        flex-shrink: 0;
+    }
+    .user-name { font-weight: 600; color: #1E293B; }
+    .user-email { font-size: 13px; color: #94A3B8; }
+    .role-badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+    .role-badge.learner { background: #F1F5F9; color: #64748B; }
+    .role-badge.instructor { background: #F0FDF4; color: #16A34A; }
+    .role-badge.admin { background: #FAF5FF; color: #7C3AED; }
+    .status-dot {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 13px;
+    }
+    .status-dot::before {
+        content: '';
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        display: inline-block;
+    }
+    .status-dot.active::before { background: #16A34A; }
+    .status-dot.active { color: #16A34A; }
+    .status-dot.locked::before { background: #DC2626; }
+    .status-dot.locked { color: #DC2626; }
+    .action-btn {
+        background: none;
+        border: 1px solid #E2E8F0;
+        border-radius: 6px;
+        padding: 6px 10px;
+        cursor: pointer;
+        color: #64748B;
+        font-size: 14px;
+        transition: all 0.2s;
+    }
+    .action-btn:hover { border-color: #2563EB; color: #2563EB; }
+    .modal-custom .modal-content {
+        border-radius: 12px;
+        border: none;
+    }
+    .modal-custom .modal-header {
+        border-bottom: 1px solid #E2E8F0;
+        padding: 20px 24px;
+    }
+    .modal-custom .modal-body { padding: 24px; }
+    .modal-custom .modal-footer {
+        border-top: 1px solid #E2E8F0;
+        padding: 16px 24px;
+    }
+    .form-label-custom {
+        font-size: 13px;
+        font-weight: 600;
+        color: #334155;
+        margin-bottom: 6px;
+    }
+    .form-control-custom {
+        padding: 10px 14px;
+        border: 1px solid #E2E8F0;
+        border-radius: 8px;
+        font-size: 14px;
+        width: 100%;
+        outline: none;
+    }
+    .form-control-custom:focus { border-color: #2563EB; }
+</style>
+
+<!-- Header -->
+<div class="page-header">
+    <h1>Quản lý Người dùng</h1>
+    <button class="btn-admin" data-bs-toggle="modal" data-bs-target="#addUserModal">
+        <i class="bi bi-plus-lg"></i> Thêm người dùng
+    </button>
+</div>
+
+<!-- Search -->
+<form method="get" class="search-bar">
+    <input type="text" name="search" placeholder="Tìm kiếm theo tên hoặc email..." value="@Model.SearchQuery" />
+    <button type="submit" class="btn-admin-outline">
+        <i class="bi bi-search"></i> Tìm kiếm
+    </button>
+    <button type="button" class="btn-admin-outline" onclick="document.querySelector('.filter-row').classList.toggle('d-none')">
+        <i class="bi bi-funnel"></i> Bộ lọc
+    </button>
+</form>
+
+<!-- Filter Row -->
+<div class="filter-row">
+    <div class="filter-group">
+        <span class="filter-group-label">Lọc theo Vai trò:</span>
+        <a href="@Url.Action("Index", new { search = Model.SearchQuery, status = Model.StatusFilter })"
+           class="chip @(string.IsNullOrEmpty(Model.RoleFilter) ? "active" : "")">Tất cả vai trò</a>
+        <a href="@Url.Action("Index", new { search = Model.SearchQuery, role = "Learner", status = Model.StatusFilter })"
+           class="chip @(Model.RoleFilter == "Learner" ? "active" : "")">Learner</a>
+        <a href="@Url.Action("Index", new { search = Model.SearchQuery, role = "Instructor", status = Model.StatusFilter })"
+           class="chip @(Model.RoleFilter == "Instructor" ? "active" : "")">Instructor</a>
+        <a href="@Url.Action("Index", new { search = Model.SearchQuery, role = "Admin", status = Model.StatusFilter })"
+           class="chip @(Model.RoleFilter == "Admin" ? "active" : "")">Admin</a>
+    </div>
+    <div class="filter-group">
+        <span class="filter-group-label">Lọc theo Trạng thái:</span>
+        <a href="@Url.Action("Index", new { search = Model.SearchQuery, role = Model.RoleFilter })"
+           class="chip @(string.IsNullOrEmpty(Model.StatusFilter) ? "active" : "")">Tất cả trạng thái</a>
+        <a href="@Url.Action("Index", new { search = Model.SearchQuery, role = Model.RoleFilter, status = "active" })"
+           class="chip @(Model.StatusFilter == "active" ? "active" : "")">Đang hoạt động</a>
+        <a href="@Url.Action("Index", new { search = Model.SearchQuery, role = Model.RoleFilter, status = "locked" })"
+           class="chip @(Model.StatusFilter == "locked" ? "active" : "")">Đã khóa</a>
+    </div>
+</div>
+
+<!-- Users Table -->
+<table class="user-table">
+    <thead>
+        <tr>
+            <th>Họ tên & Email</th>
+            <th>Liên hệ</th>
+            <th>Vai trò</th>
+            <th>Trạng thái</th>
+            <th>Thao tác</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.Users.Any())
+        {
+            @foreach (var user in Model.Users)
+            {
+                <tr>
+                    <td>
+                        <div class="user-info">
+                            <div class="user-avatar" style="background: @user.AvatarColor;">
+                                @user.AvatarInitial
+                            </div>
+                            <div>
+                                <div class="user-name">@user.FullName</div>
+                                <div class="user-email">@user.Email</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>@user.Phone</td>
+                    <td>
+                        <span class="role-badge @user.Role.ToLower()">@user.Role</span>
+                    </td>
+                    <td>
+                        @if (user.IsActive)
+                        {
+                            <span class="status-dot active">Hoạt động</span>
+                        }
+                        else
+                        {
+                            <span class="status-dot locked">Đã khóa</span>
+                        }
+                    </td>
+                    <td>
+                        <button class="action-btn" title="Chỉnh sửa"
+                                data-bs-toggle="modal" data-bs-target="#editUserModal"
+                                onclick="fillEditModal('@user.Id','@user.FullName','@user.Email','@user.Phone','@user.Role',@(user.IsActive ? "true" : "false"))">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="action-btn" title="Xem chi tiết"
+                                data-bs-toggle="modal" data-bs-target="#viewUserModal"
+                                onclick="fillViewModal('@user.FullName','@user.Email','@user.Phone','@user.Role',@(user.IsActive ? "true" : "false"))">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="5" class="text-center py-4 text-muted">
+                    Không tìm thấy người dùng nào
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<!-- Add User Modal -->
+<div class="modal fade modal-custom" id="addUserModal" tabindex="-1" aria-labelledby="addUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addUserModalLabel" style="font-weight: 700; color: #1E293B;">Thêm người dùng mới</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+            <form asp-action="Create" method="post">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label-custom">Họ và tên</label>
+                        <input type="text" class="form-control-custom" name="FullName" placeholder="Nhập họ và tên" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label-custom">Email</label>
+                        <input type="email" class="form-control-custom" name="Email" placeholder="Nhập địa chỉ email" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label-custom">Số điện thoại</label>
+                        <input type="text" class="form-control-custom" name="Phone" placeholder="Nhập số điện thoại" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label-custom">Vai trò</label>
+                        <select class="form-control-custom" name="Role">
+                            <option value="Learner">Learner</option>
+                            <option value="Instructor">Instructor</option>
+                            <option value="Admin">Admin</option>
+                        </select>
+                    </div>
+                    <div class="alert alert-info py-2 small mb-0">
+                        <i class="bi bi-info-circle"></i> Mật khẩu mặc định: <strong>Default@123</strong>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-admin-outline" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn-admin">
+                        <i class="bi bi-plus-lg"></i> Tạo người dùng
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit User Modal -->
+<div class="modal fade modal-custom" id="editUserModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" style="font-weight: 700; color: #1E293B;">Chỉnh sửa người dùng</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+            <form asp-action="Edit" method="post">
+                <div class="modal-body">
+                    <input type="hidden" name="Id" id="editUserId" />
+                    <div class="mb-3">
+                        <label class="form-label-custom">Họ và tên</label>
+                        <input type="text" class="form-control-custom" name="FullName" id="editFullName" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label-custom">Email</label>
+                        <input type="email" class="form-control-custom" name="Email" id="editEmail" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label-custom">Số điện thoại</label>
+                        <input type="text" class="form-control-custom" name="Phone" id="editPhone" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label-custom">Vai trò</label>
+                        <select class="form-control-custom" name="Role" id="editRole">
+                            <option value="Learner">Learner</option>
+                            <option value="Instructor">Instructor</option>
+                            <option value="Admin">Admin</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label-custom">Trạng thái</label>
+                        <select class="form-control-custom" name="IsActive" id="editIsActive">
+                            <option value="true">Hoạt động</option>
+                            <option value="false">Đã khóa</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-admin-outline" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn-admin">
+                        <i class="bi bi-check-lg"></i> Lưu thay đổi
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- View User Modal -->
+<div class="modal fade modal-custom" id="viewUserModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" style="font-weight: 700; color: #1E293B;">Chi tiết người dùng</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+            <div class="modal-body">
+                <table class="table table-borderless mb-0">
+                    <tr><td class="text-muted" style="width:140px;">Họ và tên</td><td class="fw-semibold" id="viewFullName"></td></tr>
+                    <tr><td class="text-muted">Email</td><td id="viewEmail"></td></tr>
+                    <tr><td class="text-muted">Số điện thoại</td><td id="viewPhone"></td></tr>
+                    <tr><td class="text-muted">Vai trò</td><td id="viewRole"></td></tr>
+                    <tr><td class="text-muted">Trạng thái</td><td id="viewStatus"></td></tr>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-admin-outline" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function fillEditModal(id, name, email, phone, role, isActive) {
+    document.getElementById('editUserId').value = id;
+    document.getElementById('editFullName').value = name;
+    document.getElementById('editEmail').value = email;
+    document.getElementById('editPhone').value = phone === 'N/A' ? '' : phone;
+    document.getElementById('editRole').value = role;
+    document.getElementById('editIsActive').value = isActive ? 'true' : 'false';
+}
+
+function fillViewModal(name, email, phone, role, isActive) {
+    document.getElementById('viewFullName').textContent = name;
+    document.getElementById('viewEmail').textContent = email;
+    document.getElementById('viewPhone').textContent = phone;
+    document.getElementById('viewRole').innerHTML = '<span class="role-badge ' + role.toLowerCase() + '">' + role + '</span>';
+    document.getElementById('viewStatus').innerHTML = isActive
+        ? '<span class="status-dot active">Hoạt động</span>'
+        : '<span class="status-dot locked">Đã khóa</span>';
+}
+</script>

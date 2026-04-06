@@ -1,0 +1,400 @@
+@using EduLMS.Web.Areas.Admin.Controllers
+@using EduLMS.Web.Models
+@using EduLMS.Web.Models.Enums
+@model List<InstructorPayoutSummary>
+@{
+    ViewData["Title"] = "Thanh toán Giảng viên";
+    var batches = ViewBag.Batches as List<PayoutBatch> ?? new();
+}
+
+<style>
+    .payout-card { background: #fff; border-radius: 12px; border: 1px solid #E2E8F0; margin-bottom: 16px; overflow: hidden; }
+    .payout-card-header { padding: 16px 20px; background: #F8FAFC; border-bottom: 1px solid #E2E8F0; display: flex; justify-content: space-between; align-items: center; }
+    .payout-card-body { padding: 20px; }
+    .stat-box { background: #F8FAFC; border-radius: 8px; padding: 12px 16px; text-align: center; }
+    .stat-box .value { font-size: 20px; font-weight: 700; color: #1E293B; }
+    .stat-box .label { font-size: 12px; color: #94A3B8; margin-top: 2px; }
+    .badge-pending { background: #FEF9C3; color: #CA8A04; font-size: 12px; padding: 3px 10px; border-radius: 20px; font-weight: 600; }
+    .badge-completed { background: #DCFCE7; color: #16A34A; font-size: 12px; padding: 3px 10px; border-radius: 20px; font-weight: 600; }
+    .badge-draft { background: #E0E7FF; color: #4338CA; font-size: 12px; padding: 3px 10px; border-radius: 20px; font-weight: 600; }
+</style>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="fw-bold mb-1" style="color: #1E293B;">Thanh toán Giảng viên</h4>
+        <p class="text-muted mb-0" style="font-size: 14px;">Quản lý doanh thu và đợt thanh toán lương giảng viên</p>
+    </div>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show mb-4" style="border-radius: 10px;">
+        <i class="bi bi-check-circle me-2"></i> @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show mb-4" style="border-radius: 10px;">
+        <i class="bi bi-exclamation-circle me-2"></i> @TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<!-- Instructor Earnings -->
+<h5 class="fw-bold mb-3" style="color: #1E293B;">Doanh thu chờ thanh toán</h5>
+
+@if (!Model.Any())
+{
+    <div class="text-center py-5 text-muted">
+        <i class="bi bi-cash-stack" style="font-size: 40px; color: #CBD5E1;"></i>
+        <p class="mt-3">Chưa có doanh thu nào.</p>
+    </div>
+}
+
+@foreach (var ins in Model)
+{
+    <div class="payout-card">
+        <div class="payout-card-header">
+            <div class="d-flex align-items-center gap-3">
+                <div style="width:40px;height:40px;background:#E0E7FF;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;color:#4338CA;">
+                    @ins.FullName.FirstOrDefault()
+                </div>
+                <div>
+                    <div class="fw-bold" style="color:#1E293B;">@ins.FullName</div>
+                    <div class="text-muted" style="font-size:12px;">@ins.Email · Hoa hồng platform: @((ins.CommissionRate * 100).ToString("N0"))%</div>
+                </div>
+            </div>
+            <div class="d-flex gap-2">
+                <button class="btn btn-sm btn-outline-secondary" style="border-radius:8px;"
+                        onclick="openBankModal('@ins.InstructorId','@ins.BankName','@ins.BankAccountNumber','@ins.BankAccountName',@ins.CommissionRate)">
+                    <i class="bi bi-bank me-1"></i>Cài đặt ngân hàng
+                </button>
+                @if (ins.PendingCount > 0)
+                {
+                    <button class="btn btn-sm btn-success" style="border-radius:8px;"
+                            onclick="openPayoutModal('@ins.InstructorId','@Html.Raw(ins.FullName.Replace("'","\\'"  ))',@ins.PendingAmount,@ins.PendingCount,'@ins.BankName','@ins.BankAccountNumber','@Html.Raw((ins.BankAccountName??"").Replace("'","\\'"))')">
+                        <i class="bi bi-cash-coin me-1"></i>Tạo đợt thanh toán
+                    </button>
+                }
+            </div>
+        </div>
+        <div class="payout-card-body">
+            <div class="row g-3 align-items-stretch">
+                <!-- Revenue breakdown -->
+                <div class="col-md-5">
+                    <div class="stat-box h-100">
+                        <div class="label mb-2">Phân tích doanh thu chờ (@ins.PendingCount đơn)</div>
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span style="font-size:13px;color:#64748B;">Tổng doanh thu</span>
+                            <span style="font-size:14px;font-weight:600;color:#334155;">@ins.PendingGross.ToString("N0")đ</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span style="font-size:13px;color:#64748B;">Platform thu (@((ins.CommissionRate * 100).ToString("N0"))%)</span>
+                            <span style="font-size:14px;font-weight:600;color:#DC2626;">
+                                @(ins.PendingGross > 0 ? $"-{ins.PendingPlatformFee:N0}đ" : "—")
+                            </span>
+                        </div>
+                        <div style="border-top:2px solid #E2E8F0;padding-top:8px;" class="d-flex justify-content-between align-items-center">
+                            <span style="font-size:13px;font-weight:700;color:#1E293B;">Cần thanh toán</span>
+                            <span style="font-size:20px;font-weight:800;color:#16A34A;">@ins.PendingAmount.ToString("N0")đ</span>
+                        </div>
+                        <div class="mt-2 text-end">
+                            <span style="font-size:12px;color:#94A3B8;">Đã thanh toán: @ins.TotalPaidAmount.ToString("N0")đ</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bank info + QR -->
+                <div class="col-md-7">
+                    <div class="stat-box text-start h-100">
+                        @if (!string.IsNullOrEmpty(ins.BankAccountNumber))
+                        {
+                            <div class="d-flex gap-3 align-items-start">
+                                <div style="flex:1;">
+                                    <div class="label mb-2">Thông tin chuyển khoản</div>
+                                    <div class="fw-bold" style="font-size:15px;color:#1E293B;">@ins.BankName</div>
+                                    <div class="d-flex align-items-center gap-2 mt-1">
+                                        <span style="font-size:18px;font-weight:700;color:#2563EB;letter-spacing:1px;">@ins.BankAccountNumber</span>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary" style="padding:2px 8px;font-size:11px;border-radius:6px;"
+                                                onclick="navigator.clipboard.writeText('@ins.BankAccountNumber')">
+                                            <i class="bi bi-copy"></i>
+                                        </button>
+                                    </div>
+                                    <div style="font-size:13px;color:#64748B;margin-top:4px;">@ins.BankAccountName</div>
+                                    @if (ins.PendingAmount > 0)
+                                    {
+                                        <div class="mt-2 p-2" style="background:#F0FDF4;border-radius:8px;border:1px solid #86EFAC;">
+                                            <div style="font-size:12px;color:#16A34A;font-weight:600;">Số tiền cần chuyển:</div>
+                                            <div style="font-size:18px;font-weight:800;color:#15803D;">@ins.PendingAmount.ToString("N0")đ</div>
+                                        </div>
+                                    }
+                                </div>
+                                @if (ins.PendingAmount > 0)
+                                {
+                                    @* VietQR: https://img.vietqr.io/image/{bank}-{stk}-compact.png?amount={amount}&accountName={name} *@
+                                    <div style="flex-shrink:0;text-align:center;">
+                                        <img src="https://img.vietqr.io/image/@(ins.BankName?.Replace(" ",""))-@ins.BankAccountNumber-compact.png?amount=@((long)ins.PendingAmount)&addInfo=Luong%20giang%20vien%20@Uri.EscapeDataString(ins.FullName)&accountName=@Uri.EscapeDataString(ins.BankAccountName ?? "")"
+                                             alt="QR" style="width:130px;height:130px;border-radius:8px;border:1px solid #E2E8F0;"
+                                             onerror="this.style.display='none'" />
+                                        <div style="font-size:11px;color:#94A3B8;margin-top:4px;">Quét QR chuyển khoản</div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="label mb-1">Thông tin ngân hàng</div>
+                            <span class="text-muted">Chưa có thông tin ngân hàng</span>
+                            <div style="font-size:12px;color:#94A3B8;margin-top:4px;">Nhấn "Cài đặt ngân hàng" để thêm.</div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Payout History -->
+<h5 class="fw-bold mb-3 mt-4" style="color: #1E293B;">Lịch sử đợt thanh toán</h5>
+<div class="payout-card">
+    <div class="payout-card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead style="background:#F8FAFC;">
+                <tr>
+                    <th style="padding:12px 20px;font-size:13px;font-weight:600;color:#64748B;">Đợt</th>
+                    <th style="padding:12px 20px;font-size:13px;font-weight:600;color:#64748B;">Giảng viên</th>
+                    <th style="padding:12px 20px;font-size:13px;font-weight:600;color:#64748B;">Tổng tiền</th>
+                    <th style="padding:12px 20px;font-size:13px;font-weight:600;color:#64748B;">Trạng thái</th>
+                    <th style="padding:12px 20px;font-size:13px;font-weight:600;color:#64748B;">Ngày tạo</th>
+                    <th style="padding:12px 20px;font-size:13px;font-weight:600;color:#64748B;"></th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!batches.Any())
+                {
+                    <tr><td colspan="6" class="text-center text-muted py-4">Chưa có đợt thanh toán nào.</td></tr>
+                }
+                @foreach (var batch in batches)
+                {
+                    <tr>
+                        <td style="padding:12px 20px;font-size:14px;">@batch.Note</td>
+                        <td style="padding:12px 20px;font-size:14px;">@batch.Instructor?.FullName</td>
+                        <td style="padding:12px 20px;font-size:14px;font-weight:600;color:#1E293B;">@batch.TotalAmount.ToString("N0")đ</td>
+                        <td style="padding:12px 20px;">
+                            @if (batch.Status == PayoutBatchStatus.Completed)
+                            {
+                                <span class="badge-completed"><i class="bi bi-check-circle me-1"></i>Đã thanh toán</span>
+                            }
+                            else
+                            {
+                                <span class="badge-draft"><i class="bi bi-hourglass me-1"></i>Chờ xác nhận</span>
+                            }
+                        </td>
+                        <td style="padding:12px 20px;font-size:13px;color:#64748B;">@batch.CreatedAt.ToString("dd/MM/yyyy")</td>
+                        <td style="padding:12px 20px;">
+                            @if (batch.Status == PayoutBatchStatus.Draft)
+                            {
+                                <form asp-action="Complete" asp-route-id="@batch.Id" method="post"
+                                      onsubmit="return confirm('Xác nhận đã chuyển khoản cho giảng viên?')">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-sm btn-success" style="border-radius:6px;">
+                                        <i class="bi bi-check-lg me-1"></i>Xác nhận đã trả
+                                    </button>
+                                </form>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Create Payout Modal -->
+<div class="modal fade" id="payoutModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" style="border-radius:12px;border:none;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold">Tạo đợt thanh toán</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form asp-action="CreateBatch" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="instructorId" id="payoutInstructorId" />
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <!-- Left: info + amount -->
+                        <div class="col-md-6">
+                            <div style="font-size:12px;color:#94A3B8;">GIẢNG VIÊN</div>
+                            <div class="fw-bold" style="font-size:15px;color:#1E293B;" id="payoutInstructorName"></div>
+
+                            <div style="font-size:12px;color:#94A3B8;margin-top:12px;">NGÂN HÀNG</div>
+                            <div class="fw-semibold" id="payoutBankName" style="font-size:14px;color:#1E293B;"></div>
+                            <div class="d-flex align-items-center gap-2 mt-1">
+                                <span id="payoutBankAccount" style="font-size:18px;font-weight:700;color:#2563EB;letter-spacing:1px;"></span>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" style="padding:2px 8px;font-size:11px;border-radius:6px;"
+                                        onclick="navigator.clipboard.writeText(document.getElementById('payoutBankAccount').textContent)">
+                                    <i class="bi bi-copy"></i>
+                                </button>
+                            </div>
+                            <div id="payoutBankHolder" style="font-size:13px;color:#64748B;"></div>
+
+                            <div class="mt-3 p-3" style="background:#F0FDF4;border-radius:10px;border:1.5px solid #86EFAC;">
+                                <div style="font-size:12px;color:#16A34A;font-weight:600;">SỐ TIỀN CẦN CHUYỂN</div>
+                                <div class="fw-bold" style="font-size:28px;color:#15803D;line-height:1.2;" id="payoutAmount"></div>
+                                <div style="font-size:12px;color:#94A3B8;margin-top:2px;" id="payoutCount"></div>
+                            </div>
+
+                            <div class="mt-3">
+                                <label class="form-label fw-semibold" style="font-size:13px;">Chọn đợt thanh toán *</label>
+                                <div class="d-flex gap-2">
+                                    <select id="payoutMonth" class="form-select form-select-sm" style="border-radius:8px;" onchange="updateNote()">
+                                        <option value="1">Tháng 1</option>
+                                        <option value="2">Tháng 2</option>
+                                        <option value="3">Tháng 3</option>
+                                        <option value="4">Tháng 4</option>
+                                        <option value="5">Tháng 5</option>
+                                        <option value="6">Tháng 6</option>
+                                        <option value="7">Tháng 7</option>
+                                        <option value="8">Tháng 8</option>
+                                        <option value="9">Tháng 9</option>
+                                        <option value="10">Tháng 10</option>
+                                        <option value="11">Tháng 11</option>
+                                        <option value="12">Tháng 12</option>
+                                    </select>
+                                    <select id="payoutYear" class="form-select form-select-sm" style="border-radius:8px;" onchange="updateNote()">
+                                        @for (int y = DateTime.Now.Year - 1; y <= DateTime.Now.Year + 1; y++)
+                                        {
+                                            <option value="@y" selected="@(y == DateTime.Now.Year)">@y</option>
+                                        }
+                                    </select>
+                                </div>
+                                <input type="hidden" name="note" id="payoutNote" />
+                                <div class="form-text" id="notePreview"></div>
+                            </div>
+
+                            <div class="alert alert-info mt-3 mb-0" style="font-size:12px;border-radius:8px;">
+                                <i class="bi bi-info-circle me-1"></i>
+                                Quét QR → chuyển khoản → nhấn <strong>"Xác nhận đã trả"</strong>.
+                            </div>
+                        </div>
+
+                        <!-- Right: QR code (large) -->
+                        <div class="col-md-6 d-flex flex-column align-items-center justify-content-center">
+                            <img id="payoutQR" src="" alt="QR" style="width:220px;height:220px;border-radius:12px;border:1px solid #E2E8F0;" />
+                            <div style="font-size:12px;color:#94A3B8;margin-top:8px;text-align:center;">
+                                <i class="bi bi-qr-code me-1"></i>Quét để chuyển khoản ngay
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="border-radius:8px;">Hủy</button>
+                    <button type="submit" class="btn btn-success" style="border-radius:8px;">
+                        <i class="bi bi-cash-coin me-1"></i>Tạo đợt
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Bank Info Modal -->
+<div class="modal fade" id="bankModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content" style="border-radius:12px;border:none;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold">Cài đặt ngân hàng & hoa hồng</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form asp-action="UpdateInstructorBank" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="instructorId" id="bankInstructorId" />
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label fw-semibold" style="font-size:14px;">Ngân hàng</label>
+                            <input type="text" name="bankName" id="bankName" class="form-control" placeholder="VD: Vietcombank" style="border-radius:8px;" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold" style="font-size:14px;">Số tài khoản</label>
+                            <input type="text" name="bankAccountNumber" id="bankAccountNumber" class="form-control" style="border-radius:8px;" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold" style="font-size:14px;">Chủ tài khoản</label>
+                            <input type="text" name="bankAccountName" id="bankAccountName" class="form-control" style="border-radius:8px;" />
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold" style="font-size:14px;">Hoa hồng platform (%)</label>
+                            <input type="number" name="commissionRate" id="commissionRate" class="form-control"
+                                   min="0" max="1" step="0.01" placeholder="VD: 0.30 = 30%" style="border-radius:8px;" />
+                            <div class="form-text">Nhập số thập phân: 0.30 = platform thu 30%</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="border-radius:8px;">Hủy</button>
+                    <button type="submit" class="btn btn-primary" style="border-radius:8px;">Lưu</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    var _payoutBank = {}, _payoutAmountRaw = 0, _payoutName = '';
+
+    function updateNote() {
+        var m = document.getElementById('payoutMonth').value;
+        var y = document.getElementById('payoutYear').value;
+        var note = 'Tháng ' + m + '/' + y;
+        document.getElementById('payoutNote').value = note;
+        document.getElementById('notePreview').textContent = '→ Ghi chú: ' + note;
+    }
+
+    function openPayoutModal(id, name, amount, count, bankName, bankAccount, bankHolder) {
+        _payoutAmountRaw = amount;
+        _payoutName = name;
+        _payoutBank = { name: bankName, account: bankAccount, holder: bankHolder };
+
+        document.getElementById('payoutInstructorId').value = id;
+        document.getElementById('payoutInstructorName').textContent = name;
+        document.getElementById('payoutAmount').textContent = new Intl.NumberFormat('vi-VN').format(amount) + 'đ';
+        document.getElementById('payoutCount').textContent = count + ' đơn hàng';
+        document.getElementById('payoutBankName').textContent = bankName || '—';
+        document.getElementById('payoutBankAccount').textContent = bankAccount || '—';
+        document.getElementById('payoutBankHolder').textContent = bankHolder || '';
+
+        // Default month/year to current
+        var now = new Date();
+        document.getElementById('payoutMonth').value = now.getMonth() + 1;
+        document.getElementById('payoutYear').value = now.getFullYear();
+        updateNote();
+
+        // VietQR
+        if (bankName && bankAccount && amount > 0) {
+            var qrUrl = 'https://img.vietqr.io/image/' + bankName.replace(/\s/g,'') + '-' + bankAccount
+                + '-compact.png?amount=' + Math.round(amount)
+                + '&addInfo=' + encodeURIComponent('Luong giang vien ' + name)
+                + '&accountName=' + encodeURIComponent(bankHolder || '');
+            document.getElementById('payoutQR').src = qrUrl;
+            document.getElementById('payoutQR').style.display = '';
+        } else {
+            document.getElementById('payoutQR').style.display = 'none';
+        }
+
+        new bootstrap.Modal(document.getElementById('payoutModal')).show();
+    }
+
+    function openBankModal(id, bankName, accNum, accName, rate) {
+        document.getElementById('bankInstructorId').value = id;
+        document.getElementById('bankName').value = bankName || '';
+        document.getElementById('bankAccountNumber').value = accNum || '';
+        document.getElementById('bankAccountName').value = accName || '';
+        document.getElementById('commissionRate').value = rate;
+        new bootstrap.Modal(document.getElementById('bankModal')).show();
+    }
+</script>
+}

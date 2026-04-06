@@ -1,0 +1,155 @@
+@model GradeDetailViewModel
+@{
+    ViewData["Title"] = "Chi tiết điểm";
+}
+
+<style>
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 14px;
+        color: #64748B;
+        text-decoration: none;
+        margin-bottom: 24px;
+    }
+    .back-link:hover { color: #2563EB; }
+    .grade-detail-card {
+        max-width: 560px;
+        margin: 0 auto;
+        background: #fff;
+        border-radius: 16px;
+        border: 1px solid #E2E8F0;
+        padding: 40px;
+        text-align: center;
+    }
+    .grade-detail-card h5 {
+        font-weight: 700;
+        color: #1E293B;
+        margin-bottom: 8px;
+    }
+    .grade-type {
+        font-size: 14px;
+        color: #94A3B8;
+        margin-bottom: 32px;
+    }
+    .score-circle-wrap {
+        position: relative;
+        width: 160px;
+        height: 160px;
+        margin: 0 auto 24px;
+    }
+    .score-circle-wrap svg {
+        width: 160px;
+        height: 160px;
+        transform: rotate(-90deg);
+    }
+    .score-circle-bg {
+        fill: none;
+        stroke: #E2E8F0;
+        stroke-width: 10;
+    }
+    .score-circle-fill {
+        fill: none;
+        stroke-width: 10;
+        stroke-linecap: round;
+        transition: stroke-dashoffset 1s ease;
+    }
+    .score-circle-fill.pass { stroke: #16A34A; }
+    .score-circle-fill.fail { stroke: #DC2626; }
+    .score-text {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+    .score-text .score-num {
+        font-size: 36px;
+        font-weight: 800;
+        line-height: 1;
+    }
+    .score-text .score-num.pass { color: #16A34A; }
+    .score-text .score-num.fail { color: #DC2626; }
+    .score-text .score-max {
+        font-size: 14px;
+        color: #94A3B8;
+    }
+    .pass-badge {
+        display: inline-block;
+        font-size: 16px;
+        font-weight: 700;
+        padding: 8px 24px;
+        border-radius: 24px;
+        margin-bottom: 32px;
+    }
+    .pass-badge.pass { background: #DCFCE7; color: #16A34A; }
+    .pass-badge.fail { background: #FEE2E2; color: #DC2626; }
+    .comment-card {
+        max-width: 560px;
+        margin: 24px auto 0;
+        background: #fff;
+        border-radius: 12px;
+        border: 1px solid #E2E8F0;
+        padding: 24px;
+        text-align: left;
+    }
+    .comment-card h6 {
+        font-weight: 700;
+        color: #1E293B;
+        margin-bottom: 12px;
+        font-size: 15px;
+    }
+    .comment-text {
+        background: #F8FAFC;
+        border-left: 3px solid #2563EB;
+        padding: 16px;
+        border-radius: 0 8px 8px 0;
+        font-size: 14px;
+        color: #475569;
+        line-height: 1.7;
+        font-style: italic;
+    }
+</style>
+
+<a asp-area="Learner" asp-controller="Grades" asp-action="CourseDetail" asp-route-id="@Model.CourseId" class="back-link">
+    <i class="bi bi-arrow-left"></i> Quay lại
+</a>
+
+<div class="grade-detail-card">
+    <h5>@Model.AssignmentTitle</h5>
+    <div class="grade-type">@Model.Type</div>
+
+    @{
+        var pct = Model.MaxScore > 0 ? (Model.Score / Model.MaxScore) * 100 : 0;
+        var circumference = 2 * Math.PI * 65;
+        var dashOffset = circumference - (circumference * (double)pct / 100);
+        var passClass = Model.PassStatus == "Pass" ? "pass" : "fail";
+        var passText = Model.PassStatus == "Pass" ? "Đạt" : "Không đạt";
+    }
+
+    <div class="score-circle-wrap">
+        <svg viewBox="0 0 160 160">
+            <circle class="score-circle-bg" cx="80" cy="80" r="65"></circle>
+            <circle class="score-circle-fill @passClass"
+                    cx="80" cy="80" r="65"
+                    stroke-dasharray="@circumference.ToString("F2")"
+                    stroke-dashoffset="@dashOffset.ToString("F2")"></circle>
+        </svg>
+        <div class="score-text">
+            <div class="score-num @passClass">@Model.Score.ToString("F1")</div>
+            <div class="score-max">/ @Model.MaxScore.ToString("F0")</div>
+        </div>
+    </div>
+
+    <div class="pass-badge @passClass">@passText</div>
+</div>
+
+@if (!string.IsNullOrEmpty(Model.Comment))
+{
+    <div class="comment-card">
+        <h6><i class="bi bi-chat-left-text me-2"></i>Nhận xét của giảng viên</h6>
+        <div class="comment-text">
+            "@Model.Comment"
+        </div>
+    </div>
+}

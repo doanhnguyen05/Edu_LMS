@@ -1,0 +1,240 @@
+@model GradingListViewModel
+@{
+    ViewData["Title"] = "Trung tâm Chấm điểm";
+}
+
+<style>
+    .grading-card {
+        background: #fff;
+        border-radius: 12px;
+        border: 1px solid #E2E8F0;
+        padding: 24px;
+    }
+    .grading-tabs .nav-link {
+        color: #64748B;
+        font-size: 14px;
+        font-weight: 500;
+        border: none;
+        border-bottom: 2px solid transparent;
+        border-radius: 0;
+        padding: 10px 20px;
+    }
+    .grading-tabs .nav-link.active {
+        color: #2563EB;
+        border-bottom-color: #2563EB;
+        background: transparent;
+    }
+    .grading-tabs .nav-link .count-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 22px;
+        height: 22px;
+        background: #DC2626;
+        color: #fff;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 600;
+        padding: 0 6px;
+        margin-left: 6px;
+    }
+    .submission-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 0;
+        border-bottom: 1px solid #F1F5F9;
+    }
+    .submission-item:last-child { border-bottom: none; }
+    .submission-left {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+    .submission-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        flex-shrink: 0;
+    }
+    .submission-icon.ungraded { background: #FEF3C7; color: #F59E0B; }
+    .submission-icon.returned { background: #FEF9C3; color: #CA8A04; }
+    .submission-icon.graded { background: #DCFCE7; color: #16A34A; }
+    .submission-info .sub-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: #1E293B;
+        margin-bottom: 2px;
+    }
+    .submission-info .sub-meta {
+        font-size: 13px;
+        color: #64748B;
+    }
+    .submission-info .sub-meta span { margin-right: 12px; }
+    .btn-grade {
+        background: #2563EB;
+        color: #fff;
+        border: none;
+        padding: 6px 16px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 500;
+        text-decoration: none;
+        white-space: nowrap;
+    }
+    .btn-grade:hover { background: #1D4ED8; color: #fff; }
+    .score-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 600;
+    }
+    .score-pass { background: #DCFCE7; color: #16A34A; }
+    .score-fail { background: #FEE2E2; color: #DC2626; }
+    .filter-bar { margin-bottom: 20px; }
+</style>
+
+<!-- Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="fw-bold mb-1" style="color: #1E293B;">Trung tâm Chấm điểm</h4>
+        <p class="text-muted mb-0" style="font-size: 14px;">Chấm điểm và phản hồi bài nộp của học viên</p>
+    </div>
+</div>
+
+<div class="grading-card">
+    <!-- Filter by course -->
+    @if (ViewBag.Courses != null)
+    {
+        <div class="filter-bar">
+            <form method="get" class="d-flex align-items-center gap-2">
+                <label class="form-label mb-0 text-muted" style="font-size: 13px; white-space: nowrap;">Lọc theo khóa học:</label>
+                <select name="courseId" class="form-select form-select-sm" style="max-width: 280px; border-radius: 8px;"
+                        onchange="this.form.submit()">
+                    <option value="">— Tất cả khóa học —</option>
+                    @foreach (dynamic course in ViewBag.Courses)
+                    {
+                        if (ViewBag.SelectedCourse == course.Id)
+                        {
+                            <option value="@course.Id" selected>@course.Name</option>
+                        }
+                        else
+                        {
+                            <option value="@course.Id">@course.Name</option>
+                        }
+                    }
+                </select>
+            </form>
+        </div>
+    }
+
+    <!-- Tabs -->
+    <ul class="nav grading-tabs mb-3" id="gradingTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="ungraded-tab" data-bs-toggle="tab" data-bs-target="#ungradedPane" type="button">
+                Chờ chấm
+                @if (Model.UngradedSubmissions.Any())
+                {
+                    <span class="count-badge">@Model.UngradedSubmissions.Count</span>
+                }
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="graded-tab" data-bs-toggle="tab" data-bs-target="#gradedPane" type="button">
+                Đã chấm
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content">
+        <!-- Pending/Returned -->
+        <div class="tab-pane fade show active" id="ungradedPane" role="tabpanel">
+            @if (Model.UngradedSubmissions.Any())
+            {
+                @foreach (var sub in Model.UngradedSubmissions)
+                {
+                    var isReturned = sub.Status == "Returned";
+                    <div class="submission-item">
+                        <div class="submission-left">
+                            <div class="submission-icon @(isReturned ? "returned" : "ungraded")">
+                                <i class="bi bi-@(isReturned ? "arrow-return-left" : "file-earmark-text")"></i>
+                            </div>
+                            <div class="submission-info">
+                                <div class="sub-title">@sub.AssignmentTitle</div>
+                                <div class="sub-meta">
+                                    <span><i class="bi bi-book me-1"></i>@sub.CourseName</span>
+                                    <span><i class="bi bi-person me-1"></i>@sub.StudentName</span>
+                                    <span><i class="bi bi-clock me-1"></i>@sub.SubmittedAgo</span>
+                                    @if (isReturned)
+                                    {
+                                        <span class="text-warning"><i class="bi bi-arrow-return-left me-1"></i>Đã trả về</span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                        <a asp-action="Detail" asp-route-id="@sub.Id" class="btn-grade">
+                            <i class="bi bi-pencil-square me-1"></i> Chấm ngay
+                        </a>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="bi bi-check2-all" style="font-size: 48px; color: #16A34A;"></i>
+                    <p class="mt-3 text-muted">Tất cả bài nộp đã được chấm điểm!</p>
+                </div>
+            }
+        </div>
+
+        <!-- Graded -->
+        <div class="tab-pane fade" id="gradedPane" role="tabpanel">
+            @if (Model.GradedSubmissions.Any())
+            {
+                @foreach (var sub in Model.GradedSubmissions)
+                {
+                    <div class="submission-item">
+                        <div class="submission-left">
+                            <div class="submission-icon graded">
+                                <i class="bi bi-check-circle"></i>
+                            </div>
+                            <div class="submission-info">
+                                <div class="sub-title">@sub.AssignmentTitle</div>
+                                <div class="sub-meta">
+                                    <span><i class="bi bi-book me-1"></i>@sub.CourseName</span>
+                                    <span><i class="bi bi-person me-1"></i>@sub.StudentName</span>
+                                    <span><i class="bi bi-clock me-1"></i>@sub.SubmittedAgo</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center gap-3">
+                            @if (sub.Score.HasValue)
+                            {
+                                <span class="score-badge @(sub.Score >= 5 ? "score-pass" : "score-fail")">
+                                    @sub.Score.Value.ToString("0.#") đ
+                                </span>
+                            }
+                            <a asp-action="Detail" asp-route-id="@sub.Id" class="btn btn-outline-secondary btn-sm" style="border-radius: 8px; font-size: 13px;">
+                                Xem lại
+                            </a>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="bi bi-inbox" style="font-size: 48px; color: #CBD5E1;"></i>
+                    <p class="mt-3 text-muted">Chưa có bài nào được chấm điểm.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>

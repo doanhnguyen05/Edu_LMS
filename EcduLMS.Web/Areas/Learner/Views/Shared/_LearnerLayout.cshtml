@@ -1,0 +1,237 @@
+@{
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - EduLMS</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #F8FAFC; }
+
+        .sidebar {
+            width: 240px;
+            background: #FFFFFF;
+            border-right: 1px solid #E2E8F0;
+            min-height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            display: flex;
+            flex-direction: column;
+            z-index: 1000;
+        }
+        .sidebar-logo {
+            padding: 20px 16px;
+            font-size: 20px;
+            font-weight: 700;
+            color: #2563EB;
+        }
+        .sidebar-label {
+            padding: 8px 16px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #94A3B8;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .sidebar-menu {
+            list-style: none;
+            padding: 0 8px;
+            margin: 0;
+            flex: 1;
+        }
+        .sidebar-menu li { margin-bottom: 2px; }
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px;
+            font-size: 14px;
+            color: #64748B;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: background 0.2s, color 0.2s;
+        }
+        .sidebar-menu a:hover {
+            background: #F1F5F9;
+            color: #334155;
+        }
+        .sidebar-menu a.active {
+            background: #EFF6FF;
+            color: #2563EB;
+            font-weight: 600;
+        }
+        .sidebar-menu a i { font-size: 18px; }
+        .sidebar-signout {
+            padding: 16px;
+            border-top: 1px solid #E2E8F0;
+        }
+        .sidebar-signout a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px;
+            font-size: 14px;
+            color: #DC2626;
+            text-decoration: none;
+            border-radius: 8px;
+        }
+        .sidebar-signout a:hover { background: #FEF2F2; }
+
+        .topbar {
+            margin-left: 240px;
+            height: 64px;
+            background: #FFFFFF;
+            border-bottom: 1px solid #E2E8F0;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding: 0 24px;
+            position: sticky;
+            top: 0;
+            z-index: 999;
+        }
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .topbar-bell {
+            position: relative;
+            font-size: 20px;
+            color: #64748B;
+            cursor: pointer;
+        }
+        .topbar-bell .badge {
+            position: absolute;
+            top: -4px;
+            right: -6px;
+            background: #DC2626;
+            color: #fff;
+            font-size: 10px;
+            padding: 2px 5px;
+            border-radius: 10px;
+        }
+        .topbar-user {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .topbar-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #E0E7FF;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #4F46E5;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        .topbar-name { font-size: 14px; font-weight: 600; color: #1E293B; }
+        .topbar-role { font-size: 12px; color: #94A3B8; }
+
+        .main-content {
+            margin-left: 240px;
+            padding: 30px;
+            background: #F8FAFC;
+            min-height: calc(100vh - 64px);
+        }
+    </style>
+    @RenderSection("Styles", required: false)
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="sidebar-logo">
+            <i class="bi bi-mortarboard-fill"></i> EduLMS
+        </div>
+        <div class="sidebar-label">Main Menu</div>
+        <ul class="sidebar-menu">
+            <li>
+                <a asp-area="Learner" asp-controller="Dashboard" asp-action="Index"
+                   class="@(currentController == "Dashboard" ? "active" : "")">
+                    <i class="bi bi-grid"></i> Dashboard
+                </a>
+            </li>
+            <li>
+                <a asp-area="Learner" asp-controller="Training" asp-action="Index"
+                   class="@(currentController == "Training" ? "active" : "")">
+                    <i class="bi bi-journal-bookmark"></i> My Training
+                </a>
+            </li>
+            <li>
+                <a asp-area="Learner" asp-controller="Catalog" asp-action="Index"
+                   class="@(currentController == "Catalog" ? "active" : "")">
+                    <i class="bi bi-journal-text"></i> Course Catalog
+                </a>
+            </li>
+            <li>
+                <a asp-area="Learner" asp-controller="Calendar" asp-action="Index"
+                   class="@(currentController == "Calendar" ? "active" : "")">
+                    <i class="bi bi-calendar3"></i> Calendar
+                </a>
+            </li>
+            <li>
+                <a asp-area="Learner" asp-controller="Grades" asp-action="Index"
+                   class="@(currentController == "Grades" ? "active" : "")">
+                    <i class="bi bi-award"></i> Grades
+                </a>
+            </li>
+        </ul>
+        <div class="sidebar-signout">
+            <a asp-area="" asp-controller="Account" asp-action="Logout">
+                <i class="bi bi-box-arrow-left"></i> Sign Out
+            </a>
+        </div>
+    </aside>
+
+    <header class="topbar">
+        <div class="topbar-right">
+            <div class="topbar-bell dropdown">
+                <a href="javascript:void(0);" class="text-decoration-none" data-bs-toggle="dropdown" aria-expanded="false" style="color: #64748B; font-size: 20px; position: relative;">
+                    <i class="bi bi-bell"></i>
+                    <span class="badge" style="position:absolute;top:-4px;right:-6px;background:#DC2626;color:#fff;font-size:10px;padding:2px 5px;border-radius:10px;">3</span>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end p-0" style="width: 300px; border-radius: 12px;">
+                    <li class="px-3 py-2 border-bottom fw-semibold">Thông báo</li>
+                    <li><a class="dropdown-item py-2 px-3" href="#"><small class="text-muted">Bài tập đã được chấm điểm</small></a></li>
+                    <li><a class="dropdown-item py-2 px-3" href="#"><small class="text-muted">Khóa học mới được thêm</small></a></li>
+                    <li><a class="dropdown-item py-2 px-3" href="#"><small class="text-muted">Deadline sắp đến hạn</small></a></li>
+                </ul>
+            </div>
+            <div class="topbar-user dropdown">
+                <a href="javascript:void(0);" class="d-flex align-items-center gap-2 text-decoration-none" data-bs-toggle="dropdown" aria-expanded="false">
+                    <div class="topbar-avatar">AL</div>
+                    <div>
+                        <div class="topbar-name">Alex Learner</div>
+                        <div class="topbar-role">Learner</div>
+                    </div>
+                    <i class="bi bi-chevron-down" style="font-size: 12px; color: #94A3B8;"></i>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end" style="border-radius: 10px;">
+                    <li><a class="dropdown-item py-2" asp-area="" asp-controller="Profile" asp-action="Index"><i class="bi bi-person me-2"></i>Hồ sơ</a></li>
+                    <li><a class="dropdown-item py-2" asp-area="" asp-controller="Settings" asp-action="Index"><i class="bi bi-gear me-2"></i>Cài đặt</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item py-2 text-danger" asp-area="" asp-controller="Account" asp-action="Logout"><i class="bi bi-box-arrow-left me-2"></i>Đăng xuất</a></li>
+                </ul>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        @RenderBody()
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

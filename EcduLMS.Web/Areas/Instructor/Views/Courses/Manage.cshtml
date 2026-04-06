@@ -1,0 +1,670 @@
+@model EduLMS.Web.Models.Course
+@{
+    ViewData["Title"] = "Quản lý - " + Model.Name;
+}
+
+@section Scripts {
+<script>
+    // Toggle video input mode for Add Lesson forms
+    document.querySelectorAll('.video-toggle').forEach(function(link) {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            var chapterId = this.dataset.chapter;
+            var mode = this.dataset.mode;
+            var fileInput = document.querySelector('.video-input-file-' + chapterId);
+            var urlInput = document.querySelector('.video-input-url-' + chapterId);
+            if (mode === 'file') {
+                fileInput.style.display = 'none';
+                fileInput.disabled = true;
+                urlInput.style.display = 'block';
+                urlInput.disabled = false;
+                this.textContent = 'Upload từ máy';
+                this.dataset.mode = 'url';
+            } else {
+                urlInput.style.display = 'none';
+                urlInput.disabled = true;
+                fileInput.style.display = 'block';
+                fileInput.disabled = false;
+                this.textContent = 'Dùng link URL';
+                this.dataset.mode = 'file';
+            }
+        });
+    });
+
+    // Toggle video input mode for Edit Lesson modal
+    function toggleEditVideoMode() {
+        var mode = document.getElementById('editVideoModeBtn').dataset.mode;
+        var fileBlock = document.getElementById('editVideoFileBlock');
+        var urlBlock = document.getElementById('editVideoUrlBlock');
+        if (mode === 'file') {
+            fileBlock.style.display = 'none';
+            urlBlock.style.display = 'block';
+            document.getElementById('editVideoModeBtn').textContent = 'Upload từ máy';
+            document.getElementById('editVideoModeBtn').dataset.mode = 'url';
+        } else {
+            urlBlock.style.display = 'none';
+            fileBlock.style.display = 'block';
+            document.getElementById('editVideoModeBtn').textContent = 'Dùng link URL';
+            document.getElementById('editVideoModeBtn').dataset.mode = 'file';
+        }
+    }
+
+    function openEditChapter(id, title) {
+        document.getElementById('editChapterId').value = id;
+        document.getElementById('editChapterTitle').value = title;
+        new bootstrap.Modal(document.getElementById('editChapterModal')).show();
+    }
+
+    function openEditLesson(id, title, duration, videoUrl) {
+        document.getElementById('editLessonId').value = id;
+        document.getElementById('editLessonTitle').value = title;
+        document.getElementById('editLessonDuration').value = duration;
+        document.getElementById('editLessonVideoUrl').value = videoUrl || '';
+        // Reset to URL mode if there's a URL, otherwise file mode
+        var fileBlock = document.getElementById('editVideoFileBlock');
+        var urlBlock = document.getElementById('editVideoUrlBlock');
+        var btn = document.getElementById('editVideoModeBtn');
+        if (videoUrl && videoUrl.startsWith('http')) {
+            fileBlock.style.display = 'none';
+            urlBlock.style.display = 'block';
+            btn.textContent = 'Upload từ máy';
+            btn.dataset.mode = 'url';
+        } else {
+            urlBlock.style.display = 'none';
+            fileBlock.style.display = 'block';
+            btn.textContent = 'Dùng link URL';
+            btn.dataset.mode = 'file';
+        }
+        new bootstrap.Modal(document.getElementById('editLessonModal')).show();
+    }
+
+    function openAddAssignmentModal(chapterId, lessonId) {
+        document.getElementById('addAssignmentChapterId').value = chapterId || '';
+        document.getElementById('addAssignmentLessonId').value = lessonId || '';
+        document.getElementById('addAssignmentTitle').value = '';
+        if (tinymce.get('addAssignmentDescription')) {
+            tinymce.get('addAssignmentDescription').setContent('');
+        }
+        new bootstrap.Modal(document.getElementById('addAssignmentModal')).show();
+    }
+
+    function toggleLessonAssignments(lessonId, btn) {
+        var panel = document.getElementById('assignPanel-' + lessonId);
+        var icon = btn.querySelector('.bi-chevron-right, .bi-chevron-down');
+        if (panel.style.display === 'none' || panel.style.display === '') {
+            panel.style.display = 'block';
+            if (icon) { icon.classList.remove('bi-chevron-right'); icon.classList.add('bi-chevron-down'); }
+            btn.style.color = '#2563EB';
+            btn.style.borderColor = '#93C5FD';
+        } else {
+            panel.style.display = 'none';
+            if (icon) { icon.classList.remove('bi-chevron-down'); icon.classList.add('bi-chevron-right'); }
+            btn.style.color = '';
+            btn.style.borderColor = '';
+        }
+    }
+
+    function toggleChapterBody(chapterId, btn) {
+        var body = document.getElementById('chapterBody-' + chapterId);
+        var icon = btn.querySelector('i');
+        if (body.style.display === 'none') {
+            body.style.display = 'block';
+            if (icon) { icon.classList.remove('bi-chevron-right'); icon.classList.add('bi-chevron-down'); }
+        } else {
+            body.style.display = 'none';
+            if (icon) { icon.classList.remove('bi-chevron-down'); icon.classList.add('bi-chevron-right'); }
+        }
+    }
+
+    function openEditAssignment(id, title, description, maxScore, dueDate, attachmentUrl) {
+        document.getElementById('editAssignmentId').value = id;
+        document.getElementById('editAssignmentTitle').value = title;
+        document.getElementById('editAssignmentMaxScore').value = maxScore;
+        document.getElementById('editAssignmentDueDate').value = dueDate || '';
+        document.getElementById('removeAttachmentCheck').checked = false;
+
+        if (tinymce.get('editAssignmentDescription')) {
+            tinymce.get('editAssignmentDescription').setContent(description || '');
+        } else {
+            document.getElementById('editAssignmentDescription').value = description || '';
+        }
+
+        const attachRow = document.getElementById('currentAttachmentRow');
+        if (attachmentUrl) {
+            const fileName = attachmentUrl.split('/').pop();
+            document.getElementById('currentAttachmentLink').href = attachmentUrl;
+            document.getElementById('currentAttachmentName').textContent = fileName;
+            attachRow.style.display = 'block';
+        } else {
+            attachRow.style.display = 'none';
+        }
+
+        new bootstrap.Modal(document.getElementById('editAssignmentModal')).show();
+    }
+</script>
+<script src="https://cdn.tiny.cloud/1/4279ovt8ruxt0xnt8hz1wh1ufaqs04vqlf7sj08zbhkpzict/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+<script>
+    tinymce.init({
+        selector: '#addAssignmentDescription, #editAssignmentDescription',
+        language: 'vi',
+        height: 320, 
+        menubar: false,
+        plugins: 'lists link image table code wordcount',
+        toolbar: 'bold italic underline | bullist numlist | link | alignleft aligncenter alignright | code',
+        content_style: 'body { font-family: inherit; font-size: 14px; color: #334155; }',
+        branding: false,
+        promotion: false,
+        setup: function(editor) {
+            // Sync content to textarea before form submit
+            editor.on('change', function() { editor.save(); });
+        }
+    });
+</script>
+}
+
+<style>
+    .manage-header { background: #fff; border-radius: 12px; border: 1px solid #E2E8F0; padding: 24px; margin-bottom: 24px; }
+    .chapter-card { background: #fff; border-radius: 12px; border: 1px solid #E2E8F0; margin-bottom: 16px; overflow: hidden; }
+    .chapter-header { padding: 16px 20px; background: #F8FAFC; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #E2E8F0; }
+    .chapter-header h6 { margin: 0; font-weight: 600; color: #1E293B; font-size: 15px; }
+    .lesson-item { padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #F1F5F9; }
+    .lesson-item:last-child { border-bottom: none; }
+    .lesson-title { font-size: 14px; color: #334155; }
+    .lesson-meta { font-size: 12px; color: #94A3B8; margin-top: 2px; }
+    .btn-add { background: #EFF6FF; color: #2563EB; border: 1px dashed #93C5FD; border-radius: 8px; padding: 10px 16px; font-size: 14px; font-weight: 500; width: 100%; }
+    .btn-add:hover { background: #DBEAFE; }
+    .status-badge { font-size: 12px; font-weight: 600; padding: 4px 12px; border-radius: 20px; }
+    .badge-published { background: #DCFCE7; color: #16A34A; }
+    .badge-draft { background: #FEF9C3; color: #CA8A04; }
+    .assignment-section { border-top: 1px dashed #E2E8F0; background: #FAFAFA; }
+    .assignment-section-title { padding: 10px 20px 6px; font-size: 11px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.06em; }
+    .assignment-item { padding: 10px 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #F1F5F9; }
+    .assignment-item:last-child { border-bottom: none; }
+    /* Lesson toggle button */
+    .lesson-toggle-btn { background: none; border: 1px solid #E2E8F0; border-radius: 5px; padding: 2px 7px; cursor: pointer; display: flex; align-items: center; gap: 3px; color: #94A3B8; flex-shrink: 0; transition: all .15s; }
+    .lesson-toggle-btn:hover { background: #EFF6FF; border-color: #93C5FD; color: #2563EB; }
+    .lesson-assign-count { font-size: 10px; font-weight: 700; background: #FEF9C3; color: #CA8A04; border-radius: 10px; padding: 1px 5px; line-height: 1.4; }
+    .lesson-assign-panel { width: 100%; background: #FFFBEB; border-top: 1px dashed #FDE68A; padding: 8px 20px 10px 60px; }
+    .lesson-assign-row { display: flex; align-items: center; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed #FEF3C7; }
+    .lesson-assign-row:last-of-type { border-bottom: none; }
+    .lesson-assign-add { padding-top: 8px; }
+    /* Chapter toggle */
+    .chapter-toggle-btn { background: none; border: 1px solid #E2E8F0; border-radius: 6px; padding: 2px 8px; cursor: pointer; color: #94A3B8; transition: all .15s; }
+    .chapter-toggle-btn:hover { background: #F1F5F9; border-color: #CBD5E1; color: #475569; }
+</style>
+
+<!-- Back + Header -->
+<div class="d-flex align-items-center gap-3 mb-4">
+    <a asp-action="Index" class="btn btn-light" style="border-radius: 8px;">
+        <i class="bi bi-arrow-left"></i>
+    </a>
+    <div>
+        <h4 class="fw-bold mb-0" style="color: #1E293B;">@Model.Name</h4>
+        <span class="status-badge @(Model.Status == EduLMS.Web.Models.Enums.CourseStatus.Published ? "badge-published" : "badge-draft")">
+            @(Model.Status == EduLMS.Web.Models.Enums.CourseStatus.Published ? "Đã công bố" : "Chờ xác nhận")
+        </span>
+    </div>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show mb-4" role="alert" style="border-radius: 10px;">
+        <i class="bi bi-check-circle me-2"></i> @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="fw-bold mb-0" style="color: #1E293B;">Nội dung khóa học</h5>
+            <span class="text-muted" style="font-size: 13px;">@Model.Chapters.Count chương · @Model.Chapters.Sum(ch => ch.Lessons.Count) bài học · @Model.Chapters.Sum(ch => ch.Assignments.Count) bài tập</span>
+        </div>
+
+        <!-- Chapters -->
+        @foreach (var chapter in Model.Chapters.OrderBy(ch => ch.DisplayOrder))
+        {
+            <div class="chapter-card">
+                <div class="chapter-header">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-list-ul text-muted"></i>
+                        <h6>Chương @chapter.DisplayOrder: @chapter.Title</h6>
+                    </div>
+                    <div class="d-flex gap-2 align-items-center">
+                        <span class="text-muted" style="font-size: 13px;">@chapter.Lessons.Count bài · @chapter.Assignments.Count bài tập</span>
+                        <button type="button" class="chapter-toggle-btn"
+                                onclick="toggleChapterBody(@chapter.Id, this)" title="Ẩn/hiện nội dung">
+                            <i class="bi bi-chevron-down" style="font-size: 11px;"></i>
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" style="border-radius: 6px; padding: 2px 8px;"
+                                onclick="openEditChapter(@chapter.Id, '@Html.Raw(chapter.Title.Replace("'", "\\'"))')">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <form asp-action="DeleteChapter" asp-route-id="@chapter.Id" method="post"
+                              onsubmit="return confirm('Xóa chương này và toàn bộ bài học bên trong?')">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-sm btn-outline-danger" style="border-radius: 6px; padding: 2px 8px;">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <div id="chapterBody-@chapter.Id">
+                @foreach (var lesson in chapter.Lessons.OrderBy(l => l.DisplayOrder))
+                {
+                    <div class="lesson-item" style="flex-wrap:wrap; gap:0;">
+                        <div class="d-flex align-items-center gap-3 flex-grow-1" style="min-width:0;">
+                            <button type="button" class="lesson-toggle-btn"
+                                    onclick="toggleLessonAssignments(@lesson.Id, this)"
+                                    title="Bài tập">
+                                <i class="bi bi-chevron-right" style="font-size:11px;"></i>
+                                <span class="lesson-assign-count" id="assignCount-@lesson.Id"
+                                      style="@(lesson.Assignments.Count > 0 ? "" : "display:none;")">
+                                    @lesson.Assignments.Count
+                                </span>
+                            </button>
+                            <i class="bi bi-play-circle @(string.IsNullOrEmpty(lesson.VideoUrl) ? "text-muted" : "text-primary")"></i>
+                            <div>
+                                <div class="lesson-title">@lesson.Title</div>
+                                <div class="lesson-meta d-flex gap-2">
+                                    @if (lesson.DurationMinutes > 0)
+                                    {
+                                        <span><i class="bi bi-clock me-1"></i>@lesson.DurationMinutes phút</span>
+                                    }
+                                    @if (!string.IsNullOrEmpty(lesson.VideoUrl))
+                                    {
+                                        <span class="text-primary"><i class="bi bi-camera-video me-1"></i>Có video</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted"><i class="bi bi-camera-video-off me-1"></i>Chưa có video</span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" style="border-radius: 6px; padding: 2px 8px;"
+                                    onclick="openEditLesson(@lesson.Id, '@Html.Raw(lesson.Title.Replace("'", "\\'"))', @lesson.DurationMinutes, '@(lesson.VideoUrl ?? "")')">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <form asp-action="DeleteLesson" asp-route-id="@lesson.Id" method="post"
+                                  onsubmit="return confirm('Xóa bài học này?')">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-sm btn-outline-danger" style="border-radius: 6px; padding: 2px 8px;">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Per-lesson assignment panel -->
+                        <div class="lesson-assign-panel" id="assignPanel-@lesson.Id" style="display:none;">
+                            @foreach (var a in lesson.Assignments.OrderBy(x => x.DisplayOrder))
+                            {
+                                <div class="lesson-assign-row">
+                                    <div class="d-flex align-items-center gap-2 flex-grow-1">
+                                        <i class="bi bi-file-earmark-text text-warning" style="font-size:13px;"></i>
+                                        <span style="font-size:13px; font-weight:600; color:#1E293B;">@a.Title</span>
+                                        <span style="font-size:12px; color:#94A3B8;"><i class="bi bi-star me-1"></i>@a.MaxScore đ</span>
+                                        @if (a.DueDate.HasValue)
+                                        {
+                                            <span style="font-size:12px; color:#94A3B8;"><i class="bi bi-calendar me-1"></i>@a.DueDate.Value.ToLocalTime().ToString("dd/MM HH:mm")</span>
+                                        }
+                                        @if (!string.IsNullOrEmpty(a.AttachmentUrl))
+                                        {
+                                            <a href="@a.AttachmentUrl" target="_blank" style="font-size:12px; color:#2563EB;" onclick="event.stopPropagation()">
+                                                <i class="bi bi-paperclip"></i>
+                                            </a>
+                                        }
+                                    </div>
+                                    <div class="d-flex gap-1">
+                                        <button type="button" class="btn btn-sm btn-outline-secondary" style="border-radius:5px; padding:1px 7px;"
+                                                onclick="openEditAssignment(@a.Id, '@Html.Raw(a.Title.Replace("'", "\\'"))', '@Html.Raw((a.Description ?? "").Replace("'","&#39;"))', @a.MaxScore, '@(a.DueDate.HasValue ? a.DueDate.Value.ToLocalTime().ToString("yyyy-MM-ddTHH:mm") : "")', '@(a.AttachmentUrl ?? "")')">
+                                            <i class="bi bi-pencil" style="font-size:11px;"></i>
+                                        </button>
+                                        <form asp-action="DeleteAssignment" asp-route-id="@a.Id" method="post"
+                                              onsubmit="return confirm('Xóa bài tập này?')">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" style="border-radius:5px; padding:1px 7px;">
+                                                <i class="bi bi-trash" style="font-size:11px;"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            }
+                            <div class="lesson-assign-add">
+                                <button type="button" class="btn btn-sm btn-warning" style="border-radius:6px; font-size:12px;"
+                                        onclick="openAddAssignmentModal(null, @lesson.Id)">
+                                    <i class="bi bi-plus-lg me-1"></i>Thêm bài tập
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                <!-- Add Lesson -->
+                <div class="p-3 border-top" style="background: #FAFAFA;">
+                    <form asp-action="AddLesson" method="post" enctype="multipart/form-data" id="addLessonForm-@chapter.Id">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="chapterId" value="@chapter.Id" />
+                        <div class="row g-2 align-items-end">
+                            <div class="col-md-4">
+                                <label class="form-label mb-1" style="font-size: 12px; color: #64748B;">Tên bài học *</label>
+                                <input type="text" name="title" class="form-control form-control-sm" placeholder="VD: Giới thiệu..." required style="border-radius: 6px;" />
+                            </div>
+                            <div class="col-md-5">
+                                <label class="form-label mb-1" style="font-size: 12px; color: #64748B;">
+                                    Video
+                                    <span class="ms-2">
+                                        <a href="#" class="video-toggle text-primary" style="font-size: 11px;" data-mode="file" data-chapter="@chapter.Id">
+                                            Dùng link URL
+                                        </a>
+                                    </span>
+                                </label>
+                                <input type="file" name="videoFile" accept="video/*" class="form-control form-control-sm video-input-file-@chapter.Id" style="border-radius: 6px;" />
+                                <input type="url" name="videoUrl" class="form-control form-control-sm video-input-url-@chapter.Id" placeholder="https://youtube.com/..." style="border-radius: 6px; display:none;" disabled />
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label mb-1" style="font-size: 12px; color: #64748B;">Thời lượng (phút)</label>
+                                <input type="number" name="durationMinutes" class="form-control form-control-sm" placeholder="0" min="0" value="0" style="border-radius: 6px;" />
+                            </div>
+                            <div class="col-md-1">
+                                <button type="submit" class="btn btn-sm btn-primary w-100" style="border-radius: 6px;">
+                                    <i class="bi bi-plus-lg"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Assignments -->
+                <div class="assignment-section">
+                    <div class="assignment-section-title"><i class="bi bi-pencil-square me-1"></i>Bài tập (@chapter.Assignments.Count)</div>
+                    @foreach (var assignment in chapter.Assignments.OrderBy(a => a.DisplayOrder))
+                    {
+                        <div class="assignment-item">
+                            <div class="d-flex align-items-center gap-3">
+                                <i class="bi bi-file-earmark-text text-warning"></i>
+                                <div>
+                                    <div class="lesson-title">@assignment.Title</div>
+                                    <div class="lesson-meta d-flex gap-2 flex-wrap">
+                                        <span><i class="bi bi-star me-1"></i>@assignment.MaxScore điểm</span>
+                                        @if (assignment.DueDate.HasValue)
+                                        {
+                                            <span><i class="bi bi-calendar me-1"></i>Hạn: @assignment.DueDate.Value.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</span>
+                                        }
+                                        @if (!string.IsNullOrEmpty(assignment.AttachmentUrl))
+                                        {
+                                            <a href="@assignment.AttachmentUrl" target="_blank" style="color:#2563EB; font-size:12px; font-weight:600;" onclick="event.stopPropagation()">
+                                                <i class="bi bi-paperclip me-1"></i>File đính kèm
+                                            </a>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-sm btn-outline-secondary" style="border-radius: 6px; padding: 2px 8px;"
+                                        onclick="openEditAssignment(@assignment.Id, '@Html.Raw(assignment.Title.Replace("'", "\\'"))', '@Html.Raw((assignment.Description ?? "").Replace("'","&#39;"))', @assignment.MaxScore, '@(assignment.DueDate.HasValue ? assignment.DueDate.Value.ToLocalTime().ToString("yyyy-MM-ddTHH:mm") : "")', '@(assignment.AttachmentUrl ?? "")')">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <form asp-action="DeleteAssignment" asp-route-id="@assignment.Id" method="post"
+                                      onsubmit="return confirm('Xóa bài tập này?')">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" style="border-radius: 6px; padding: 2px 8px;">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Add Assignment -->
+                    <div class="p-3">
+                        <button type="button" class="btn btn-sm btn-warning"
+                                style="border-radius: 6px;"
+                                onclick="openAddAssignmentModal(@chapter.Id)">
+                            <i class="bi bi-plus-lg me-1"></i> Thêm bài tập
+                        </button>
+                    </div>
+                </div>
+                </div>
+            </div>
+        }
+
+        <!-- Add Chapter -->
+        <form asp-action="AddChapter" method="post" class="d-flex gap-2 mt-2">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="courseId" value="@Model.Id" />
+            <input type="text" name="title" class="form-control" placeholder="Tên chương mới..." required style="border-radius: 8px;" />
+            <button type="submit" class="btn btn-primary" style="border-radius: 8px; white-space: nowrap;">
+                <i class="bi bi-plus-lg me-1"></i> Thêm chương
+            </button>
+        </form>
+    </div>
+
+    <!-- Sidebar Info -->
+    <div class="col-lg-4">
+        <div class="manage-header">
+            <h6 class="fw-bold mb-3" style="color: #1E293B;">Thông tin khóa học</h6>
+            @if (!string.IsNullOrEmpty(Model.CoverImageUrl))
+            {
+                <img src="@Model.CoverImageUrl" alt="@Model.Name" class="img-fluid rounded mb-3" style="width: 100%; height: 140px; object-fit: cover;" />
+            }
+            <div class="mb-2" style="font-size: 13px;">
+                <span class="text-muted">Mã:</span> <strong>@Model.Code</strong>
+            </div>
+            <div class="mb-2" style="font-size: 13px;">
+                <span class="text-muted">Danh mục:</span> <strong>@(Model.Category?.Name ?? "—")</strong>
+            </div>
+            <div class="mb-2" style="font-size: 13px;">
+                <span class="text-muted">Loại:</span>
+                <strong>@(Model.CourseType == EduLMS.Web.Models.Enums.CourseType.Free ? "Miễn phí" : $"{Model.OriginalPrice:N0}đ")</strong>
+            </div>
+            <div class="mb-3" style="font-size: 13px;">
+                <span class="text-muted">Ngày tạo:</span> <strong>@Model.CreatedAt.ToString("dd/MM/yyyy")</strong>
+            </div>
+
+            @if (Model.Status == EduLMS.Web.Models.Enums.CourseStatus.Draft)
+            {
+                <form asp-action="Publish" asp-route-id="@Model.Id" method="post">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-success w-100" style="border-radius: 8px;">
+                        <i class="bi bi-globe me-2"></i>Công bố khóa học
+                    </button>
+                </form>
+            }
+            else
+            {
+                <form asp-action="Unpublish" asp-route-id="@Model.Id" method="post">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-outline-secondary w-100" style="border-radius: 8px;">
+                        <i class="bi bi-arrow-down-circle me-2"></i>Chuyển về Chờ xác nhận
+                    </button>
+                </form>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Edit Chapter Modal -->
+<div class="modal fade" id="editChapterModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content" style="border-radius: 12px; border: none;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold" style="color: #1E293B;">Chỉnh sửa chương</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form asp-action="EditChapter" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" id="editChapterId" />
+                <div class="modal-body">
+                    <label class="form-label fw-semibold" style="font-size: 14px;">Tên chương *</label>
+                    <input type="text" name="title" id="editChapterTitle" class="form-control" required style="border-radius: 8px;" />
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="border-radius: 8px;">Hủy</button>
+                    <button type="submit" class="btn btn-primary" style="border-radius: 8px;">
+                        <i class="bi bi-check-lg me-1"></i> Lưu
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Add Assignment Modal -->
+<div class="modal fade" id="addAssignmentModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" style="border-radius: 12px; border: none;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold" style="color: #1E293B;"><i class="bi bi-file-earmark-plus me-2 text-warning"></i>Thêm bài tập</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form asp-action="AddAssignment" method="post" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="chapterId" id="addAssignmentChapterId" />
+                <input type="hidden" name="lessonId" id="addAssignmentLessonId" />
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label fw-semibold" style="font-size: 14px;">Tên bài tập *</label>
+                            <input type="text" name="title" id="addAssignmentTitle" class="form-control" required style="border-radius: 8px;" placeholder="VD: Bài tập tuần 1..." />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold" style="font-size: 14px;">Hạn nộp</label>
+                            <input type="datetime-local" name="dueDate" class="form-control" style="border-radius: 8px;" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold" style="font-size: 14px;">Điểm tối đa</label>
+                            <input type="number" name="maxScore" class="form-control" value="10" min="1" max="100" step="0.5" style="border-radius: 8px;" />
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold" style="font-size: 14px;">Mô tả bài tập</label>
+                            <textarea name="description" id="addAssignmentDescription" rows="10"></textarea>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold" style="font-size: 14px;">File đính kèm</label>
+                            <input type="file" name="attachment" class="form-control" style="border-radius: 8px;"
+                                   accept=".pdf,.doc,.docx,.zip,.rar,.png,.jpg,.jpeg,.txt,.xlsx" />
+                            <div class="form-text">Hỗ trợ: PDF, Word, ZIP, RAR, hình ảnh, TXT, Excel. Tối đa 10MB.</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="border-radius: 8px;">Hủy</button>
+                    <button type="submit" class="btn btn-warning" style="border-radius: 8px;">
+                        <i class="bi bi-plus-lg me-1"></i> Thêm bài tập
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Assignment Modal -->
+<div class="modal fade" id="editAssignmentModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" style="border-radius: 12px; border: none;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold" style="color: #1E293B;">Chỉnh sửa bài tập</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form asp-action="EditAssignment" method="post" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" id="editAssignmentId" />
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label fw-semibold" style="font-size: 14px;">Tên bài tập *</label>
+                            <input type="text" name="title" id="editAssignmentTitle" class="form-control" required style="border-radius: 8px;" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold" style="font-size: 14px;">Hạn nộp</label>
+                            <input type="datetime-local" name="dueDate" id="editAssignmentDueDate" class="form-control" style="border-radius: 8px;" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold" style="font-size: 14px;">Điểm tối đa</label>
+                            <input type="number" name="maxScore" id="editAssignmentMaxScore" class="form-control" min="1" max="100" step="0.5" style="border-radius: 8px;" />
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold" style="font-size: 14px;">Mô tả bài tập</label>
+                            <textarea name="description" id="editAssignmentDescription" rows="10"></textarea>
+                        </div>
+                        <div class="col-12" id="currentAttachmentRow" style="display:none;">
+                            <label class="form-label fw-semibold" style="font-size: 14px;">File hiện tại</label>
+                            <div class="d-flex align-items-center gap-2">
+                                <a id="currentAttachmentLink" href="#" target="_blank" class="btn btn-sm btn-outline-secondary" style="border-radius: 6px;">
+                                    <i class="bi bi-paperclip me-1"></i><span id="currentAttachmentName"></span>
+                                </a>
+                                <div class="form-check mb-0">
+                                    <input class="form-check-input" type="checkbox" name="removeAttachment" value="true" id="removeAttachmentCheck" />
+                                    <label class="form-check-label" for="removeAttachmentCheck" style="font-size: 13px; color: #DC2626;">Xóa file này</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold" style="font-size: 14px;">File đính kèm mới</label>
+                            <input type="file" name="attachment" class="form-control" style="border-radius: 8px;"
+                                   accept=".pdf,.doc,.docx,.zip,.rar,.png,.jpg,.jpeg,.txt,.xlsx" />
+                            <div class="form-text">Hỗ trợ: PDF, Word, ZIP, RAR, hình ảnh, TXT, Excel. Tối đa 10MB.</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="border-radius: 8px;">Hủy</button>
+                    <button type="submit" class="btn btn-primary" style="border-radius: 8px;">
+                        <i class="bi bi-check-lg me-1"></i> Lưu thay đổi
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Lesson Modal -->
+<div class="modal fade" id="editLessonModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" style="border-radius: 12px; border: none;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold" style="color: #1E293B;">Chỉnh sửa bài học</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form asp-action="EditLesson" method="post" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" id="editLessonId" />
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-8">
+                            <label class="form-label fw-semibold" style="font-size: 14px;">Tên bài học *</label>
+                            <input type="text" name="title" id="editLessonTitle" class="form-control" required style="border-radius: 8px;" />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold" style="font-size: 14px;">Thời lượng (phút)</label>
+                            <input type="number" name="durationMinutes" id="editLessonDuration" class="form-control" min="0" style="border-radius: 8px;" />
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold" style="font-size: 14px;">
+                                Video
+                                <button type="button" id="editVideoModeBtn" class="btn btn-link btn-sm p-0 ms-2" style="font-size: 12px;" data-mode="file" onclick="toggleEditVideoMode()">
+                                    Dùng link URL
+                                </button>
+                            </label>
+                            <div id="editVideoFileBlock">
+                                <input type="file" name="videoFile" accept="video/*" class="form-control" style="border-radius: 8px;" />
+                            </div>
+                            <div id="editVideoUrlBlock" style="display: none;">
+                                <input type="url" name="videoUrl" id="editLessonVideoUrl" class="form-control" placeholder="https://youtube.com/..." style="border-radius: 8px;" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="border-radius: 8px;">Hủy</button>
+                    <button type="submit" class="btn btn-primary" style="border-radius: 8px;">
+                        <i class="bi bi-check-lg me-1"></i> Lưu thay đổi
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

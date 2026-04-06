@@ -1,0 +1,114 @@
+@{
+    ViewData["Title"] = "Giới thiệu";
+}
+
+<!-- Header -->
+<section class="about-header">
+    <div class="container">
+        <h1><i class="bi bi-mortarboard-fill me-2" style="color: #2563EB;"></i>Nền tảng hỗ trợ học tập trực tuyến</h1>
+        <p class="text-muted mt-3 mb-0">EduLMS - Giải pháp học tập thông minh cho mọi người</p>
+    </div>
+</section>
+
+<!-- Mission Section -->
+<section class="section-white">
+    <div class="container">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-6">
+                <h2 class="fw-bold mb-4" style="color: #1E293B;">Sứ mệnh của chúng tôi</h2>
+                <p class="text-muted mb-4">EduLMS được xây dựng với mục tiêu mang đến trải nghiệm học tập trực tuyến tốt nhất cho học viên và giảng viên.</p>
+                <ul class="mission-list list-unstyled">
+                    <li class="d-flex align-items-start mb-3">
+                        <i class="bi bi-check-circle-fill me-3 mt-1" style="color: #2563EB; font-size: 1.2rem;"></i>
+                        <span>Cung cấp nền tảng học tập trực tuyến hiện đại, dễ sử dụng cho mọi đối tượng người dùng.</span>
+                    </li>
+                    <li class="d-flex align-items-start mb-3">
+                        <i class="bi bi-check-circle-fill me-3 mt-1" style="color: #2563EB; font-size: 1.2rem;"></i>
+                        <span>Hỗ trợ giảng viên quản lý khóa học, bài tập và đánh giá học viên một cách hiệu quả.</span>
+                    </li>
+                    <li class="d-flex align-items-start mb-3">
+                        <i class="bi bi-check-circle-fill me-3 mt-1" style="color: #2563EB; font-size: 1.2rem;"></i>
+                        <span>Tạo môi trường học tập tương tác, kết nối giảng viên và học viên mọi lúc, mọi nơi.</span>
+                    </li>
+                    <li class="d-flex align-items-start mb-3">
+                        <i class="bi bi-check-circle-fill me-3 mt-1" style="color: #2563EB; font-size: 1.2rem;"></i>
+                        <span>Ứng dụng công nghệ tiên tiến để cá nhân hóa trải nghiệm học tập cho từng học viên.</span>
+                    </li>
+                </ul>
+            </div>
+            <div class="col-lg-6">
+                <div class="hero-image-placeholder" style="height: 300px;">
+                    <i class="bi bi-lightbulb" style="font-size: 4rem;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Instructors Section -->
+<section class="section-light">
+    <div class="container">
+        <h2 class="section-title">Đội ngũ giảng viên</h2>
+        <p class="section-subtitle">Những giảng viên giàu kinh nghiệm, tận tâm với sự nghiệp giáo dục</p>
+        <div class="row g-4 justify-content-center">
+            @{
+                var instructorData = new[] {
+                    new { Name = "TS. Nguyễn Văn A", Title = "Chuyên gia Công nghệ phần mềm", Bio = "Hơn 15 năm kinh nghiệm trong lĩnh vực phát triển phần mềm và giảng dạy đại học." },
+                    new { Name = "ThS. Trần Thị B", Title = "Chuyên gia Cơ sở dữ liệu", Bio = "Chuyên gia về thiết kế và tối ưu hóa hệ thống cơ sở dữ liệu quy mô lớn." },
+                    new { Name = "TS. Lê Văn C", Title = "Chuyên gia Trí tuệ nhân tạo", Bio = "Nghiên cứu và giảng dạy về Machine Learning, Deep Learning và ứng dụng AI." },
+                    new { Name = "PGS.TS. Phạm Văn D", Title = "Chuyên gia Mạng máy tính", Bio = "Chuyên gia hàng đầu về an ninh mạng và hệ thống phân tán." }
+                };
+            }
+            @foreach (var item in instructorData)
+            {
+                <div class="col-md-6 col-lg-3">
+                    <div class="instructor-card">
+                        <div class="instructor-avatar">
+                            @item.Name.Substring(0, 1)
+                        </div>
+                        <h6>@item.Name</h6>
+                        <p class="instructor-title">@item.Title</p>
+                        <p class="text-muted small mt-2">@item.Bio</p>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- Technical Team Section (Dark) -->
+<section class="section-dark">
+    <div class="container">
+        <h2 class="section-title text-white">Đội ngũ Kỹ thuật</h2>
+        <p class="section-subtitle text-secondary">Đội ngũ kỹ thuật chuyên nghiệp đảm bảo hệ thống hoạt động ổn định</p>
+        <div class="row g-4 justify-content-center">
+            <div class="col-md-6 col-lg-4">
+                <div class="team-card-dark">
+                    <div class="team-icon">
+                        <i class="bi bi-code-slash"></i>
+                    </div>
+                    <h5>Developer Team</h5>
+                    <p>Đội ngũ phát triển phần mềm với kinh nghiệm xây dựng các hệ thống web hiện đại, sử dụng ASP.NET Core và các công nghệ tiên tiến.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="team-card-dark">
+                    <div class="team-icon">
+                        <i class="bi bi-bug"></i>
+                    </div>
+                    <h5>QA Engineer</h5>
+                    <p>Đội ngũ kiểm thử chất lượng đảm bảo mọi tính năng hoạt động chính xác, ổn định trước khi đưa đến người dùng.</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4">
+                <div class="team-card-dark">
+                    <div class="team-icon">
+                        <i class="bi bi-server"></i>
+                    </div>
+                    <h5>System Engineer</h5>
+                    <p>Đội ngũ vận hành hệ thống đảm bảo máy chủ hoạt động 24/7, bảo mật dữ liệu và tối ưu hiệu suất.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

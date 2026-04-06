@@ -1,0 +1,389 @@
+@model AssignmentSubmitViewModel
+@{
+    ViewData["Title"] = Model.Title;
+    bool isSubmitted = Model.Status == "Submitted";
+    bool isGraded = Model.Status == "Graded";
+    bool isReturned = Model.Status == "Returned";
+    bool isLocked = isSubmitted || isGraded;
+}
+
+<style>
+    .assign-header {
+        margin-bottom: 24px;
+    }
+    .assign-header .course-badge {
+        display: inline-block;
+        background: #EFF6FF;
+        color: #2563EB;
+        font-size: 12px;
+        font-weight: 600;
+        padding: 4px 12px;
+        border-radius: 20px;
+        margin-bottom: 8px;
+    }
+    .assign-header .status-badge {
+        display: inline-block;
+        font-size: 12px;
+        font-weight: 600;
+        padding: 4px 12px;
+        border-radius: 20px;
+        margin-left: 8px;
+    }
+    .badge-draft { background: #FEF3C7; color: #D97706; }
+    .badge-submitted { background: #DCFCE7; color: #16A34A; }
+    .badge-graded { background: #EDE9FE; color: #7C3AED; }
+    .badge-returned { background: #FEF9C3; color: #CA8A04; }
+    .assign-header h4 {
+        font-weight: 700;
+        color: #1E293B;
+        margin-bottom: 6px;
+        margin-top: 8px;
+    }
+    .assign-header .deadline {
+        font-size: 14px;
+        color: #DC2626;
+        font-weight: 500;
+    }
+    .assign-header .deadline i { margin-right: 4px; }
+    .section-card {
+        background: #fff;
+        border-radius: 12px;
+        border: 1px solid #E2E8F0;
+        padding: 24px;
+        margin-bottom: 24px;
+    }
+    .section-card h5 {
+        font-weight: 700;
+        color: #1E293B;
+        margin-bottom: 16px;
+        font-size: 16px;
+    }
+    .desc-text {
+        font-size: 14px;
+        color: #475569;
+        line-height: 1.7;
+    }
+    .answer-textarea {
+        width: 100%;
+        min-height: 200px;
+        border: 1px solid #E2E8F0;
+        border-radius: 8px;
+        padding: 16px;
+        font-size: 14px;
+        font-family: inherit;
+        color: #334155;
+        resize: vertical;
+        outline: none;
+    }
+    .answer-textarea:focus { border-color: #2563EB; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+    .answer-textarea:disabled { background: #F8FAFC; color: #64748B; cursor: not-allowed; }
+    .upload-area {
+        border: 2px dashed #CBD5E1;
+        border-radius: 12px;
+        padding: 32px;
+        text-align: center;
+        cursor: pointer;
+        transition: border-color 0.2s, background 0.2s;
+        margin-top: 16px;
+    }
+    .upload-area:hover { border-color: #2563EB; background: #F8FAFF; }
+    .upload-area.locked { cursor: default; opacity: 0.6; }
+    .upload-area.locked:hover { border-color: #CBD5E1; background: transparent; }
+    .upload-area i { font-size: 36px; color: #94A3B8; display: block; margin-bottom: 8px; }
+    .upload-area .upload-text { font-size: 14px; color: #64748B; }
+    .upload-area .upload-hint { font-size: 12px; color: #94A3B8; margin-top: 4px; }
+    .sidebar-card {
+        background: #fff;
+        border-radius: 12px;
+        border: 1px solid #E2E8F0;
+        padding: 24px;
+        margin-bottom: 20px;
+    }
+    .sidebar-card h6 {
+        font-weight: 700;
+        color: #1E293B;
+        margin-bottom: 12px;
+        font-size: 15px;
+    }
+    .warning-box {
+        background: #FEF3C7;
+        border-radius: 8px;
+        padding: 12px;
+        font-size: 13px;
+        color: #92400E;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    .warning-box i { font-size: 16px; margin-top: 1px; }
+    .success-box {
+        background: #DCFCE7;
+        border-radius: 8px;
+        padding: 12px;
+        font-size: 13px;
+        color: #166534;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    .returned-box {
+        background: #FEF9C3;
+        border-radius: 8px;
+        padding: 12px;
+        font-size: 13px;
+        color: #854D0E;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    .btn-draft {
+        display: block;
+        width: 100%;
+        background: #F1F5F9;
+        color: #475569;
+        border: none;
+        border-radius: 8px;
+        padding: 12px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        margin-bottom: 10px;
+    }
+    .btn-draft:hover { background: #E2E8F0; }
+    .btn-submit-final {
+        display: block;
+        width: 100%;
+        background: #16A34A;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        padding: 12px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+    .btn-submit-final:hover { background: #15803D; }
+    .grade-result-card {
+        background: #F5F3FF;
+        border: 1px solid #DDD6FE;
+        border-radius: 10px;
+        padding: 16px;
+        text-align: center;
+        margin-bottom: 12px;
+    }
+    .grade-score { font-size: 32px; font-weight: 800; color: #7C3AED; }
+    .grade-status-pass { color: #16A34A; font-weight: 600; font-size: 14px; }
+    .grade-status-fail { color: #DC2626; font-weight: 600; font-size: 14px; }
+</style>
+
+<div class="row">
+    <div class="col-lg-8">
+        <!-- Header -->
+        <div class="assign-header">
+            <span class="course-badge">@Model.CourseName</span>
+            @{
+                var badgeClass = Model.Status switch {
+                    "Submitted" => "badge-submitted",
+                    "Graded" => "badge-graded",
+                    "Returned" => "badge-returned",
+                    _ => "badge-draft"
+                };
+                var statusLabel = Model.Status switch {
+                    "Submitted" => "Đã nộp",
+                    "Graded" => "Đã chấm",
+                    "Returned" => "Trả về — nộp lại",
+                    _ => "Chờ xác nhận"
+                };
+            }
+            <span class="status-badge @badgeClass">@statusLabel</span>
+            <h4>@Model.Title</h4>
+            @if (!string.IsNullOrEmpty(Model.DueDate))
+            {
+                <div class="deadline">
+                    <i class="bi bi-clock"></i> Hạn nộp: @Model.DueDate
+                </div>
+            }
+        </div>
+
+        <!-- Description -->
+        <div class="section-card">
+            <h5><i class="bi bi-file-text me-2"></i>Mô tả yêu cầu</h5>
+            <div class="desc-text">
+                @if (!string.IsNullOrEmpty(Model.Description))
+                {
+                    @Html.Raw(Model.Description)
+                }
+                else
+                {
+                    <span class="text-muted">Chưa có mô tả yêu cầu.</span>
+                }
+            </div>
+        </div>
+
+        <!-- Answer form -->
+        @if (!isLocked || isReturned)
+        {
+            <div class="section-card">
+                <h5><i class="bi bi-pencil me-2"></i>Bài làm của bạn</h5>
+                @if (isReturned)
+                {
+                    <div class="returned-box mb-3">
+                        <i class="bi bi-arrow-return-left"></i>
+                        <span>Giáo viên đã yêu cầu nộp lại. Hãy chỉnh sửa và nộp lại bài.</span>
+                    </div>
+                }
+                <form id="assignmentForm" method="post" enctype="multipart/form-data">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="assignmentId" value="@Model.AssignmentId" />
+                    <textarea name="content" class="answer-textarea" id="answerContent"
+                              placeholder="Nhập bài làm của bạn tại đây...">@Model.ExistingContent</textarea>
+
+                    <div class="upload-area" id="uploadArea">
+                        <input type="file" name="file" id="fileInput" style="display:none;"
+                               accept=".pdf,.doc,.docx,.zip,.rar,.png,.jpg,.txt,.xlsx" />
+                        <i class="bi bi-cloud-arrow-up"></i>
+                        <div class="upload-text" id="uploadText">
+                            @if (!string.IsNullOrEmpty(Model.ExistingFileName))
+                            {
+                                <span><i class="bi bi-paperclip me-1"></i>@Model.ExistingFileName <span class="text-muted">(đổi file: nhấn để chọn)</span></span>
+                            }
+                            else
+                            {
+                                <span>Kéo thả file vào đây hoặc <strong style="color:#2563EB;">nhấn để chọn</strong></span>
+                            }
+                        </div>
+                        <div class="upload-hint">Hỗ trợ: PDF, DOCX, ZIP, RAR (Tối đa 10MB)</div>
+                    </div>
+                </form>
+            </div>
+        }
+        else
+        {
+            <!-- Read-only view -->
+            <div class="section-card">
+                <h5><i class="bi bi-file-earmark-check me-2"></i>Bài làm đã nộp</h5>
+                @if (!string.IsNullOrEmpty(Model.ExistingContent))
+                {
+                    <div class="answer-textarea" style="background:#F8FAFC; min-height:120px; overflow:auto;">@Model.ExistingContent</div>
+                }
+                @if (!string.IsNullOrEmpty(Model.ExistingFileName))
+                {
+                    <div class="mt-3" style="font-size:14px; color:#16A34A;">
+                        <i class="bi bi-paperclip me-1"></i> File đã nộp: <strong>@Model.ExistingFileName</strong>
+                    </div>
+                }
+                @if (string.IsNullOrEmpty(Model.ExistingContent) && string.IsNullOrEmpty(Model.ExistingFileName))
+                {
+                    <p class="text-muted">Không có nội dung.</p>
+                }
+            </div>
+        }
+    </div>
+
+    <!-- Right Sidebar -->
+    <div class="col-lg-4">
+        <div class="sidebar-card">
+            @if (isGraded)
+            {
+                <h6><i class="bi bi-award me-2"></i>Kết quả chấm điểm</h6>
+                <div class="text-center py-3 text-muted">
+                    <i class="bi bi-check-circle" style="font-size:40px; color:#16A34A;"></i>
+                    <p class="mt-2" style="font-size:14px;">Bài đã được chấm. Xem trong mục Grades.</p>
+                </div>
+            }
+            else if (isSubmitted)
+            {
+                <h6><i class="bi bi-send me-2"></i>Đã nộp bài</h6>
+                <div class="success-box">
+                    <i class="bi bi-check-circle-fill"></i>
+                    <span>Bài của bạn đã được nộp thành công. Vui lòng chờ giáo viên chấm.</span>
+                </div>
+                <div style="font-size:13px; color:#64748B;">
+                    <i class="bi bi-info-circle me-1"></i> Điểm tối đa: <strong>@Model.MaxScore</strong>
+                </div>
+            }
+            else
+            {
+                <h6><i class="bi bi-send me-2"></i>Nộp bài tập</h6>
+                <div class="warning-box">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    <span>Sau khi nộp bài, bạn sẽ không thể chỉnh sửa. Hãy kiểm tra kỹ trước khi nộp.</span>
+                </div>
+                <div style="font-size:13px; color:#64748B; margin-bottom:12px;">
+                    <i class="bi bi-star me-1"></i> Điểm tối đa: <strong>@Model.MaxScore</strong>
+                </div>
+                <button class="btn-draft" id="btnSaveDraft" onclick="doSaveDraft()">
+                    <i class="bi bi-save me-1"></i> Lưu Chờ xác nhận
+                </button>
+                <button class="btn-submit-final" id="btnSubmit" onclick="doSubmitFinal()">
+                    <i class="bi bi-send me-1"></i> Nộp bài
+                </button>
+            }
+        </div>
+
+        @if (TempData["DraftSaved"] != null)
+        {
+            <div class="alert alert-success" style="border-radius:10px; font-size:14px;">
+                <i class="bi bi-check-circle me-1"></i> Đã lưu Chờ xác nhận thành công!
+            </div>
+        }
+        @if (TempData["Submitted"] != null)
+        {
+            <div class="alert alert-success" style="border-radius:10px; font-size:14px;">
+                <i class="bi bi-check-circle me-1"></i> Nộp bài thành công!
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    var form = document.getElementById('assignmentForm');
+
+    document.getElementById('uploadArea')?.addEventListener('click', function () {
+        document.getElementById('fileInput').click();
+    });
+
+    document.getElementById('fileInput')?.addEventListener('change', function () {
+        if (this.files.length > 0) {
+            document.getElementById('uploadText').innerHTML =
+                '<i class="bi bi-paperclip me-1"></i> ' + this.files[0].name;
+        }
+    });
+
+    document.getElementById('uploadArea')?.addEventListener('dragover', function (e) {
+        e.preventDefault();
+        this.style.borderColor = '#2563EB';
+    });
+    document.getElementById('uploadArea')?.addEventListener('dragleave', function () {
+        this.style.borderColor = '#CBD5E1';
+    });
+    document.getElementById('uploadArea')?.addEventListener('drop', function (e) {
+        e.preventDefault();
+        this.style.borderColor = '#CBD5E1';
+        if (e.dataTransfer.files.length > 0) {
+            var dt = new DataTransfer();
+            dt.items.add(e.dataTransfer.files[0]);
+            document.getElementById('fileInput').files = dt.files;
+            document.getElementById('uploadText').innerHTML =
+                '<i class="bi bi-paperclip me-1"></i> ' + e.dataTransfer.files[0].name;
+        }
+    });
+
+    function doSaveDraft() {
+        if (!form) return;
+        form.action = '@Url.Action("SaveDraft", "Assignment", new { area = "Learner" })';
+        form.submit();
+    }
+
+    function doSubmitFinal() {
+        if (!confirm('Bạn có chắc chắn muốn nộp bài? Sau khi nộp sẽ không thể chỉnh sửa.')) return;
+        if (!form) return;
+        form.action = '@Url.Action("SubmitFinal", "Assignment", new { area = "Learner" })';
+        form.submit();
+    }
+</script>
+}

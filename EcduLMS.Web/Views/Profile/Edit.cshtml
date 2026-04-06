@@ -1,0 +1,161 @@
+@model EduLMS.Web.ViewModels.Profile.EditProfileViewModel
+@{
+    Layout = (string?)ViewData["Layout"];
+    ViewData["Title"] = "Chỉnh sửa hồ sơ";
+}
+
+<style>
+    .edit-card {
+        background: #fff;
+        border-radius: 16px;
+        border: 1px solid #E2E8F0;
+        padding: 32px;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    .edit-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 28px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid #E2E8F0;
+    }
+    .edit-header h4 {
+        font-size: 20px;
+        font-weight: 700;
+        color: #1E293B;
+        margin: 0;
+    }
+    .edit-header .back-link {
+        color: #64748B;
+        text-decoration: none;
+        font-size: 20px;
+    }
+    .form-label-custom {
+        font-size: 13px;
+        font-weight: 600;
+        color: #334155;
+        margin-bottom: 6px;
+    }
+    .form-control-custom {
+        padding: 10px 14px;
+        border: 1px solid #E2E8F0;
+        border-radius: 8px;
+        font-size: 14px;
+        width: 100%;
+        outline: none;
+        transition: border-color 0.2s;
+    }
+    .form-control-custom:focus { border-color: #2563EB; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+    .avatar-upload {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 16px;
+        background: #F8FAFC;
+        border-radius: 12px;
+        border: 1px dashed #CBD5E1;
+    }
+    .avatar-preview {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        background: #2563EB;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 24px;
+        font-weight: 700;
+        flex-shrink: 0;
+        overflow: hidden;
+    }
+    .avatar-preview img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .info-badge {
+        display: inline-block;
+        padding: 6px 14px;
+        background: #F1F5F9;
+        border-radius: 8px;
+        font-size: 13px;
+        color: #64748B;
+    }
+</style>
+
+<div class="edit-card">
+    <div class="edit-header">
+        <a asp-action="Index" class="back-link"><i class="bi bi-arrow-left"></i></a>
+        <h4>Chỉnh sửa hồ sơ</h4>
+    </div>
+
+    <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
+
+    <form asp-action="Edit" method="post" enctype="multipart/form-data">
+        <!-- Avatar Upload -->
+        <div class="mb-4">
+            <label class="form-label-custom">Ảnh đại diện</label>
+            <div class="avatar-upload">
+                <div class="avatar-preview">
+                    @if (!string.IsNullOrEmpty(Model.AvatarUrl))
+                    {
+                        <img src="@Model.AvatarUrl" alt="Avatar" />
+                    }
+                    else
+                    {
+                        @(string.IsNullOrEmpty(Model.FullName) ? "?" : Model.FullName[..1].ToUpper())
+                    }
+                </div>
+                <div>
+                    <input type="file" name="avatarFile" accept="image/jpeg,image/png,image/webp" class="form-control form-control-sm" style="border-radius: 6px;" />
+                    <small class="text-muted d-block mt-1">JPG, PNG hoặc WebP. Tối đa 2MB.</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Email (read-only) -->
+        <div class="mb-3">
+            <label class="form-label-custom">Email</label>
+            <div class="info-badge"><i class="bi bi-lock me-1"></i> @Model.Email</div>
+            <small class="text-muted d-block mt-1">Email không thể thay đổi.</small>
+        </div>
+
+        <!-- Role (read-only) -->
+        <div class="mb-3">
+            <label class="form-label-custom">Vai trò</label>
+            <div class="info-badge">@Model.Role</div>
+        </div>
+
+        <!-- FullName -->
+        <div class="mb-3">
+            <label asp-for="FullName" class="form-label-custom"></label>
+            <input asp-for="FullName" class="form-control-custom" placeholder="Nhập họ và tên" />
+            <span asp-validation-for="FullName" class="text-danger small"></span>
+        </div>
+
+        <!-- Phone -->
+        <div class="mb-3">
+            <label asp-for="Phone" class="form-label-custom"></label>
+            <input asp-for="Phone" class="form-control-custom" placeholder="Nhập số điện thoại" />
+            <span asp-validation-for="Phone" class="text-danger small"></span>
+        </div>
+
+        <!-- Bio -->
+        <div class="mb-4">
+            <label asp-for="Bio" class="form-label-custom"></label>
+            <textarea asp-for="Bio" class="form-control-custom" rows="3" placeholder="Viết vài dòng giới thiệu về bản thân..." style="resize: vertical;"></textarea>
+            <span asp-validation-for="Bio" class="text-danger small"></span>
+        </div>
+
+        <!-- Actions -->
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary px-4" style="border-radius: 8px; background: #2563EB; border-color: #2563EB;">
+                <i class="bi bi-check-lg me-1"></i> Lưu thay đổi
+            </button>
+            <a asp-action="Index" class="btn btn-outline-secondary px-4" style="border-radius: 8px;">Hủy</a>
+        </div>
+    </form>
+</div>

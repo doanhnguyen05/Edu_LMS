@@ -1,0 +1,110 @@
+@model GradesOverviewViewModel
+@{
+    ViewData["Title"] = "Kết quả học tập";
+}
+
+<style>
+    .grades-header {
+        margin-bottom: 24px;
+    }
+    .grades-header h4 {
+        font-weight: 700;
+        color: #1E293B;
+    }
+    .grade-card {
+        background: #fff;
+        border-radius: 12px;
+        border: 1px solid #E2E8F0;
+        padding: 24px;
+        transition: box-shadow 0.2s;
+        height: 100%;
+        cursor: pointer;
+        text-decoration: none;
+        display: block;
+        color: inherit;
+    }
+    .grade-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); color: inherit; }
+    .grade-card h6 {
+        font-weight: 600;
+        color: #1E293B;
+        margin-bottom: 16px;
+        font-size: 15px;
+    }
+    .grade-score {
+        font-size: 42px;
+        font-weight: 800;
+        margin-bottom: 8px;
+        line-height: 1;
+    }
+    .grade-score.high { color: #16A34A; }
+    .grade-score.medium { color: #F59E0B; }
+    .grade-score.low { color: #DC2626; }
+    .grade-score.none { color: #CBD5E1; font-size: 20px; }
+    .grade-label { font-size: 13px; color: #94A3B8; }
+    .grade-progress {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 1px solid #F1F5F9;
+    }
+    .grade-progress .gp-label { font-size: 13px; color: #64748B; }
+    .grade-progress .gp-value { font-size: 13px; font-weight: 600; color: #334155; }
+    .status-badge {
+        display: inline-block;
+        font-size: 11px;
+        font-weight: 600;
+        padding: 3px 10px;
+        border-radius: 20px;
+        margin-top: 8px;
+    }
+    .status-active { background: #DBEAFE; color: #2563EB; }
+    .status-completed { background: #DCFCE7; color: #16A34A; }
+    .status-notstarted { background: #F1F5F9; color: #94A3B8; }
+</style>
+
+<div class="grades-header">
+    <h4><i class="bi bi-award me-2"></i>Kết quả học tập</h4>
+</div>
+
+<div class="row">
+    @foreach (var grade in Model.CourseGrades)
+    {
+        var scoreClass = grade.AverageScore.HasValue
+            ? (grade.AverageScore >= 8 ? "high" : grade.AverageScore >= 5 ? "medium" : "low")
+            : "none";
+        var statusClass = grade.Status == "Hoàn thành" ? "status-completed"
+            : grade.Status == "Đang học" ? "status-active" : "status-notstarted";
+
+        <div class="col-md-6 mb-4">
+            <a asp-area="Learner" asp-controller="Grades" asp-action="CourseDetail" asp-route-id="@grade.CourseId" class="grade-card">
+                <h6>@grade.CourseName</h6>
+                <div class="grade-score @scoreClass">
+                    @if (grade.AverageScore.HasValue)
+                    {
+                        @grade.AverageScore.Value.ToString("F1")
+                    }
+                    else
+                    {
+                        <span>Chưa có điểm</span>
+                    }
+                </div>
+                <div class="grade-label">Điểm trung bình</div>
+                <div class="grade-progress">
+                    <span class="gp-label">Đã chấm điểm:</span>
+                    <span class="gp-value">@grade.GradedProgress</span>
+                </div>
+                <span class="status-badge @statusClass">@grade.Status</span>
+            </a>
+        </div>
+    }
+</div>
+
+@if (!Model.CourseGrades.Any())
+{
+    <div style="text-align: center; padding: 60px 0;">
+        <i class="bi bi-award" style="font-size: 48px; color: #CBD5E1; display: block; margin-bottom: 16px;"></i>
+        <p style="font-size: 16px; color: #94A3B8;">Chưa có kết quả học tập nào.</p>
+    </div>
+}

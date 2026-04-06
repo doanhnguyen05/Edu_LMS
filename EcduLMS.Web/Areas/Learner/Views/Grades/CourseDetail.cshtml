@@ -1,0 +1,256 @@
+@model GradeCourseDetailViewModel
+@{
+    ViewData["Title"] = "Kết quả - " + Model.CourseName;
+}
+
+<style>
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 14px;
+        color: #64748B;
+        text-decoration: none;
+        margin-bottom: 20px;
+    }
+    .back-link:hover { color: #2563EB; }
+    .course-grade-header {
+        background: #fff;
+        border-radius: 12px;
+        border: 1px solid #E2E8F0;
+        padding: 24px;
+        margin-bottom: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .course-grade-header h4 {
+        font-weight: 700;
+        color: #1E293B;
+        margin: 0;
+    }
+    .avg-score {
+        font-size: 36px;
+        font-weight: 800;
+    }
+    .avg-score.high { color: #16A34A; }
+    .avg-score.medium { color: #F59E0B; }
+    .avg-score.low { color: #DC2626; }
+    .avg-score.none { color: #CBD5E1; font-size: 18px; }
+    .avg-label { font-size: 12px; color: #94A3B8; text-align: right; }
+    .assignment-list {
+        background: #fff;
+        border-radius: 12px;
+        border: 1px solid #E2E8F0;
+        overflow: hidden;
+    }
+    .assignment-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 24px;
+        border-bottom: 1px solid #F1F5F9;
+        transition: background 0.2s;
+        text-decoration: none;
+        color: inherit;
+    }
+    .assignment-row:last-child { border-bottom: none; }
+    .assignment-row:hover { background: #F8FAFC; color: inherit; }
+    .assignment-left {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+    .assignment-icon {
+        width: 40px; height: 40px; border-radius: 10px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 18px;
+    }
+    .icon-assignment { background: #DBEAFE; color: #2563EB; }
+    .icon-quiz { background: #F3E8FF; color: #7C3AED; }
+    .icon-project { background: #FEF3C7; color: #D97706; }
+    .assignment-info .assign-title { font-size: 14px; font-weight: 600; color: #1E293B; }
+    .assignment-info .assign-type { font-size: 12px; color: #94A3B8; }
+    .assignment-right {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+    .score-display {
+        text-align: right;
+    }
+    .score-display .score-num { font-size: 18px; font-weight: 700; }
+    .score-display .score-num.high { color: #16A34A; }
+    .score-display .score-num.medium { color: #F59E0B; }
+    .score-display .score-num.low { color: #DC2626; }
+    .score-display .score-num.none { color: #CBD5E1; }
+    .score-display .score-max { font-size: 12px; color: #94A3B8; }
+    .status-badge-sm {
+        font-size: 11px;
+        font-weight: 600;
+        padding: 4px 10px;
+        border-radius: 20px;
+    }
+    .badge-pass { background: #DCFCE7; color: #16A34A; }
+    .badge-fail { background: #FEE2E2; color: #DC2626; }
+    .badge-pending { background: #FEF3C7; color: #D97706; }
+    .badge-notsubmitted { background: #F1F5F9; color: #94A3B8; }
+    .arrow-icon { color: #CBD5E1; font-size: 16px; }
+    .assignment-action {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 4px;
+        min-width: 170px;
+    }
+    .btn-start-assignment {
+        font-size: 12px;
+        font-weight: 600;
+        border-radius: 6px;
+        padding: 6px 12px;
+        text-decoration: none;
+        background: #F59E0B;
+        color: #fff;
+    }
+    .btn-start-assignment:hover { background: #D97706; color: #fff; }
+    .btn-start-assignment-disabled {
+        font-size: 12px;
+        font-weight: 600;
+        border-radius: 6px;
+        padding: 6px 12px;
+        background: #E2E8F0;
+        color: #94A3B8;
+        cursor: not-allowed;
+    }
+    .blocked-note {
+        font-size: 11px;
+        color: #D97706;
+        text-align: right;
+    }
+</style>
+
+<a asp-area="Learner" asp-controller="Grades" asp-action="Index" class="back-link">
+    <i class="bi bi-arrow-left"></i> Quay lại danh sách khóa học
+</a>
+
+@if (TempData["AssignmentAccessError"] != null)
+{
+    <div class="alert alert-warning" style="border-radius:10px;">
+        <i class="bi bi-exclamation-triangle me-1"></i> @TempData["AssignmentAccessError"]
+    </div>
+}
+
+<div class="course-grade-header">
+    <h4>@Model.CourseName</h4>
+    <div>
+        @{
+            var avgClass = Model.AverageScore.HasValue
+                ? (Model.AverageScore >= 8 ? "high" : Model.AverageScore >= 5 ? "medium" : "low")
+                : "none";
+        }
+        <div class="avg-score @avgClass">
+            @if (Model.AverageScore.HasValue)
+            {
+                @Model.AverageScore.Value.ToString("F1")
+            }
+            else
+            {
+                <span>--</span>
+            }
+        </div>
+        <div class="avg-label">Điểm trung bình</div>
+    </div>
+</div>
+
+<div class="assignment-list">
+    @foreach (var item in Model.Assignments)
+    {
+        var iconClass = item.Type switch
+        {
+            "Quiz" => "icon-quiz",
+            "Project" => "icon-project",
+            _ => "icon-assignment"
+        };
+        var iconName = item.Type switch
+        {
+            "Quiz" => "bi-question-circle",
+            "Project" => "bi-kanban",
+            _ => "bi-file-earmark-text"
+        };
+        var scoreNum = item.Score.HasValue ? item.Score.Value.ToString("F1") : "--";
+        var scoreClass = item.Score.HasValue
+            ? (item.Score >= 8 ? "high" : item.Score >= 5 ? "medium" : "low")
+            : "none";
+        var badgeClass = item.Status switch
+        {
+            "Pass" => "badge-pass",
+            "Fail" => "badge-fail",
+            "Chưa chấm" => "badge-pending",
+            _ => "badge-notsubmitted"
+        };
+
+        if (item.SubmissionId > 0 && item.Score.HasValue)
+        {
+            <a asp-area="Learner" asp-controller="Grades" asp-action="GradeDetail" asp-route-id="@item.SubmissionId" class="assignment-row">
+                <div class="assignment-left">
+                    <div class="assignment-icon @iconClass">
+                        <i class="bi @iconName"></i>
+                    </div>
+                    <div class="assignment-info">
+                        <div class="assign-title">@item.Title</div>
+                        <div class="assign-type">@item.Type</div>
+                    </div>
+                </div>
+                <div class="assignment-right">
+                    <div class="score-display">
+                        <div class="score-num @scoreClass">@scoreNum</div>
+                        <div class="score-max">/ @item.MaxScore.ToString("F0")</div>
+                    </div>
+                    <span class="status-badge-sm @badgeClass">@item.Status</span>
+                    <i class="bi bi-chevron-right arrow-icon"></i>
+                </div>
+            </a>
+        }
+        else
+        {
+            <div class="assignment-row">
+                <div class="assignment-left">
+                    <div class="assignment-icon @iconClass">
+                        <i class="bi @iconName"></i>
+                    </div>
+                    <div class="assignment-info">
+                        <div class="assign-title">@item.Title</div>
+                        <div class="assign-type">@item.Type</div>
+                    </div>
+                </div>
+                <div class="assignment-right">
+                    <div class="score-display">
+                        <div class="score-num @scoreClass">@scoreNum</div>
+                        <div class="score-max">/ @item.MaxScore.ToString("F0")</div>
+                    </div>
+                    @if (item.Status == "Chưa nộp")
+                    {
+                        <div class="assignment-action">
+                            @if (item.CanStartAssignment)
+                            {
+                                <a asp-area="Learner" asp-controller="Assignment" asp-action="Submit" asp-route-id="@item.AssignmentId" class="btn-start-assignment">
+                                    Làm bài ngay
+                                </a>
+                            }
+                            else
+                            {
+                                <span class="btn-start-assignment-disabled">Chưa mở bài tập</span>
+                                <span class="blocked-note">@item.StartBlockedReason</span>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <span class="status-badge-sm @badgeClass">@item.Status</span>
+                    }
+                    <i class="bi bi-chevron-right arrow-icon"></i>
+                </div>
+            </div>
+        }
+    }
+</div>

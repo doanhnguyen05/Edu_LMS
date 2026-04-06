@@ -1,0 +1,630 @@
+@model EduLMS.Web.ViewModels.Learner.CalendarViewModel
+@{
+    ViewData["Title"] = "Lịch học";
+}
+
+@section Styles {
+<style>
+    /* ── Layout ─────────────────────────── */
+    .cal-page { display: grid; grid-template-columns: 1fr 292px; gap: 20px; align-items: start; }
+    @@media (max-width: 1100px) { .cal-page { grid-template-columns: 1fr; } }
+
+    /* ── Toolbar ────────────────────────── */
+    .cal-toolbar {
+        display: flex; align-items: center; justify-content: space-between;
+        margin-bottom: 18px; flex-wrap: wrap; gap: 10px;
+    }
+    .cal-toolbar-left { display: flex; align-items: center; gap: 8px; }
+    .cal-title { font-size: 16px; font-weight: 700; color: #1E293B; min-width: 200px; text-align: center; }
+    .nav-btn {
+        width: 32px; height: 32px; border-radius: 7px;
+        border: 1px solid #E2E8F0; background: #fff; color: #64748B;
+        cursor: pointer; display: flex; align-items: center; justify-content: center;
+        font-size: 13px; transition: all 0.15s;
+    }
+    .nav-btn:hover { border-color: #2563EB; color: #2563EB; }
+    .today-btn {
+        background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 7px;
+        padding: 6px 14px; font-size: 12px; font-weight: 600; color: #475569; cursor: pointer;
+    }
+    .today-btn:hover { border-color: #2563EB; color: #2563EB; }
+    .view-switch {
+        display: inline-flex; border: 1px solid #E2E8F0; border-radius: 8px;
+        overflow: hidden; background: #fff;
+    }
+    .view-btn {
+        border: none; background: #fff; color: #64748B;
+        padding: 6px 12px; font-size: 12px; font-weight: 600; cursor: pointer;
+    }
+    .view-btn + .view-btn { border-left: 1px solid #E2E8F0; }
+    .view-btn:hover { background: #F8FAFC; color: #2563EB; }
+    .view-btn.active { background: #2563EB; color: #fff; }
+
+    /* ── Grid ───────────────────────────── */
+    .cal-box {
+        background: #fff; border: 1px solid #E2E8F0; border-radius: 14px;
+        overflow: hidden;
+    }
+    .cal-grid {
+        display: grid;
+        grid-template-columns: 80px repeat(7, 1fr);
+        border-collapse: collapse;
+    }
+    /* Header row */
+    .cal-head-empty {
+        background: #F8FAFC; border-bottom: 2px solid #E2E8F0;
+        border-right: 1px solid #E2E8F0; padding: 10px 0;
+    }
+    .cal-head-cell {
+        text-align: center; padding: 10px 4px;
+        background: #F8FAFC; border-bottom: 2px solid #E2E8F0;
+        border-right: 1px solid #E2E8F0; font-size: 12px;
+        font-weight: 600; color: #64748B; line-height: 1.4;
+    }
+    .cal-head-cell.today { background: #EFF6FF; color: #2563EB; }
+    .cal-head-cell .head-day { font-size: 18px; font-weight: 700; }
+    .cal-head-cell.today .head-day {
+        background: #2563EB; color: #fff; border-radius: 50%;
+        width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center;
+    }
+
+    /* Period label cell */
+    .period-label-cell {
+        display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+        padding: 14px 4px; border-right: 1px solid #E2E8F0;
+        border-bottom: 1px solid #E2E8F0; gap: 4px;
+    }
+    .period-icon  { font-size: 18px; }
+    .period-name  { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
+    .period-hours { font-size: 10px; color: #94A3B8; }
+    .row-morning  .period-label-cell { background: #FFFBEB; }
+    .row-morning  .period-name  { color: #D97706; }
+    .row-afternoon .period-label-cell { background: #EFF6FF; }
+    .row-afternoon .period-name { color: #2563EB; }
+    .row-evening  .period-label-cell { background: #F5F3FF; }
+    .row-evening  .period-name  { color: #7C3AED; }
+
+    /* Event cells */
+    .cal-cell {
+        min-height: 110px; padding: 6px 5px; vertical-align: top;
+        border-right: 1px solid #E2E8F0; border-bottom: 1px solid #E2E8F0;
+        display: flex; flex-direction: column; gap: 4px;
+    }
+    .cal-cell:last-child { border-right: none; }
+    .row-morning  .cal-cell { background: rgba(255,251,235,0.4); }
+    .row-afternoon .cal-cell { background: rgba(239,246,255,0.35); }
+    .row-evening  .cal-cell { background: rgba(245,243,255,0.35); }
+    .cal-cell.today-col { background: rgba(239,246,255,0.7) !important; }
+    .month-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+    }
+    .month-weekday {
+        background: #F8FAFC; border-bottom: 1px solid #E2E8F0; border-right: 1px solid #E2E8F0;
+        text-align: center; font-size: 12px; font-weight: 700; color: #64748B; padding: 10px 0;
+    }
+    .month-weekday:nth-child(7n) { border-right: none; }
+    .month-cell {
+        min-height: 130px; border-right: 1px solid #E2E8F0; border-bottom: 1px solid #E2E8F0;
+        padding: 6px; display: flex; flex-direction: column; gap: 6px; background: #fff;
+    }
+    .month-cell:nth-child(7n) { border-right: none; }
+    .month-cell.other-month { background: #FAFAFA; }
+    .month-cell.today { background: #EFF6FF; }
+    .month-day {
+        width: 26px; height: 26px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
+        font-size: 12px; font-weight: 700; color: #334155;
+    }
+    .month-cell.other-month .month-day { color: #94A3B8; }
+    .month-cell.today .month-day { background: #2563EB; color: #fff; }
+    .month-events { display: flex; flex-direction: column; gap: 4px; }
+    .month-ev {
+        border-radius: 6px; padding: 3px 6px; color: #fff; font-size: 11px;
+        line-height: 1.35; cursor: pointer; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+    }
+    .month-more { font-size: 10px; color: #64748B; font-weight: 600; padding-left: 3px; }
+
+    /* Event block */
+    .ev-block {
+        border-radius: 7px; padding: 5px 8px; cursor: pointer;
+        transition: filter 0.1s; color: #fff; overflow: hidden;
+        display: flex; flex-direction: column; gap: 2px;
+    }
+    .ev-block:hover { filter: brightness(0.92); }
+    .ev-block.type-class    { background: #2563EB; }
+    .ev-block.type-assign   { background: #DC2626; }
+    .ev-block.type-personal { background: #16A34A; }
+    .ev-time   { font-size: 10px; opacity: 0.85; font-weight: 500; }
+    .ev-title  { font-size: 12px; font-weight: 700; line-height: 1.3;
+                 overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+    .ev-course { font-size: 10px; opacity: 0.88;
+                 overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+    .ev-zoom-badge {
+        margin-top: 2px; background: rgba(255,255,255,0.22); border-radius: 3px;
+        padding: 1px 5px; font-size: 10px; font-weight: 600;
+        display: inline-flex; align-items: center; gap: 3px; width: fit-content;
+    }
+
+    /* ── Sidebar ────────────────────────── */
+    .sidebar-box { background: #fff; border: 1px solid #E2E8F0; border-radius: 14px; overflow: hidden; }
+    .sidebar-header {
+        padding: 14px 16px; border-bottom: 1px solid #F1F5F9;
+        font-size: 13px; font-weight: 700; color: #1E293B;
+        display: flex; justify-content: space-between; align-items: center;
+    }
+    .period-section-hdr {
+        padding: 7px 14px 5px; font-size: 10px; font-weight: 700;
+        text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #F1F5F9;
+    }
+    .period-section-hdr.morning   { color: #D97706; background: #FFFBEB; }
+    .period-section-hdr.afternoon { color: #2563EB; background: #EFF6FF; }
+    .period-section-hdr.evening   { color: #7C3AED; background: #F5F3FF; }
+    .ev-item {
+        display: flex; gap: 10px; padding: 10px 14px;
+        border-bottom: 1px solid #F8FAFC; cursor: pointer; transition: background 0.1s; align-items: flex-start;
+    }
+    .ev-item:hover { background: #F8FAFC; }
+    .ev-badge {
+        width: 42px; height: 42px; border-radius: 10px; flex-shrink: 0;
+        display: flex; flex-direction: column; align-items: center; justify-content: center; background: #EFF6FF;
+    }
+    .ev-badge .day { font-size: 16px; font-weight: 700; color: #2563EB; line-height: 1; }
+    .ev-badge .mon { font-size: 10px; color: #64748B; }
+    .ev-badge.assign   { background: #FEF2F2; } .ev-badge.assign .day   { color: #DC2626; }
+    .ev-badge.personal { background: #F0FDF4; } .ev-badge.personal .day { color: #16A34A; }
+    .ev-info  { flex: 1; min-width: 0; }
+    .ev-stitle { font-size: 13px; font-weight: 600; color: #1E293B; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .ev-scourse{ font-size: 11px; color: #64748B; margin-top: 1px; }
+    .ev-stime  { font-size: 11px; color: #94A3B8; margin-top: 2px; }
+    .ev-szoom  { font-size: 11px; color: #2563EB; font-weight: 600; margin-top: 3px; }
+    .empty-sidebar { text-align: center; padding: 28px 16px; color: #94A3B8; font-size: 13px; }
+
+    /* ── Event popup ─────────────────────── */
+    .ev-popup {
+        display: none; position: fixed; z-index: 9999;
+        background: #fff; border: 1px solid #E2E8F0; border-radius: 13px;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.13); width: 280px; overflow: hidden;
+    }
+    .ev-popup-head { padding: 12px 14px; color: #fff; font-size: 13px; font-weight: 700;
+        display: flex; justify-content: space-between; align-items: center; }
+    .ev-popup-body { padding: 12px 14px; }
+    .ev-popup-row { display: flex; gap: 7px; align-items: flex-start; margin-bottom: 7px; font-size: 12px; color: #475569; }
+    .ev-popup-row i { color: #94A3B8; flex-shrink: 0; margin-top: 1px; }
+    .ev-type-chip { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 700; margin-bottom: 8px; }
+    .chip-class { background: #EFF6FF; color: #2563EB; }
+    .chip-assign { background: #FEF2F2; color: #DC2626; }
+    .chip-personal { background: #F0FDF4; color: #16A34A; }
+    .popup-close-btn { background: none; border: none; color: rgba(255,255,255,0.85); cursor: pointer; font-size: 15px; padding: 0; }
+</style>
+}
+
+<!-- Toolbar -->
+<div class="cal-toolbar">
+    <div class="cal-toolbar-left">
+        <button class="nav-btn" id="btnPrev"><i class="bi bi-chevron-left"></i></button>
+        <div class="cal-title" id="calTitle"></div>
+        <button class="nav-btn" id="btnNext"><i class="bi bi-chevron-right"></i></button>
+        <button class="today-btn" id="btnToday">Hôm nay</button>
+    </div>
+    <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+        <div class="view-switch" id="viewSwitch">
+            <button type="button" class="view-btn" data-view="day">Ngày</button>
+            <button type="button" class="view-btn active" data-view="week">Tuần</button>
+            <button type="button" class="view-btn" data-view="month">Tháng</button>
+        </div>
+        <div id="periodLegend" style="display:flex; gap:10px;">
+            <span style="font-size:12px; color:#D97706; font-weight:600;">☀ Sáng 05–12h</span>
+            <span style="font-size:12px; color:#2563EB; font-weight:600;">🌤 Chiều 12–18h</span>
+            <span style="font-size:12px; color:#7C3AED; font-weight:600;">🌙 Tối 18–23h</span>
+        </div>
+    </div>
+</div>
+
+<div class="cal-page">
+    <!-- Calendar Grid -->
+    <div class="cal-box">
+        <div class="cal-grid" id="calGrid">
+            <!-- Populated by JS -->
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div>
+        <div class="sidebar-box">
+            <div class="sidebar-header">
+                <span><i class="bi bi-calendar-event me-2"></i>Sự kiện sắp tới</span>
+                <span style="font-size:11px; color:#94A3B8;">@Model.UpcomingEvents.Count sự kiện</span>
+            </div>
+            <div class="sidebar-body">
+                @{
+                    var months = new[] { "", "Th1", "Th2", "Th3", "Th4", "Th5", "Th6", "Th7", "Th8", "Th9", "Th10", "Th11", "Th12" };
+                    var morningEvs   = Model.UpcomingEvents.Where(e => e.StartTime.Hour >= 5  && e.StartTime.Hour < 12).ToList();
+                    var afternoonEvs = Model.UpcomingEvents.Where(e => e.StartTime.Hour >= 12 && e.StartTime.Hour < 18).ToList();
+                    var eveningEvs   = Model.UpcomingEvents.Where(e => e.StartTime.Hour >= 18 || e.StartTime.Hour < 5).ToList();
+                }
+                @if (!Model.UpcomingEvents.Any())
+                {
+                    <div class="empty-sidebar">
+                        <i class="bi bi-calendar-check d-block mb-2" style="font-size:28px;"></i>
+                        Không có sự kiện sắp tới
+                    </div>
+                }
+                @if (morningEvs.Any())
+                {
+                    <div class="period-section-hdr morning">☀ Buổi sáng</div>
+                    foreach (var ev in morningEvs) {
+                        var bc = ev.EventType == "Assignment" ? "assign" : ev.EventType == "Personal" ? "personal" : "";
+                        <div class="ev-item">
+                            <div class="ev-badge @bc">
+                                <span class="day">@ev.StartTime.Day</span>
+                                <span class="mon">@months[ev.StartTime.Month]</span>
+                            </div>
+                            <div class="ev-info">
+                                <div class="ev-stitle">@ev.Title</div>
+                                @if (!string.IsNullOrEmpty(ev.CourseName)) { <div class="ev-scourse"><i class="bi bi-book" style="font-size:10px;"></i> @ev.CourseName</div> }
+                                <div class="ev-stime"><i class="bi bi-clock" style="font-size:10px;"></i> @ev.StartTime.ToString("HH:mm") – @ev.EndTime.ToString("HH:mm")</div>
+                                @if (!string.IsNullOrEmpty(ev.ZoomLink)) { <div class="ev-szoom"><a href="@ev.ZoomLink" target="_blank" style="color:#2563EB;text-decoration:none;"><i class="bi bi-camera-video" style="font-size:10px;"></i> Tham gia</a></div> }
+                            </div>
+                        </div>
+                    }
+                }
+                @if (afternoonEvs.Any())
+                {
+                    <div class="period-section-hdr afternoon">🌤 Buổi chiều</div>
+                    foreach (var ev in afternoonEvs) {
+                        var bc = ev.EventType == "Assignment" ? "assign" : ev.EventType == "Personal" ? "personal" : "";
+                        <div class="ev-item">
+                            <div class="ev-badge @bc">
+                                <span class="day">@ev.StartTime.Day</span>
+                                <span class="mon">@months[ev.StartTime.Month]</span>
+                            </div>
+                            <div class="ev-info">
+                                <div class="ev-stitle">@ev.Title</div>
+                                @if (!string.IsNullOrEmpty(ev.CourseName)) { <div class="ev-scourse"><i class="bi bi-book" style="font-size:10px;"></i> @ev.CourseName</div> }
+                                <div class="ev-stime"><i class="bi bi-clock" style="font-size:10px;"></i> @ev.StartTime.ToString("HH:mm") – @ev.EndTime.ToString("HH:mm")</div>
+                                @if (!string.IsNullOrEmpty(ev.ZoomLink)) { <div class="ev-szoom"><a href="@ev.ZoomLink" target="_blank" style="color:#2563EB;text-decoration:none;"><i class="bi bi-camera-video" style="font-size:10px;"></i> Tham gia</a></div> }
+                            </div>
+                        </div>
+                    }
+                }
+                @if (eveningEvs.Any())
+                {
+                    <div class="period-section-hdr evening">🌙 Buổi tối</div>
+                    foreach (var ev in eveningEvs) {
+                        var bc = ev.EventType == "Assignment" ? "assign" : ev.EventType == "Personal" ? "personal" : "";
+                        <div class="ev-item">
+                            <div class="ev-badge @bc">
+                                <span class="day">@ev.StartTime.Day</span>
+                                <span class="mon">@months[ev.StartTime.Month]</span>
+                            </div>
+                            <div class="ev-info">
+                                <div class="ev-stitle">@ev.Title</div>
+                                @if (!string.IsNullOrEmpty(ev.CourseName)) { <div class="ev-scourse"><i class="bi bi-book" style="font-size:10px;"></i> @ev.CourseName</div> }
+                                <div class="ev-stime"><i class="bi bi-clock" style="font-size:10px;"></i> @ev.StartTime.ToString("HH:mm") – @ev.EndTime.ToString("HH:mm")</div>
+                                @if (!string.IsNullOrEmpty(ev.ZoomLink)) { <div class="ev-szoom"><a href="@ev.ZoomLink" target="_blank" style="color:#2563EB;text-decoration:none;"><i class="bi bi-camera-video" style="font-size:10px;"></i> Tham gia</a></div> }
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Event popup -->
+<div class="ev-popup" id="evPopup">
+    <div class="ev-popup-head" id="popupHead">
+        <span id="popupTitle" style="flex:1;"></span>
+        <button class="popup-close-btn" onclick="closeEvPopup()"><i class="bi bi-x-lg"></i></button>
+    </div>
+    <div class="ev-popup-body">
+        <div id="popupChip"></div>
+        <div class="ev-popup-row" id="pCourseRow" style="display:none;"><i class="bi bi-book"></i><span id="pCourse"></span></div>
+        <div class="ev-popup-row"><i class="bi bi-clock"></i><span id="pTime"></span></div>
+        <div class="ev-popup-row"><i class="bi bi-calendar3"></i><span id="pDate"></span></div>
+        <div class="ev-popup-row" id="pDescRow" style="display:none;"><i class="bi bi-card-text"></i><span id="pDesc"></span></div>
+        <div class="ev-popup-row" id="pZoomRow" style="display:none;">
+            <i class="bi bi-camera-video"></i>
+            <a id="pZoom" href="#" target="_blank" style="color:#2563EB;font-weight:700;text-decoration:none;">Tham gia buổi học</a>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+const GET_EVENTS_URL = '@Url.Action("GetEvents", "Calendar", new { area = "Learner" })';
+const VN_DAYS = ['CN', 'Th 2', 'Th 3', 'Th 4', 'Th 5', 'Th 6', 'Th 7'];
+const VN_DAYS_SHORT = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+
+let viewMode = 'week';
+let focusDate = new Date();
+
+function atStartOfDay(d) {
+    const dt = new Date(d);
+    dt.setHours(0, 0, 0, 0);
+    return dt;
+}
+
+function getWeekStart(d) {
+    const dt = atStartOfDay(d);
+    const day = dt.getDay(); // 0=Sun
+    dt.setDate(dt.getDate() - day);
+    return dt;
+}
+
+function getMonthStart(d) {
+    return new Date(d.getFullYear(), d.getMonth(), 1);
+}
+
+function dayKey(d) {
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+function getPeriod(hour) {
+    if (hour >= 5 && hour < 12)  return 'morning';
+    if (hour >= 12 && hour < 18) return 'afternoon';
+    return 'evening';
+}
+
+function fmtDate(d) {
+    return d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', weekday: 'long' });
+}
+function fmtTime(d) {
+    return d ? d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : '';
+}
+
+function escHtml(s) {
+    return (s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function getCurrentRange() {
+    if (viewMode === 'day') {
+        const start = atStartOfDay(focusDate);
+        const end = new Date(start); end.setDate(end.getDate() + 1);
+        return { start, end };
+    }
+    if (viewMode === 'month') {
+        const start = getMonthStart(focusDate);
+        const end = new Date(start.getFullYear(), start.getMonth() + 1, 1);
+        return { start, end };
+    }
+    const start = getWeekStart(focusDate);
+    const end = new Date(start); end.setDate(end.getDate() + 7);
+    return { start, end };
+}
+
+function setTitle(start) {
+    if (viewMode === 'day') {
+        document.getElementById('calTitle').textContent =
+            start.toLocaleDateString('vi-VN', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' });
+        return;
+    }
+    if (viewMode === 'month') {
+        document.getElementById('calTitle').textContent = `Tháng ${start.getMonth() + 1}, ${start.getFullYear()}`;
+        return;
+    }
+    const d0 = start;
+    const d6 = new Date(start); d6.setDate(d6.getDate() + 6);
+    document.getElementById('calTitle').textContent =
+        `${d0.getDate()}/${d0.getMonth()+1} – ${d6.getDate()}/${d6.getMonth()+1} tháng ${d6.getMonth()+1}, ${d6.getFullYear()}`;
+}
+
+function updateViewButtons() {
+    document.querySelectorAll('#viewSwitch .view-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.view === viewMode);
+    });
+    document.getElementById('periodLegend').style.display = viewMode === 'month' ? 'none' : 'flex';
+}
+
+function renderPeriodGrid(start, days, events) {
+    const today = new Date(); today.setHours(0,0,0,0);
+    const end = new Date(start); end.setDate(end.getDate() + days);
+
+    const grid = Array.from({length: days}, () => ({ morning: [], afternoon: [], evening: [] }));
+    for (const ev of events) {
+        const evStart = new Date(ev.start);
+        if (evStart < start || evStart >= end) continue;
+        const dayIdx = Math.round((evStart - start) / 86400000);
+        if (dayIdx < 0 || dayIdx >= days) continue;
+        const period = getPeriod(evStart.getHours());
+        grid[dayIdx][period].push(ev);
+    }
+
+    const g = document.getElementById('calGrid');
+    g.classList.remove('month-grid');
+    g.style.gridTemplateColumns = `80px repeat(${days}, 1fr)`;
+    let html = '';
+
+    html += '<div class="cal-head-empty"></div>';
+    for (let i = 0; i < days; i++) {
+        const d = new Date(start); d.setDate(d.getDate() + i);
+        const isToday = d.getTime() === today.getTime();
+        const dayNum = `<span class="head-day">${d.getDate()}</span>`;
+        html += `<div class="cal-head-cell${isToday ? ' today' : ''}">
+            <div style="font-size:11px;">${VN_DAYS_SHORT[d.getDay()]}</div>
+            ${dayNum}
+        </div>`;
+    }
+
+    const periods = [
+        { key: 'morning',   cls: 'row-morning',   icon: '☀', label: 'Sáng', hours: '05–12h' },
+        { key: 'afternoon', cls: 'row-afternoon',  icon: '🌤', label: 'Chiều', hours: '12–18h' },
+        { key: 'evening',   cls: 'row-evening',    icon: '🌙', label: 'Tối', hours: '18–23h' }
+    ];
+
+    for (const p of periods) {
+        html += `<div class="${p.cls}" style="display:contents;">`;
+        // Period label cell
+        html += `<div class="period-label-cell">
+            <span class="period-icon">${p.icon}</span>
+            <span class="period-name">${p.label}</span>
+            <span class="period-hours">${p.hours}</span>
+        </div>`;
+        for (let i = 0; i < days; i++) {
+            const d = new Date(start); d.setDate(d.getDate() + i);
+            const isToday = d.getTime() === today.getTime();
+            html += `<div class="cal-cell${isToday ? ' today-col' : ''}">`;
+            for (const ev of grid[i][p.key]) {
+                const startAt = new Date(ev.start), endAt = ev.end ? new Date(ev.end) : null;
+                const typeCls = ev.extendedProps?.eventType === 'Assignment' ? 'type-assign'
+                              : ev.extendedProps?.eventType === 'Personal'   ? 'type-personal'
+                              : 'type-class';
+                const timeStr = endAt ? `${fmtTime(startAt)} – ${fmtTime(endAt)}` : fmtTime(startAt);
+                const course  = escHtml(ev.extendedProps?.courseName ?? '');
+                const zoom    = escHtml(ev.extendedProps?.zoomLink ?? '');
+                const evJson  = encodeURIComponent(JSON.stringify(ev));
+                html += `<div class="ev-block ${typeCls}" onclick="showPopup(this, event)" data-ev="${evJson}">
+                    <div class="ev-time">${timeStr}</div>
+                    <div class="ev-title">${escHtml(ev.title)}</div>
+                    ${course ? `<div class="ev-course">📖 ${course}</div>` : ''}
+                    ${zoom   ? `<div class="ev-zoom-badge">📹 Tham gia</div>` : ''}
+                </div>`;
+            }
+            html += '</div>';
+        }
+        html += '</div>';
+    }
+
+    g.innerHTML = html;
+}
+
+function renderMonthGrid(monthStart, events) {
+    const g = document.getElementById('calGrid');
+    g.classList.add('month-grid');
+    g.style.gridTemplateColumns = 'repeat(7, 1fr)';
+
+    const today = atStartOfDay(new Date());
+    const monthEnd = new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 1);
+    const gridStart = getWeekStart(monthStart);
+
+    const byDay = {};
+    for (const ev of events) {
+        const d = new Date(ev.start);
+        const key = dayKey(d);
+        byDay[key] ??= [];
+        byDay[key].push(ev);
+    }
+    Object.keys(byDay).forEach(k => byDay[k].sort((a, b) => new Date(a.start) - new Date(b.start)));
+
+    let html = '';
+    for (let i = 0; i < 7; i++) html += `<div class="month-weekday">${VN_DAYS_SHORT[i]}</div>`;
+
+    for (let i = 0; i < 42; i++) {
+        const d = new Date(gridStart); d.setDate(d.getDate() + i);
+        const isToday = d.getTime() === today.getTime();
+        const inMonth = d.getMonth() === monthStart.getMonth();
+        const key = dayKey(d);
+        const dayEvents = byDay[key] ?? [];
+
+        html += `<div class="month-cell${isToday ? ' today' : ''}${inMonth ? '' : ' other-month'}">`;
+        html += `<span class="month-day">${d.getDate()}</span>`;
+        html += `<div class="month-events">`;
+
+        dayEvents.slice(0, 3).forEach(ev => {
+            const startAt = new Date(ev.start);
+            const color = ev.color ?? '#2563EB';
+            const evJson = encodeURIComponent(JSON.stringify(ev));
+            html += `<div class="month-ev" style="background:${color};" onclick="showPopup(this, event)" data-ev="${evJson}">${fmtTime(startAt)} ${escHtml(ev.title)}</div>`;
+        });
+
+        if (dayEvents.length > 3) {
+            html += `<div class="month-more">+${dayEvents.length - 3} sự kiện</div>`;
+        }
+
+        html += `</div></div>`;
+
+        if (i >= 34 && d >= monthEnd && d.getDay() === 6) break;
+    }
+
+    g.innerHTML = html;
+}
+
+async function renderCalendar() {
+    const { start, end } = getCurrentRange();
+    setTitle(start);
+    updateViewButtons();
+
+    let events = [];
+    try {
+        const r = await fetch(`${GET_EVENTS_URL}?start=${start.toISOString()}&end=${end.toISOString()}`);
+        events = await r.json();
+    } catch (e) {}
+
+    if (viewMode === 'month') {
+        renderMonthGrid(start, events);
+    } else if (viewMode === 'day') {
+        renderPeriodGrid(start, 1, events);
+    } else {
+        renderPeriodGrid(start, 7, events);
+    }
+}
+
+function shiftFocus(step) {
+    if (viewMode === 'day') {
+        focusDate.setDate(focusDate.getDate() + step);
+    } else if (viewMode === 'month') {
+        focusDate.setMonth(focusDate.getMonth() + step);
+    } else {
+        focusDate.setDate(focusDate.getDate() + step * 7);
+    }
+}
+
+document.getElementById('btnPrev').onclick  = () => { shiftFocus(-1); renderCalendar(); };
+document.getElementById('btnNext').onclick  = () => { shiftFocus(1); renderCalendar(); };
+document.getElementById('btnToday').onclick = () => { focusDate = new Date(); renderCalendar(); };
+
+document.querySelectorAll('#viewSwitch .view-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        viewMode = btn.dataset.view || 'week';
+        renderCalendar();
+    });
+});
+
+// Popup
+function showPopup(el, e) {
+    const ev = JSON.parse(decodeURIComponent(el.dataset.ev));
+    const p  = ev.extendedProps ?? {};
+    const start = new Date(ev.start), end = ev.end ? new Date(ev.end) : null;
+
+    document.getElementById('popupTitle').textContent = ev.title;
+    document.getElementById('popupHead').style.background = ev.color ?? '#2563EB';
+    document.getElementById('pTime').textContent = end ? `${fmtTime(start)} – ${fmtTime(end)}` : fmtTime(start);
+    document.getElementById('pDate').textContent = fmtDate(start);
+
+    const chipMap   = { Class: 'chip-class', Assignment: 'chip-assign', Personal: 'chip-personal' };
+    const chipLabel = { Class: 'Buổi học', Assignment: 'Bài tập', Personal: 'Cá nhân' };
+    document.getElementById('popupChip').innerHTML =
+        `<span class="ev-type-chip ${chipMap[p.eventType] ?? 'chip-class'}">${chipLabel[p.eventType] ?? 'Sự kiện'}</span>`;
+
+    const cr = document.getElementById('pCourseRow');
+    if (p.courseName) { cr.style.display = 'flex'; document.getElementById('pCourse').textContent = p.courseName; }
+    else cr.style.display = 'none';
+
+    const dr = document.getElementById('pDescRow');
+    if (p.description) { dr.style.display = 'flex'; document.getElementById('pDesc').textContent = p.description; }
+    else dr.style.display = 'none';
+
+    const zr = document.getElementById('pZoomRow');
+    if (p.zoomLink) { zr.style.display = 'flex'; document.getElementById('pZoom').href = p.zoomLink; }
+    else zr.style.display = 'none';
+
+    const rect = el.getBoundingClientRect();
+    const popup = document.getElementById('evPopup');
+    popup.style.display = 'block';
+    popup.style.top  = Math.min(rect.bottom + 6, window.innerHeight - 260) + 'px';
+    popup.style.left = Math.min(rect.left, window.innerWidth - 295) + 'px';
+    if (e) e.stopPropagation();
+}
+
+function closeEvPopup() { document.getElementById('evPopup').style.display = 'none'; }
+document.addEventListener('click', (e) => {
+    if (!document.getElementById('evPopup').contains(e.target) &&
+        !e.target.closest('.ev-block') &&
+        !e.target.closest('.month-ev')) {
+        closeEvPopup();
+    }
+});
+
+document.addEventListener('DOMContentLoaded', renderCalendar);
+</script>
+}

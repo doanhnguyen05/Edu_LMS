@@ -1,0 +1,151 @@
+@model EduLMS.Web.ViewModels.Profile.ProfileViewModel
+@{
+    Layout = (string?)ViewData["Layout"];
+    ViewData["Title"] = "Hồ sơ cá nhân";
+}
+
+<style>
+    .profile-card {
+        background: #fff;
+        border-radius: 16px;
+        border: 1px solid #E2E8F0;
+        overflow: hidden;
+        max-width: 700px;
+        margin: 0 auto;
+    }
+    .profile-header {
+        background: linear-gradient(135deg, #2563EB 0%, #7C3AED 100%);
+        padding: 40px 32px 60px;
+        text-align: center;
+        position: relative;
+    }
+    .profile-avatar-wrapper {
+        position: absolute;
+        bottom: -40px;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+    .profile-avatar {
+        width: 88px;
+        height: 88px;
+        border-radius: 50%;
+        border: 4px solid #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 32px;
+        font-weight: 700;
+        color: #fff;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        overflow: hidden;
+    }
+    .profile-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .profile-body {
+        padding: 56px 32px 32px;
+        text-align: center;
+    }
+    .profile-name {
+        font-size: 22px;
+        font-weight: 700;
+        color: #1E293B;
+    }
+    .profile-role {
+        display: inline-block;
+        padding: 4px 14px;
+        border-radius: 16px;
+        font-size: 12px;
+        font-weight: 600;
+        margin-top: 6px;
+    }
+    .role-admin { background: #FAF5FF; color: #7C3AED; }
+    .role-instructor { background: #F0FDF4; color: #16A34A; }
+    .role-learner { background: #EFF6FF; color: #2563EB; }
+    .profile-info {
+        margin-top: 24px;
+        text-align: left;
+    }
+    .info-row {
+        display: flex;
+        padding: 14px 0;
+        border-bottom: 1px solid #F1F5F9;
+        align-items: center;
+    }
+    .info-row:last-child { border-bottom: none; }
+    .info-label {
+        width: 160px;
+        font-size: 13px;
+        font-weight: 600;
+        color: #64748B;
+        flex-shrink: 0;
+    }
+    .info-value {
+        font-size: 14px;
+        color: #1E293B;
+        flex: 1;
+    }
+    .profile-actions {
+        padding: 0 32px 32px;
+        text-align: center;
+    }
+</style>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success py-2 small mb-3 text-center" style="max-width: 700px; margin: 0 auto 16px;">
+        <i class="bi bi-check-circle me-1"></i> @TempData["SuccessMessage"]
+    </div>
+}
+
+<div class="profile-card">
+    <div class="profile-header">
+        <div class="profile-avatar-wrapper">
+            <div class="profile-avatar" style="background: @Model.AvatarColor;">
+                @if (!string.IsNullOrEmpty(Model.AvatarUrl))
+                {
+                    <img src="@Model.AvatarUrl" alt="Avatar" />
+                }
+                else
+                {
+                    @Model.AvatarInitial
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="profile-body">
+        <div class="profile-name">@Model.FullName</div>
+        <span class="profile-role role-@Model.Role.ToLower()">@Model.Role</span>
+
+        <div class="profile-info">
+            <div class="info-row">
+                <div class="info-label"><i class="bi bi-envelope me-2"></i>Email</div>
+                <div class="info-value">@Model.Email</div>
+            </div>
+            <div class="info-row">
+                <div class="info-label"><i class="bi bi-telephone me-2"></i>Số điện thoại</div>
+                <div class="info-value">@(Model.Phone ?? "Chưa cập nhật")</div>
+            </div>
+            <div class="info-row">
+                <div class="info-label"><i class="bi bi-person-lines-fill me-2"></i>Giới thiệu</div>
+                <div class="info-value">@(string.IsNullOrEmpty(Model.Bio) ? "Chưa cập nhật" : Model.Bio)</div>
+            </div>
+            <div class="info-row">
+                <div class="info-label"><i class="bi bi-calendar3 me-2"></i>Ngày tham gia</div>
+                <div class="info-value">@Model.CreatedAt</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="profile-actions">
+        <a asp-action="Edit" class="btn btn-primary px-4 me-2" style="border-radius: 8px; background: #2563EB; border-color: #2563EB;">
+            <i class="bi bi-pencil me-1"></i> Chỉnh sửa hồ sơ
+        </a>
+        <a asp-controller="Settings" asp-action="Index" class="btn btn-outline-secondary px-4" style="border-radius: 8px;">
+            <i class="bi bi-gear me-1"></i> Cài đặt
+        </a>
+    </div>
+</div>

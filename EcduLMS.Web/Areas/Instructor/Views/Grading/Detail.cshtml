@@ -1,0 +1,370 @@
+@model GradingDetailViewModel
+@{
+    ViewData["Title"] = "Chấm điểm - " + Model.AssignmentTitle;
+}
+
+<style>
+    .detail-card {
+        background: #fff;
+        border-radius: 12px;
+        border: 1px solid #E2E8F0;
+        padding: 24px;
+        height: 100%;
+    }
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: #64748B;
+        text-decoration: none;
+        font-size: 14px;
+        margin-bottom: 20px;
+    }
+    .back-link:hover { color: #2563EB; }
+    .assignment-header {
+        margin-bottom: 24px;
+    }
+    .assignment-header h4 {
+        font-weight: 700;
+        color: #1E293B;
+        margin-bottom: 8px;
+    }
+    .assignment-header .course-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: #EFF6FF;
+        color: #2563EB;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 500;
+    }
+    .student-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: #F8FAFC;
+        border: 1px solid #E2E8F0;
+        padding: 8px 14px;
+        border-radius: 10px;
+        font-size: 14px;
+        margin-top: 12px;
+    }
+    .student-badge .avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: #E0E7FF;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #4F46E5;
+        font-weight: 600;
+        font-size: 13px;
+    }
+    .file-preview {
+        background: #F8FAFC;
+        border: 2px dashed #E2E8F0;
+        border-radius: 12px;
+        padding: 40px;
+        text-align: center;
+        margin-top: 20px;
+    }
+    .file-preview i { font-size: 48px; color: #94A3B8; }
+    .file-preview p { color: #64748B; margin-top: 12px; font-size: 14px; }
+    .content-preview {
+        background: #F8FAFC;
+        border: 1px solid #E2E8F0;
+        border-radius: 12px;
+        padding: 20px;
+        margin-top: 20px;
+        font-size: 14px;
+        color: #334155;
+        line-height: 1.7;
+        white-space: pre-wrap;
+    }
+    .grading-sidebar h5 {
+        font-weight: 700;
+        color: #1E293B;
+        margin-bottom: 20px;
+        font-size: 18px;
+    }
+    .score-input {
+        position: relative;
+    }
+    .score-input input {
+        font-size: 24px;
+        font-weight: 700;
+        text-align: center;
+        height: 56px;
+        border-radius: 10px;
+        border: 2px solid #E2E8F0;
+    }
+    .score-input input:focus {
+        border-color: #2563EB;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+    .score-input .score-max {
+        position: absolute;
+        right: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94A3B8;
+        font-size: 16px;
+        font-weight: 600;
+    }
+    .pass-toggle {
+        display: flex;
+        gap: 8px;
+        margin-top: 16px;
+    }
+    .pass-toggle .toggle-btn {
+        flex: 1;
+        padding: 10px;
+        border-radius: 8px;
+        border: 2px solid #E2E8F0;
+        background: #fff;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        text-align: center;
+        transition: all 0.2s;
+    }
+    .pass-toggle .toggle-btn.pass-active {
+        border-color: #16A34A;
+        background: #DCFCE7;
+        color: #16A34A;
+    }
+    .pass-toggle .toggle-btn.fail-active {
+        border-color: #DC2626;
+        background: #FEE2E2;
+        color: #DC2626;
+    }
+    .pass-toggle .toggle-btn:hover { border-color: #94A3B8; }
+    .already-graded-banner {
+        background: #DCFCE7;
+        border: 1px solid #86EFAC;
+        border-radius: 10px;
+        padding: 10px 16px;
+        font-size: 13px;
+        color: #16A34A;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .returned-banner {
+        background: #FEF9C3;
+        border: 1px solid #FDE047;
+        border-radius: 10px;
+        padding: 10px 16px;
+        font-size: 13px;
+        color: #CA8A04;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+</style>
+
+@Html.AntiForgeryToken()
+
+<a asp-action="Index" class="back-link">
+    <i class="bi bi-arrow-left"></i> Quay lại Grading Hub
+</a>
+
+<div class="row g-4">
+    <!-- Left: Submission Content -->
+    <div class="col-lg-8">
+        <div class="detail-card">
+            <div class="assignment-header">
+                <h4>@Model.AssignmentTitle</h4>
+                <span class="course-tag">
+                    <i class="bi bi-book"></i> @Model.CourseName
+                </span>
+                @if (!string.IsNullOrEmpty(Model.AssignmentDescription))
+                {
+                    <div class="mt-3" style="font-size: 14px; color: #475569; line-height: 1.6;">
+                        @Html.Raw(Model.AssignmentDescription)
+                    </div>
+                }
+                <div class="student-badge">
+                    <div class="avatar">
+                        @(Model.StudentName.Length > 0 ? Model.StudentName[0].ToString().ToUpper() : "?")
+                    </div>
+                    <div>
+                        <div style="font-weight: 600; color: #1E293B;">@Model.StudentName</div>
+                        <div style="font-size: 12px; color: #94A3B8;">
+                            Nộp lúc: @(Model.SubmittedAt ?? "—")
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.Content))
+            {
+                <h6 class="fw-semibold" style="color: #475569;">Nội dung bài nộp</h6>
+                <div class="content-preview">@Model.Content</div>
+            }
+
+            @if (!string.IsNullOrEmpty(Model.FileUrl))
+            {
+                <div class="file-preview">
+                    <i class="bi bi-file-earmark-zip"></i>
+                    <p>@(Model.FileName ?? "File đính kèm")</p>
+                    <a href="@Model.FileUrl" class="btn btn-outline-primary" style="border-radius: 8px;" download>
+                        <i class="bi bi-download me-1"></i> Tải xuống
+                    </a>
+                </div>
+            }
+            else if (string.IsNullOrEmpty(Model.Content))
+            {
+                <div class="file-preview">
+                    <i class="bi bi-file-earmark-x"></i>
+                    <p>Không có nội dung hoặc file đính kèm</p>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Right: Grading Sidebar -->
+    <div class="col-lg-4">
+        <div class="detail-card">
+            <h5><i class="bi bi-award me-2"></i>Chấm điểm</h5>
+
+            @if (Model.Status == "Graded")
+            {
+                <div class="already-graded-banner">
+                    <i class="bi bi-check-circle-fill"></i>
+                    Đã chấm — có thể cập nhật lại bên dưới
+                </div>
+            }
+            else if (Model.Status == "Returned")
+            {
+                <div class="returned-banner">
+                    <i class="bi bi-arrow-return-left"></i>
+                    Đã trả về — chờ học viên nộp lại
+                </div>
+            }
+
+            <div class="mb-3">
+                <label class="form-label fw-semibold" style="font-size: 14px;">Điểm số</label>
+                <div class="score-input">
+                    <input type="number" class="form-control" id="scoreInput"
+                           min="0" max="@Model.MaxScore" step="0.5" placeholder="0"
+                           value="@(Model.ExistingScore?.ToString("0.#") ?? "")" />
+                    <span class="score-max">/ @Model.MaxScore.ToString("0.#")</span>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-semibold" style="font-size: 14px;">Trạng thái</label>
+                <div class="pass-toggle">
+                    <div class="toggle-btn @(Model.ExistingPassStatus == "Fail" ? "" : "pass-active")" id="btnPass" onclick="setPassStatus('pass')">
+                        <i class="bi bi-check-circle me-1"></i> Đạt
+                    </div>
+                    <div class="toggle-btn @(Model.ExistingPassStatus == "Fail" ? "fail-active" : "")" id="btnFail" onclick="setPassStatus('fail')">
+                        <i class="bi bi-x-circle me-1"></i> Không đạt
+                    </div>
+                </div>
+                <input type="hidden" id="passStatus" value="@(Model.ExistingPassStatus ?? "Pass")" />
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label fw-semibold" style="font-size: 14px;">Nhận xét</label>
+                <textarea class="form-control" id="commentInput" rows="5"
+                          placeholder="Nhập nhận xét cho học viên..."
+                          style="border-radius: 8px; font-size: 14px;">@(Model.ExistingComment ?? "")</textarea>
+            </div>
+
+            <button class="btn btn-primary w-100 mb-2" style="border-radius: 8px; padding: 10px;" onclick="submitGrade()">
+                <i class="bi bi-send me-1"></i> @(Model.Status == "Graded" ? "Cập nhật điểm" : "Lưu & Gửi")
+            </button>
+            @if (Model.Status != "Returned")
+            {
+                <button class="btn btn-outline-secondary w-100" style="border-radius: 8px; padding: 10px;" onclick="returnSubmission()">
+                    <i class="bi bi-arrow-return-left me-1"></i> Trả về (Yêu cầu nộp lại)
+                </button>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    const antiForgeryToken = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+    function setPassStatus(status) {
+        document.getElementById('passStatus').value = status === 'pass' ? 'Pass' : 'Fail';
+        const btnPass = document.getElementById('btnPass');
+        const btnFail = document.getElementById('btnFail');
+        if (status === 'pass') {
+            btnPass.className = 'toggle-btn pass-active';
+            btnFail.className = 'toggle-btn';
+        } else {
+            btnPass.className = 'toggle-btn';
+            btnFail.className = 'toggle-btn fail-active';
+        }
+    }
+
+    document.getElementById('scoreInput').addEventListener('input', function () {
+        const score = parseFloat(this.value);
+        const max = @Model.MaxScore;
+        if (!isNaN(score)) {
+            setPassStatus(score >= max / 2 ? 'pass' : 'fail');
+        }
+    });
+
+    function submitGrade() {
+        const score = document.getElementById('scoreInput').value;
+        const passStatus = document.getElementById('passStatus').value;
+        const comment = document.getElementById('commentInput').value;
+
+        if (score === '' || score === null) {
+            alert('Vui lòng nhập điểm số.');
+            return;
+        }
+
+        fetch('@Url.Action("SubmitGrade", "Grading", new { area = "Instructor" })', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'RequestVerificationToken': antiForgeryToken
+            },
+            body: JSON.stringify({
+                submissionId: @Model.SubmissionId,
+                score: parseFloat(score),
+                passStatus: passStatus,
+                comment: comment
+            })
+        }).then(async res => {
+            if (res.ok) {
+                window.location.href = '@Url.Action("Index", "Grading", new { area = "Instructor" })';
+            } else {
+                const data = await res.json().catch(() => ({}));
+                alert(data.error || 'Có lỗi xảy ra. Vui lòng thử lại.');
+            }
+        });
+    }
+
+    function returnSubmission() {
+        if (!confirm('Bạn có chắc muốn yêu cầu học viên nộp lại bài?')) return;
+
+        fetch('@Url.Action("ReturnSubmission", "Grading", new { area = "Instructor" })', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'RequestVerificationToken': antiForgeryToken
+            },
+            body: JSON.stringify({ submissionId: @Model.SubmissionId })
+        }).then(res => {
+            if (res.ok) {
+                window.location.href = '@Url.Action("Index", "Grading", new { area = "Instructor" })';
+            } else {
+                alert('Có lỗi xảy ra. Vui lòng thử lại.');
+            }
+        });
+    }
+</script>
+}

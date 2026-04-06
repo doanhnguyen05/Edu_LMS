@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="EcduLMS.Web/EduLMS.Web.csproj" />
+  <Project Path="EcduLMS.Web.Tests/EcduLMS.Web.Tests.csproj" />
+</Solution>

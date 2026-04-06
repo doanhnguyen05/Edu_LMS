@@ -1,0 +1,232 @@
+@model AdminDashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<style>
+    .stat-card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 20px;
+        border: 1px solid #E2E8F0;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+    .stat-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        flex-shrink: 0;
+    }
+    .stat-value {
+        font-size: 24px;
+        font-weight: 700;
+        color: #1E293B;
+        line-height: 1.2;
+    }
+    .stat-label {
+        font-size: 13px;
+        color: #94A3B8;
+        margin-top: 2px;
+    }
+    .card-panel {
+        background: #fff;
+        border-radius: 12px;
+        border: 1px solid #E2E8F0;
+        padding: 24px;
+    }
+    .card-panel-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #1E293B;
+        margin-bottom: 20px;
+    }
+    .activity-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 12px 0;
+        border-bottom: 1px solid #F1F5F9;
+    }
+    .activity-item:last-child { border-bottom: none; }
+    .activity-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        flex-shrink: 0;
+    }
+    .activity-desc {
+        font-size: 14px;
+        color: #334155;
+        line-height: 1.4;
+    }
+    .activity-time {
+        font-size: 12px;
+        color: #94A3B8;
+        margin-top: 2px;
+    }
+    .view-all-link {
+        display: block;
+        text-align: center;
+        padding: 14px;
+        font-size: 14px;
+        color: #2563EB;
+        text-decoration: none;
+        border-top: 1px solid #E2E8F0;
+        margin-top: 8px;
+    }
+    .view-all-link:hover { background: #F8FAFC; }
+</style>
+
+<!-- Stat Cards -->
+<div class="row g-3 mb-4">
+    <div class="col">
+        <div class="stat-card">
+            <div class="stat-icon" style="background: #EFF6FF; color: #2563EB;">
+                <i class="bi bi-people-fill"></i>
+            </div>
+            <div>
+                <div class="stat-value">@(Model.TotalUsers >= 1000 ? $"{Model.TotalUsers / 1000.0:0.#}k" : Model.TotalUsers.ToString())</div>
+                <div class="stat-label">Tổng User</div>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="stat-card">
+            <div class="stat-icon" style="background: #F0FDF4; color: #16A34A;">
+                <i class="bi bi-book-fill"></i>
+            </div>
+            <div>
+                <div class="stat-value">@Model.TotalCourses</div>
+                <div class="stat-label">Khóa học</div>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="stat-card">
+            <div class="stat-icon" style="background: #FDF4FF; color: #A855F7;">
+                <i class="bi bi-collection-fill"></i>
+            </div>
+            <div>
+                <div class="stat-value">@Model.TotalGroups</div>
+                <div class="stat-label">Nhóm</div>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="stat-card">
+            <div class="stat-icon" style="background: #FFF7ED; color: #EA580C;">
+                <i class="bi bi-clock-fill"></i>
+            </div>
+            <div>
+                <div class="stat-value">@(Model.TotalStudyHours >= 1000 ? $"{Model.TotalStudyHours / 1000.0m:0.#}k" : Model.TotalStudyHours.ToString("0.#"))</div>
+                <div class="stat-label">Giờ học</div>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="stat-card">
+            <div class="stat-icon" style="background: #ECFDF5; color: #059669;">
+                <i class="bi bi-check-circle-fill"></i>
+            </div>
+            <div>
+                <div class="stat-value">@Model.CompletionRate%</div>
+                <div class="stat-label">Tỷ lệ hoàn thành</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart + Activity Timeline -->
+<div class="row g-4">
+    <!-- Chart -->
+    <div class="col-lg-8">
+        <div class="card-panel">
+            <div class="card-panel-title">Biểu đồ truy cập hệ thống</div>
+            <div style="position: relative; height: 300px;">
+                <canvas id="accessChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <!-- Activity Timeline -->
+    <div class="col-lg-4">
+        <div class="card-panel" style="padding-bottom: 0;">
+            <div class="card-panel-title">Dòng thời gian hoạt động</div>
+            @if (Model.RecentActivities.Any())
+            {
+                @foreach (var activity in Model.RecentActivities)
+                {
+                    <div class="activity-item">
+                        <div class="activity-icon" style="background: @(activity.IconColor)1A; color: @activity.IconColor;">
+                            <i class="bi @activity.Icon"></i>
+                        </div>
+                        <div>
+                            <div class="activity-desc">@activity.Description</div>
+                            <div class="activity-time">@activity.Time</div>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="text-center py-4 text-muted">
+                    <i class="bi bi-inbox" style="font-size: 32px;"></i>
+                    <p class="mt-2 mb-0">Chưa có hoạt động nào</p>
+                </div>
+            }
+            <a href="#" class="view-all-link">
+                <i class="bi bi-arrow-right"></i> Xem tất cả log hệ thống
+            </a>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    const ctx = document.getElementById('accessChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: @Json.Serialize(Model.AccessChartLabels),
+            datasets: [{
+                label: 'Hoạt động hệ thống',
+                data: @Json.Serialize(Model.AccessChartData),
+                borderColor: '#2563EB',
+                backgroundColor: 'rgba(37, 99, 235, 0.08)',
+                fill: true,
+                tension: 0.4,
+                pointRadius: 4,
+                pointBackgroundColor: '#2563EB',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: '#F1F5F9' },
+                    ticks: { color: '#94A3B8', font: { size: 12 } }
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: { color: '#94A3B8', font: { size: 12 } }
+                }
+            }
+        }
+    });
+</script>
+}

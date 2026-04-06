@@ -1,0 +1,316 @@
+@model TrainingViewModel
+@{
+    ViewData["Title"] = "My Training";
+}
+
+<style>
+    .training-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+    .training-header h4 { font-weight: 700; color: #1E293B; margin: 0; }
+    .search-bar {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .search-bar input {
+        border: 1px solid #E2E8F0;
+        border-radius: 8px;
+        padding: 8px 16px;
+        font-size: 14px;
+        width: 260px;
+        outline: none;
+    }
+    .search-bar input:focus { border-color: #2563EB; }
+    .filter-btn {
+        background: #fff;
+        border: 1px solid #E2E8F0;
+        border-radius: 8px;
+        padding: 8px 16px;
+        font-size: 14px;
+        color: #64748B;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .filter-btn:hover { border-color: #2563EB; color: #2563EB; }
+    .tab-nav {
+        display: flex;
+        gap: 0;
+        margin-bottom: 24px;
+        border-bottom: 2px solid #E2E8F0;
+    }
+    .tab-nav a {
+        padding: 12px 24px;
+        font-size: 14px;
+        font-weight: 600;
+        color: #64748B;
+        text-decoration: none;
+        border-bottom: 2px solid transparent;
+        margin-bottom: -2px;
+        transition: all 0.2s;
+    }
+    .tab-nav a:hover { color: #2563EB; }
+    .tab-nav a.active {
+        color: #2563EB;
+        border-bottom-color: #2563EB;
+    }
+    .course-card {
+        background: #fff;
+        border-radius: 12px;
+        border: 1px solid #E2E8F0;
+        overflow: hidden;
+        transition: box-shadow 0.2s;
+        height: 100%;
+    }
+    .course-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+    .course-thumb {
+        height: 160px;
+        background: linear-gradient(135deg, #667EEA 0%, #764BA2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+    }
+    .course-thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .course-thumb .code-badge {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        background: rgba(0,0,0,0.6);
+        color: #fff;
+        font-size: 11px;
+        font-weight: 600;
+        padding: 4px 10px;
+        border-radius: 6px;
+    }
+    .course-thumb .status-badge {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        font-size: 11px;
+        font-weight: 600;
+        padding: 4px 10px;
+        border-radius: 6px;
+    }
+    .status-learning { background: #DBEAFE; color: #2563EB; }
+    .status-notstarted { background: #F1F5F9; color: #64748B; }
+    .status-completed { background: #DCFCE7; color: #16A34A; }
+    .course-body { padding: 16px; }
+    .course-body h6 {
+        font-weight: 600;
+        color: #1E293B;
+        margin-bottom: 12px;
+        font-size: 15px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    .progress-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 16px;
+    }
+    .progress-bar-custom {
+        height: 8px;
+        border-radius: 4px;
+        background: #E2E8F0;
+        overflow: hidden;
+        flex-grow: 1;
+    }
+    .progress-bar-fill {
+        height: 100%;
+        border-radius: 4px;
+        background: #2563EB;
+        transition: width 0.5s ease;
+    }
+    .progress-bar-fill.completed { background: #16A34A; }
+    .progress-pct { font-size: 13px; font-weight: 600; color: #2563EB; min-width: 36px; text-align: right; }
+    .progress-pct.completed { color: #16A34A; }
+    .btn-continue {
+        display: block;
+        width: 100%;
+        background: #2563EB;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        padding: 10px;
+        font-size: 14px;
+        font-weight: 600;
+        text-align: center;
+        text-decoration: none;
+        transition: background 0.2s;
+    }
+    .btn-continue:hover { background: #1D4ED8; color: #fff; }
+    .btn-continue.completed-btn { background: #16A34A; }
+    .btn-continue.completed-btn:hover { background: #15803D; }
+    .filter-dropdown {
+        background: #fff;
+        border: 1px solid #E2E8F0;
+        border-radius: 10px;
+        padding: 16px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        min-width: 220px;
+    }
+    .filter-dropdown label { font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 8px; display: block; }
+    .filter-dropdown .form-check { margin-bottom: 6px; }
+    .filter-dropdown .form-check-label { font-size: 13px; color: #334155; }
+</style>
+
+<div class="training-header">
+    <h4>My Training</h4>
+    <div class="search-bar">
+        <input type="text" placeholder="Tìm kiếm khóa học..." id="searchInput" />
+        <div class="dropdown">
+            <button class="filter-btn dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                <i class="bi bi-funnel"></i> Lọc
+            </button>
+            <div class="dropdown-menu filter-dropdown p-3">
+                <label>Lọc theo tiến độ</label>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="progressFilter" id="filterAll" value="all" checked>
+                    <label class="form-check-label" for="filterAll">Tất cả</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="progressFilter" id="filterNotStarted" value="0">
+                    <label class="form-check-label" for="filterNotStarted">Chưa bắt đầu (0%)</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="progressFilter" id="filterInProgress" value="progress">
+                    <label class="form-check-label" for="filterInProgress">Đang học dở (&gt;0%)</label>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="tab-nav">
+    <a href="#" class="active" data-tab="active" onclick="switchTab('active', event)">Đang học</a>
+    <a href="#" data-tab="completed" onclick="switchTab('completed', event)">Đã hoàn thành</a>
+</div>
+
+<!-- Active Courses Tab -->
+<div id="tab-active" class="tab-content">
+    <div class="row" id="activeCourseList">
+        @foreach (var course in Model.ActiveCourses)
+        {
+            <div class="col-md-6 mb-4 course-item" data-name="@course.Name.ToLower()" data-progress="@course.Progress">
+                <div class="course-card">
+                    <div class="course-thumb">
+                        @if (!string.IsNullOrEmpty(course.CoverImageUrl))
+                        {
+                            <img src="@course.CoverImageUrl" alt="@course.Name" />
+                        }
+                        else
+                        {
+                            <i class="bi bi-journal-code" style="font-size: 48px; color: rgba(255,255,255,0.5);"></i>
+                        }
+                        @if (!string.IsNullOrEmpty(course.Code))
+                        {
+                            <span class="code-badge">@course.Code</span>
+                        }
+                        <span class="status-badge @(course.Progress > 0 ? "status-learning" : "status-notstarted")">
+                            @course.Status
+                        </span>
+                    </div>
+                    <div class="course-body">
+                        <h6>@course.Name</h6>
+                        <div class="progress-row">
+                            <div class="progress-bar-custom">
+                                <div class="progress-bar-fill" style="width: @course.Progress%"></div>
+                            </div>
+                            <span class="progress-pct">@course.Progress%</span>
+                        </div>
+                        <a asp-area="Learner" asp-controller="Training" asp-action="Detail" asp-route-id="@course.Id" class="btn-continue">
+                            Tiếp tục học
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Completed Courses Tab -->
+<div id="tab-completed" class="tab-content" style="display: none;">
+    <div class="row">
+        @foreach (var course in Model.CompletedCourses)
+        {
+            <div class="col-md-6 mb-4">
+                <div class="course-card">
+                    <div class="course-thumb">
+                        @if (!string.IsNullOrEmpty(course.CoverImageUrl))
+                        {
+                            <img src="@course.CoverImageUrl" alt="@course.Name" />
+                        }
+                        else
+                        {
+                            <i class="bi bi-journal-check" style="font-size: 48px; color: rgba(255,255,255,0.5);"></i>
+                        }
+                        @if (!string.IsNullOrEmpty(course.Code))
+                        {
+                            <span class="code-badge">@course.Code</span>
+                        }
+                        <span class="status-badge status-completed">@course.Status</span>
+                    </div>
+                    <div class="course-body">
+                        <h6>@course.Name</h6>
+                        <div class="progress-row">
+                            <div class="progress-bar-custom">
+                                <div class="progress-bar-fill completed" style="width: 100%"></div>
+                            </div>
+                            <span class="progress-pct completed">100%</span>
+                        </div>
+                        <a asp-area="Learner" asp-controller="Training" asp-action="Detail" asp-route-id="@course.Id" class="btn-continue completed-btn">
+                            Xem lại
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    function switchTab(tab, event) {
+        event.preventDefault();
+        document.querySelectorAll('.tab-nav a').forEach(a => a.classList.remove('active'));
+        event.target.classList.add('active');
+        document.querySelectorAll('.tab-content').forEach(t => t.style.display = 'none');
+        document.getElementById('tab-' + tab).style.display = 'block';
+    }
+
+    document.getElementById('searchInput').addEventListener('input', function() {
+        var query = this.value.toLowerCase();
+        document.querySelectorAll('.course-item').forEach(function(item) {
+            var name = item.getAttribute('data-name');
+            item.style.display = name.includes(query) ? '' : 'none';
+        });
+    });
+
+    document.querySelectorAll('input[name="progressFilter"]').forEach(function(radio) {
+        radio.addEventListener('change', function() {
+            var val = this.value;
+            document.querySelectorAll('.course-item').forEach(function(item) {
+                var progress = parseFloat(item.getAttribute('data-progress'));
+                if (val === 'all') item.style.display = '';
+                else if (val === '0') item.style.display = progress === 0 ? '' : 'none';
+                else if (val === 'progress') item.style.display = progress > 0 ? '' : 'none';
+            });
+        });
+    });
+</script>
+}

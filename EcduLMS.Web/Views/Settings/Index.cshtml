@@ -1,0 +1,139 @@
+@model EduLMS.Web.ViewModels.Profile.ChangePasswordViewModel
+@{
+    Layout = (string?)ViewData["Layout"];
+    ViewData["Title"] = "Cài đặt";
+}
+
+<style>
+    .settings-card {
+        background: #fff;
+        border-radius: 16px;
+        border: 1px solid #E2E8F0;
+        max-width: 600px;
+        margin: 0 auto;
+        overflow: hidden;
+    }
+    .settings-header {
+        padding: 24px 32px;
+        border-bottom: 1px solid #E2E8F0;
+    }
+    .settings-header h4 {
+        font-size: 20px;
+        font-weight: 700;
+        color: #1E293B;
+        margin: 0;
+    }
+    .settings-header p {
+        font-size: 13px;
+        color: #94A3B8;
+        margin: 4px 0 0;
+    }
+    .settings-tabs {
+        display: flex;
+        border-bottom: 1px solid #E2E8F0;
+    }
+    .settings-tab {
+        padding: 14px 24px;
+        font-size: 14px;
+        font-weight: 600;
+        color: #64748B;
+        text-decoration: none;
+        border-bottom: 2px solid transparent;
+        cursor: pointer;
+    }
+    .settings-tab.active {
+        color: #2563EB;
+        border-bottom-color: #2563EB;
+    }
+    .settings-body {
+        padding: 32px;
+    }
+    .form-label-custom {
+        font-size: 13px;
+        font-weight: 600;
+        color: #334155;
+        margin-bottom: 6px;
+    }
+    .form-control-custom {
+        padding: 10px 14px;
+        border: 1px solid #E2E8F0;
+        border-radius: 8px;
+        font-size: 14px;
+        width: 100%;
+        outline: none;
+        transition: border-color 0.2s;
+    }
+    .form-control-custom:focus { border-color: #2563EB; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+    .password-wrapper {
+        position: relative;
+    }
+    .password-toggle {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: #94A3B8;
+        cursor: pointer;
+        font-size: 16px;
+    }
+</style>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success py-2 small mb-3 text-center" style="max-width: 600px; margin: 0 auto 16px;">
+        <i class="bi bi-check-circle me-1"></i> @TempData["SuccessMessage"]
+    </div>
+}
+
+<div class="settings-card">
+    <div class="settings-header">
+        <h4><i class="bi bi-gear me-2"></i>Cài đặt</h4>
+        <p>Quản lý tài khoản và bảo mật</p>
+    </div>
+
+    <div class="settings-tabs">
+        <a class="settings-tab active"><i class="bi bi-shield-lock me-1"></i> Đổi mật khẩu</a>
+        <a class="settings-tab" style="cursor: default; opacity: 0.5;" title="Sắp ra mắt"><i class="bi bi-bell me-1"></i> Thông báo</a>
+    </div>
+
+    <div class="settings-body">
+        <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
+
+        <form asp-action="ChangePassword" method="post">
+            <div class="mb-3">
+                <label asp-for="OldPassword" class="form-label-custom"></label>
+                <div class="password-wrapper">
+                    <input asp-for="OldPassword" class="form-control-custom" placeholder="Nhập mật khẩu hiện tại" />
+                </div>
+                <span asp-validation-for="OldPassword" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="NewPassword" class="form-label-custom"></label>
+                <div class="password-wrapper">
+                    <input asp-for="NewPassword" class="form-control-custom" placeholder="Nhập mật khẩu mới (ít nhất 6 ký tự)" />
+                </div>
+                <span asp-validation-for="NewPassword" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-4">
+                <label asp-for="ConfirmPassword" class="form-label-custom"></label>
+                <div class="password-wrapper">
+                    <input asp-for="ConfirmPassword" class="form-control-custom" placeholder="Nhập lại mật khẩu mới" />
+                </div>
+                <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center">
+                <button type="submit" class="btn btn-primary px-4" style="border-radius: 8px; background: #2563EB; border-color: #2563EB;">
+                    <i class="bi bi-check-lg me-1"></i> Cập nhật mật khẩu
+                </button>
+                <a asp-controller="Profile" asp-action="Index" class="text-decoration-none text-muted small">
+                    <i class="bi bi-arrow-left me-1"></i> Quay lại hồ sơ
+                </a>
+            </div>
+        </form>
+    </div>
+</div>

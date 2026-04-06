@@ -1,0 +1,35 @@
+{
+  "browser": "safari",
+  "startedAt": "2026-04-05T07:59:22.849Z",
+  "endedAt": "2026-04-05T07:59:23.777Z",
+  "durationMs": 928,
+  "total": 1,
+  "passCount": 0,
+  "nonPassCount": 1,
+  "failCount": 0,
+  "infraFailCount": 1,
+  "results": [
+    {
+      "id": "AT_LOGIN_01",
+      "group": "PASS - role learner",
+      "name": "Dang nhap thanh cong voi learner",
+      "browser": "safari",
+      "status": "INFRA_FAIL",
+      "durationMs": 927,
+      "observedUrl": "",
+      "expectedType": "success",
+      "expectedTexts": [],
+      "expectedUrlContains": "/Learner/Dashboard",
+      "expectedUrlContainsAny": [
+        "/Learner/Dashboard",
+        "/Learner"
+      ],
+      "expectedValidationField": "",
+      "observedValidationMessage": "",
+      "observedBodySnippet": "",
+      "screenshotFile": "",
+      "errorType": "INFRA",
+      "errorMessage": "Could not create a session: You must enable 'Allow remote automation' in the Developer section of Safari Settings to control Safari via WebDriver."
+    }
+  ]
+}

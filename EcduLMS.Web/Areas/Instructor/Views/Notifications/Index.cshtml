@@ -1,0 +1,283 @@
+@model EduLMS.Web.ViewModels.Instructor.InstructorNotificationsViewModel
+@{
+    ViewData["Title"] = "Thông báo";
+}
+
+@section Styles {
+<style>
+    .notif-card {
+        background: #fff;
+        border: 1px solid #E2E8F0;
+        border-radius: 12px;
+        padding: 24px 28px;
+        margin-bottom: 20px;
+    }
+    .notif-card h5 {
+        font-size: 16px;
+        font-weight: 700;
+        color: #1E293B;
+        margin-bottom: 20px;
+    }
+    .form-label-custom {
+        font-size: 13px;
+        font-weight: 600;
+        color: #475569;
+        margin-bottom: 6px;
+        display: block;
+    }
+    .form-control-custom {
+        border: 1px solid #E2E8F0;
+        border-radius: 8px;
+        padding: 10px 14px;
+        font-size: 14px;
+        color: #1E293B;
+        width: 100%;
+        outline: none;
+        transition: border-color 0.15s;
+        background: #fff;
+    }
+    .form-control-custom:focus { border-color: #2563EB; }
+    select.form-control-custom { height: 42px; }
+
+    .btn-send {
+        background: #2563EB;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        padding: 10px 28px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: background 0.2s;
+    }
+    .btn-send:hover { background: #1D4ED8; }
+    .btn-send:disabled { background: #93C5FD; cursor: not-allowed; }
+
+    /* History table */
+    .history-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .history-table thead th {
+        padding: 10px 16px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #94A3B8;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        background: #F8FAFC;
+        border-bottom: 1px solid #E2E8F0;
+        text-align: left;
+    }
+    .history-table tbody tr {
+        border-bottom: 1px solid #F1F5F9;
+        transition: background 0.1s;
+    }
+    .history-table tbody tr:last-child { border-bottom: none; }
+    .history-table tbody tr:hover { background: #F8FAFC; }
+    .history-table td {
+        padding: 14px 16px;
+        font-size: 13px;
+        color: #334155;
+        vertical-align: middle;
+    }
+    .badge-course {
+        background: #EFF6FF;
+        color: #2563EB;
+        font-size: 11px;
+        font-weight: 600;
+        padding: 3px 10px;
+        border-radius: 20px;
+        white-space: nowrap;
+    }
+    .badge-all {
+        background: #F0FDF4;
+        color: #16A34A;
+        font-size: 11px;
+        font-weight: 600;
+        padding: 3px 10px;
+        border-radius: 20px;
+    }
+    .recipient-count {
+        font-size: 12px;
+        font-weight: 700;
+        color: #64748B;
+    }
+    .empty-state {
+        text-align: center;
+        padding: 40px 24px;
+        color: #94A3B8;
+    }
+    .empty-state i { font-size: 36px; display: block; margin-bottom: 10px; }
+
+    /* TinyMCE wrapper */
+    .tox-tinymce { border-radius: 8px !important; border-color: #E2E8F0 !important; }
+
+    .alert-toast {
+        padding: 12px 20px;
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 500;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .alert-success-custom { background: #DCFCE7; color: #15803D; border: 1px solid #BBF7D0; }
+    .alert-error-custom { background: #FEE2E2; color: #DC2626; border: 1px solid #FECACA; }
+</style>
+}
+
+<!-- Toast alerts -->
+@if (TempData["Success"] != null)
+{
+    <div class="alert-toast alert-success-custom">
+        <i class="bi bi-check-circle-fill"></i> @TempData["Success"]
+    </div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert-toast alert-error-custom">
+        <i class="bi bi-exclamation-circle-fill"></i> @TempData["Error"]
+    </div>
+}
+
+<!-- Page header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="fw-bold mb-1" style="color: #1E293B;">Thông báo</h4>
+        <p class="text-muted mb-0" style="font-size: 14px;">Gửi thông báo đến học viên của bạn</p>
+    </div>
+</div>
+
+<!-- Compose form -->
+<div class="notif-card">
+    <h5><i class="bi bi-send me-2 text-primary"></i>Tạo thông báo mới</h5>
+    <form asp-action="Send" method="post" id="sendForm">
+        @Html.AntiForgeryToken()
+        <div class="row g-3">
+            <div class="col-md-8">
+                <label class="form-label-custom">Tiêu đề <span class="text-danger">*</span></label>
+                <input type="text" name="title" id="titleInput" class="form-control-custom"
+                       placeholder="Nhập tiêu đề thông báo..." required maxlength="300" />
+            </div>
+            <div class="col-md-4">
+                <label class="form-label-custom">Gửi đến</label>
+                <select name="courseId" class="form-control-custom">
+                    <option value="">— Tất cả học viên —</option>
+                    @foreach (var c in Model.Courses)
+                    {
+                        <option value="@c.Id">[@c.Code] @c.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="col-12">
+                <label class="form-label-custom">Nội dung <span class="text-danger">*</span></label>
+                <textarea name="message" id="notifMessage" rows="6"
+                          class="form-control-custom"></textarea>
+            </div>
+            <div class="col-12 d-flex justify-content-end pt-2">
+                <button type="submit" class="btn-send" id="sendBtn">
+                    <i class="bi bi-send"></i> Gửi thông báo
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Sent history -->
+<div class="notif-card">
+    <h5><i class="bi bi-clock-history me-2" style="color:#64748B;"></i>Lịch sử đã gửi</h5>
+    @if (!Model.SentNotifications.Any())
+    {
+        <div class="empty-state">
+            <i class="bi bi-bell-slash"></i>
+            Chưa có thông báo nào được gửi.
+        </div>
+    }
+    else
+    {
+        <div style="overflow-x:auto;">
+            <table class="history-table">
+                <thead>
+                    <tr>
+                        <th>Tiêu đề</th>
+                        <th>Gửi đến</th>
+                        <th>Học viên</th>
+                        <th>Thời gian</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var n in Model.SentNotifications)
+                    {
+                        <tr>
+                            <td>
+                                <div style="font-weight:600; color:#1E293B; max-width:380px;">@n.Title</div>
+                                @if (!string.IsNullOrEmpty(n.Message))
+                                {
+                                    <div style="font-size:12px; color:#94A3B8; margin-top:3px; max-width:380px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                                        @System.Text.RegularExpressions.Regex.Replace(n.Message, "<.*?>", "")
+                                    </div>
+                                }
+                            </td>
+                            <td>
+                                @if (n.CourseName != null)
+                                {
+                                    <span class="badge-course"><i class="bi bi-journal-bookmark me-1"></i>@n.CourseName</span>
+                                }
+                                else
+                                {
+                                    <span class="badge-all"><i class="bi bi-people me-1"></i>Tất cả</span>
+                                }
+                            </td>
+                            <td>
+                                <span class="recipient-count">
+                                    <i class="bi bi-person-check me-1"></i>@n.RecipientCount
+                                </span>
+                            </td>
+                            <td style="color:#64748B; white-space:nowrap;">
+                                @n.SentAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+@section Scripts {
+<script src="https://cdn.tiny.cloud/1/4279ovt8ruxt0xnt8hz1wh1ufaqs04vqlf7sj08zbhkpzict/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+<script>
+    tinymce.init({
+        selector: '#notifMessage',
+        language: 'vi',
+        height: 320,
+        menubar: false,
+        plugins: 'lists link code wordcount',
+        toolbar: 'bold italic underline | bullist numlist | link | alignleft aligncenter alignright | code',
+        content_style: 'body { font-family: inherit; font-size: 14px; color: #334155; line-height: 1.6; }',
+        branding: false,
+        promotion: false,
+        placeholder: 'Nhập nội dung thông báo...',
+        setup: function (editor) {
+            editor.on('change input', function () { editor.save(); });
+        }
+    });
+
+    document.getElementById('sendForm').addEventListener('submit', function (e) {
+        const content = tinymce.get('notifMessage').getContent({ format: 'text' }).trim();
+        if (!content) {
+            e.preventDefault();
+            alert('Vui lòng nhập nội dung thông báo.');
+            return;
+        }
+        tinymce.triggerSave();
+        document.getElementById('sendBtn').disabled = true;
+        document.getElementById('sendBtn').innerHTML = '<i class="bi bi-hourglass-split"></i> Đang gửi...';
+    });
+</script>
+}

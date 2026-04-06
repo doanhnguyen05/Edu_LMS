@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - EduLMS</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold fs-4" asp-controller="Home" asp-action="Index" style="color: #2563EB;">
+                <i class="bi bi-mortarboard-fill me-2"></i>EduLMS
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain"
+                    aria-controls="navbarMain" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarMain">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-3">
+                    <li class="nav-item">
+                        <a class="nav-link fw-semibold" asp-controller="Home" asp-action="Index">Trang ch&#7911;</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link fw-semibold" asp-controller="About" asp-action="Index">Gi&#7899;i thi&#7879;u</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link fw-semibold" asp-controller="Help" asp-action="Index">Trung t&acirc;m h&#7895; tr&#7907;</a>
+                    </li>
+                </ul>
+                <div class="d-flex gap-2">
+                    <a asp-controller="Account" asp-action="Register" class="btn btn-primary px-4">B&#7855;t &#273;&#7847;u h&#7885;c</a>
+                    <a asp-controller="Account" asp-action="Login" class="btn btn-outline-primary px-4">&#272;&#259;ng nh&#7853;p h&#7879; th&#7889;ng</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        @RenderBody()
+    </main>
+
+    <!-- Footer -->
+    <footer class="site-footer" style="background-color: #1E293B;">
+        <div class="container py-5">
+            <div class="row g-4">
+                <!-- Logo & Description -->
+                <div class="col-lg-4 col-md-6">
+                    <a href="/" class="text-decoration-none">
+                        <h4 class="text-white fw-bold"><i class="bi bi-mortarboard-fill me-2" style="color: #2563EB;"></i>EduLMS</h4>
+                    </a>
+                    <p class="text-secondary mt-3">N&#7873;n t&#7843;ng h&#7895; tr&#7907; h&#7885;c t&#7853;p tr&#7921;c tuy&#7871;n th&ocirc;ng minh, gi&uacute;p h&#7885;c vi&ecirc;n ti&#7871;p c&#7853;n ki&#7871;n th&#7913;c m&#7885;i l&uacute;c, m&#7885;i n&#417;i.</p>
+                    <div class="d-flex gap-3 mt-3">
+                        <a href="#" class="text-secondary fs-5"><i class="bi bi-facebook"></i></a>
+                        <a href="#" class="text-secondary fs-5"><i class="bi bi-twitter-x"></i></a>
+                        <a href="#" class="text-secondary fs-5"><i class="bi bi-linkedin"></i></a>
+                    </div>
+                </div>
+                <!-- About Links -->
+                <div class="col-lg-3 col-md-6">
+                    <h6 class="text-white fw-bold text-uppercase mb-3">V&#7873; ch&uacute;ng t&ocirc;i</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a asp-controller="About" asp-action="Index" class="text-secondary text-decoration-none">Gi&#7899;i thi&#7879;u n&#7873;n t&#7843;ng</a></li>
+                        <li class="mb-2"><a asp-controller="About" asp-action="Index" class="text-secondary text-decoration-none">&#272;&#7897;i ng&#361; gi&#7843;ng vi&ecirc;n</a></li>
+                        <li class="mb-2"><a asp-controller="About" asp-action="Index" class="text-secondary text-decoration-none">&#272;&#7897;i ng&#361; k&#7929; thu&#7853;t</a></li>
+                        <li class="mb-2"><a asp-controller="About" asp-action="Index" class="text-secondary text-decoration-none">&#272;i&#7873;u kho&#7843;n d&#7883;ch v&#7909;</a></li>
+                    </ul>
+                </div>
+                <!-- Support Links -->
+                <div class="col-lg-3 col-md-6">
+                    <h6 class="text-white fw-bold text-uppercase mb-3">H&#7895; tr&#7907;</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a asp-controller="Help" asp-action="Index" class="text-secondary text-decoration-none">Trung t&acirc;m tr&#7907; gi&uacute;p</a></li>
+                        <li class="mb-2"><a asp-controller="Help" asp-action="Index" class="text-secondary text-decoration-none">C&acirc;u h&#7887;i th&#432;&#7901;ng g&#7863;p</a></li>
+                        <li class="mb-2"><a asp-controller="Help" asp-action="Index" class="text-secondary text-decoration-none">H&#432;&#7899;ng d&#7851;n &#273;&#259;ng k&yacute; kh&oacute;a h&#7885;c</a></li>
+                        <li class="mb-2"><a asp-controller="Help" asp-action="Index" class="text-secondary text-decoration-none">Li&ecirc;n h&#7879;</a></li>
+                    </ul>
+                </div>
+                <!-- Contact -->
+                <div class="col-lg-2 col-md-6">
+                    <h6 class="text-white fw-bold text-uppercase mb-3">Li&ecirc;n h&#7879;</h6>
+                    <ul class="list-unstyled text-secondary">
+                        <li class="mb-2"><i class="bi bi-envelope me-2"></i>info&#64;edulms.vn</li>
+                        <li class="mb-2"><i class="bi bi-telephone me-2"></i>(028) 1234 5678</li>
+                    </ul>
+                </div>
+            </div>
+            <hr class="border-secondary mt-4" />
+            <div class="text-center text-secondary small">
+                &copy; 2026 EduLMS. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
