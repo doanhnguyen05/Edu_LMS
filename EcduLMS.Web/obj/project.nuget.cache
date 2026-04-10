@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "CFYad5ekyN4=",
+  "dgSpecHash": "ouoj7eAKsK8=",
   "success": true,
-  "projectFilePath": "/Users/doanhnguyen/Documents/tài liệu/phầm mềm/WEB nâng cao/EcduLMS.Web/EduLMS.Web.csproj",
+  "projectFilePath": "/Users/doanhnguyen/Documents/tài liệu/phầm mềm/WEB nâng cao/EcduLMS.Web/EduLMS.Web.csproj",
   "expectedPackageFiles": [
     "/Users/doanhnguyen/.nuget/packages/automapper/12.0.1/automapper.12.0.1.nupkg.sha512",
     "/Users/doanhnguyen/.nuget/packages/automapper.extensions.microsoft.dependencyinjection/12.0.1/automapper.extensions.microsoft.dependencyinjection.12.0.1.nupkg.sha512",
@@ -75,9 +75,9 @@
       "code": "NU1603",
       "level": "Warning",
       "message": "EduLMS.Web depends on X.PagedList.Mvc.Core (>= 10.0.7) but X.PagedList.Mvc.Core 10.0.7 was not found. X.PagedList.Mvc.Core 10.1.1 was resolved instead.",
-      "projectPath": "/Users/doanhnguyen/Documents/tài liệu/phầm mềm/WEB nâng cao/EcduLMS.Web/EduLMS.Web.csproj",
+      "projectPath": "/Users/doanhnguyen/Documents/tài liệu/phầm mềm/WEB nâng cao/EcduLMS.Web/EduLMS.Web.csproj",
       "warningLevel": 1,
-      "filePath": "/Users/doanhnguyen/Documents/tài liệu/phầm mềm/WEB nâng cao/EcduLMS.Web/EduLMS.Web.csproj",
+      "filePath": "/Users/doanhnguyen/Documents/tài liệu/phầm mềm/WEB nâng cao/EcduLMS.Web/EduLMS.Web.csproj",
       "libraryId": "X.PagedList.Mvc.Core",
       "targetGraphs": [
         "net9.0"
@@ -87,9 +87,9 @@
       "code": "NU1603",
       "level": "Warning",
       "message": "X.PagedList.Mvc.Core 10.1.1 depends on X.Web.PagedList (>= 10.1.1) but X.Web.PagedList 10.1.1 was not found. X.Web.PagedList 10.1.2 was resolved instead.",
-      "projectPath": "/Users/doanhnguyen/Documents/tài liệu/phầm mềm/WEB nâng cao/EcduLMS.Web/EduLMS.Web.csproj",
+      "projectPath": "/Users/doanhnguyen/Documents/tài liệu/phầm mềm/WEB nâng cao/EcduLMS.Web/EduLMS.Web.csproj",
       "warningLevel": 1,
-      "filePath": "/Users/doanhnguyen/Documents/tài liệu/phầm mềm/WEB nâng cao/EcduLMS.Web/EduLMS.Web.csproj",
+      "filePath": "/Users/doanhnguyen/Documents/tài liệu/phầm mềm/WEB nâng cao/EcduLMS.Web/EduLMS.Web.csproj",
       "libraryId": "X.Web.PagedList",
       "targetGraphs": [
         "net9.0"

@@ -1,0 +1,13 @@
+{
+  "name": "kiem-thu-tu-dong",
+  "private": true,
+  "description": "Entry point for the automated login test suite",
+  "scripts": {
+    "test:login": "npm --prefix login-selenium run test:login",
+    "test:login:choose": "npm --prefix login-selenium run test:login:choose",
+    "test:login:coccoc": "npm --prefix login-selenium run test:login:coccoc",
+    "test:login:safari": "npm --prefix login-selenium run test:login:safari",
+    "test:login:chrome": "npm --prefix login-selenium run test:login:chrome",
+    "test:login:all": "npm --prefix login-selenium run test:login:all"
+  }
+}

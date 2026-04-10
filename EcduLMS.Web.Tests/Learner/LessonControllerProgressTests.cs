@@ -11,6 +11,7 @@ namespace EcduLMS.Web.Tests.Learner;
 
 public class LessonControllerProgressTests
 {
+    
     [Fact]
     public async Task MarkComplete_FirstLesson_ShouldCreateProgressAndIncreaseEnrollmentPercent()
     {

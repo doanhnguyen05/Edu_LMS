@@ -12,8 +12,10 @@ namespace EcduLMS.Web.Tests.TestHelpers;
 
 internal static class TestInfrastructure
 {
+    
     internal static ApplicationDbContext CreateDbContext(string? databaseName = null)
     {
+        //Cấu hình sử dụng InMemoryDatabase (Database chạy trên RAM, tự xóa khi test xong)
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
             .UseInMemoryDatabase(databaseName ?? Guid.NewGuid().ToString("N"))
             .Options;

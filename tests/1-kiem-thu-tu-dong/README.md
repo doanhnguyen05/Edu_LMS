@@ -21,3 +21,4 @@ Cac tinh huong da duoc tu dong hoa:
 Tong cong: 15 test case.
 
 Khi chay `npm run test:login`, script se hoi ban chon browser de chay (Safari/Coc Coc/Chrome/tat ca).
+

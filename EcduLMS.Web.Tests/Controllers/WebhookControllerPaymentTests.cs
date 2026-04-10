@@ -14,6 +14,7 @@ namespace EcduLMS.Web.Tests.Controllers;
 
 public class WebhookControllerPaymentTests
 {
+    // Test case: Webhook nhận được payload khớp với một payment đang chờ xử lý
     [Fact]
     public async Task SePay_WhenPayloadMatchesPendingPayment_ShouldCompletePaymentAndCreateEnrollment()
     {
@@ -46,7 +47,7 @@ public class WebhookControllerPaymentTests
         Assert.Equal(60000m, earning!.PlatformFee);
         Assert.Equal(140000m, earning.NetAmount);
     }
-
+    // Test case: Webhook nhận được payload có transfer amount thấp hơn amount của payment
     [Fact]
     public async Task SePay_WhenTransferAmountIsLowerThanPaymentAmount_ShouldNotCompletePayment()
     {

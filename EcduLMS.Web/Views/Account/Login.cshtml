@@ -86,14 +86,14 @@
 
         <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
 
-        <form asp-action="Login" method="post">
+        <form asp-action="Login" method="post" novalidate>
             <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
 
             <div class="mb-3">
                 <label asp-for="Email" class="form-label small fw-semibold"></label>
                 <div class="input-icon-wrapper">
                     <i class="bi bi-envelope"></i>
-                    <input asp-for="Email" class="form-control" placeholder="you@example.com" />
+                    <input asp-for="Email" type="text" inputmode="email" autocomplete="username" spellcheck="false" autocapitalize="off" class="form-control" placeholder="you@example.com" />
                 </div>
                 <span asp-validation-for="Email" class="text-danger small"></span>
             </div>

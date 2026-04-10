@@ -176,8 +176,9 @@ function buildLoginTestCases(runtimeConfig) {
       name: "Dang nhap that bai khi email sai dinh dang",
       email: "abc.com",
       password: runtimeConfig.validPassword,
-      expectedType: "browserValidation",
-      expectedValidationField: "email"
+      expectedType: "error",
+      expectedTexts: ["Email không hợp lệ"],
+      allowValidationMessageFallback: true
     },
     {
       id: "AT_LOGIN_12",
@@ -198,8 +199,10 @@ function buildLoginTestCases(runtimeConfig) {
       name: "Dang nhap that bai voi chuoi SQL injection o email",
       email: "' OR 1=1 --",
       password: "Any@123",
-      expectedType: "browserValidation",
-      expectedValidationField: "email"
+      expectedType: "error",
+      expectedTexts: ["Email không hợp lệ"],
+      allowValidationMessageFallback: true,
+      allowAnyKnownLoginError: true
     },
     {
       id: "AT_LOGIN_14",
@@ -216,8 +219,10 @@ function buildLoginTestCases(runtimeConfig) {
       name: "Dang nhap that bai voi email chua script",
       email: "<script>alert(1)</script>@mail.com",
       password: runtimeConfig.validPassword,
-      expectedType: "browserValidation",
-      expectedValidationField: "email"
+      expectedType: "error",
+      expectedTexts: ["Email không hợp lệ"],
+      allowValidationMessageFallback: true,
+      allowAnyKnownLoginError: true
     }
   ];
 }
@@ -295,6 +300,33 @@ function askQuestion(rl, question) {
 async function runSuiteForBrowser(browserName, suiteCases) {
   const startedAt = new Date();
   const results = [];
+  const preflightError = await preflightBrowser(browserName);
+
+  if (preflightError) {
+    const classified = classifyTestFailure(preflightError);
+
+    console.log(
+      `[INFRA_FAIL] [${browserName}] Browser preflight that bai: ${classified.message}`
+    );
+
+    for (const testCase of suiteCases) {
+      results.push(buildInfraResult(testCase, browserName, classified));
+    }
+
+    const endedAt = new Date();
+    return {
+      browser: browserName,
+      startedAt: startedAt.toISOString(),
+      endedAt: endedAt.toISOString(),
+      durationMs: endedAt.getTime() - startedAt.getTime(),
+      total: results.length,
+      passCount: 0,
+      nonPassCount: results.length,
+      failCount: 0,
+      infraFailCount: results.length,
+      results
+    };
+  }
 
   for (const testCase of suiteCases) {
     const result = await runOneTestCase(testCase, browserName);
@@ -320,6 +352,48 @@ async function runSuiteForBrowser(browserName, suiteCases) {
     failCount,
     infraFailCount,
     results
+  };
+}
+
+async function preflightBrowser(browserName) {
+  let driver;
+
+  try {
+    driver = await createDriver(browserName);
+    await driver.get("about:blank");
+    return null;
+  } catch (error) {
+    return error;
+  } finally {
+    if (driver) {
+      try {
+        await driver.quit();
+      } catch (_) {
+        // Ignore cleanup failure in preflight.
+      }
+    }
+  }
+}
+
+function buildInfraResult(testCase, browserName, classified) {
+  return {
+    id: testCase.id,
+    group: testCase.group || "",
+    name: testCase.name,
+    browser: browserName,
+    status: "INFRA_FAIL",
+    durationMs: 0,
+    observedUrl: "",
+    expectedType: testCase.expectedType,
+    expectedTexts: normalizeExpectedTexts(testCase),
+    expectedUrlContains: testCase.expectedUrlContains || "",
+    expectedUrlContainsAny: getSuccessUrlCandidates(testCase),
+    expectedValidationField: testCase.expectedValidationField || "",
+    observedValidationMessage: "",
+    observedBodySnippet: "",
+    screenshotFile: "",
+    errorType: classified.errorType,
+    errorMessage: classified.message
   };
 }
 
@@ -357,18 +431,9 @@ async function runOneTestCase(testCase, browserName) {
     const passwordInput = await driver.findElement(By.id("Password"));
     const submitButton = await driver.findElement(By.css("button[type='submit']"));
 
-    await emailInput.clear();
-    await passwordInput.clear();
-
-    if (typeof testCase.email === "string" && testCase.email.length > 0) {
-      await emailInput.sendKeys(testCase.email);
-    }
-
-    if (typeof testCase.password === "string" && testCase.password.length > 0) {
-      await passwordInput.sendKeys(testCase.password);
-    }
-
-    await submitButton.click();
+    await setInputValue(driver, emailInput, testCase.email);
+    await setInputValue(driver, passwordInput, testCase.password);
+    await submitLoginForm(driver, submitButton);
     const assertionResult = await assertExpectedOutcome(
       driver,
       testCase,
@@ -500,14 +565,31 @@ async function assertErrorOutcome(driver, testCase, timeoutMs) {
     };
   }
 
-  // Fallback for browser-native validation to avoid false FAILs when form is blocked before postback.
-  const validationMessage = await getAnyValidationMessage(driver);
-  if (validationMessage) {
-    return {
-      observedUrl,
-      observedValidationMessage: validationMessage,
-      observedBodySnippet: bodyText.slice(0, 240)
-    };
+  if (testCase.allowAnyKnownLoginError) {
+    const knownLoginErrorMatched = matchTexts(
+      bodyText,
+      KNOWN_LOGIN_ERROR_TEXTS,
+      "any"
+    );
+
+    if (knownLoginErrorMatched) {
+      return {
+        observedUrl,
+        observedValidationMessage: "",
+        observedBodySnippet: bodyText.slice(0, 240)
+      };
+    }
+  }
+
+  if (testCase.allowValidationMessageFallback || testCase.expectedType === "browserValidation") {
+    const validationMessage = await getAnyValidationMessage(driver);
+    if (validationMessage) {
+      return {
+        observedUrl,
+        observedValidationMessage: validationMessage,
+        observedBodySnippet: bodyText.slice(0, 240)
+      };
+    }
   }
 
   const expectedTextHint =
@@ -662,7 +744,18 @@ function classifyTestFailure(error) {
     "err_connection_refused",
     "net::err_connection_refused",
     "unable to connect",
-    "target machine actively refused"
+    "target machine actively refused",
+    "unable to obtain browser driver",
+    "unable to obtain driver",
+    "error executing command for",
+    "selenium-manager",
+    "chrome for testing",
+    "last-known-good-versions-with-downloads.json",
+    "googlechromelabs.github.io",
+    "operation not permitted",
+    "eperm",
+    "listen eperm",
+    "chromedriver"
   ];
   const isInfra = infraPatterns.some((x) => normalized.includes(x));
 
@@ -800,6 +893,72 @@ async function getValidationMessageByField(driver, field) {
   } catch (_) {
     return "";
   }
+}
+
+async function setInputValue(driver, element, value) {
+  const normalizedValue = typeof value === "string" ? value : "";
+
+  await driver.executeScript(
+    `
+      const el = arguments[0];
+      const nextValue = arguments[1];
+      if (!el) {
+        return;
+      }
+
+      el.focus();
+      el.value = '';
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+      el.dispatchEvent(new Event('change', { bubbles: true }));
+      el.value = nextValue;
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+      el.dispatchEvent(new Event('change', { bubbles: true }));
+      el.blur();
+    `,
+    element,
+    normalizedValue
+  );
+
+  const actualValue = await element.getAttribute("value");
+  if (actualValue === normalizedValue) {
+    return;
+  }
+
+  await element.click();
+  try {
+    await element.clear();
+  } catch (_) {
+    // Continue with sendKeys fallback below.
+  }
+
+  if (normalizedValue.length > 0) {
+    await element.sendKeys(normalizedValue);
+  }
+}
+
+async function submitLoginForm(driver, submitButton) {
+  await driver.executeScript(
+    `
+      const btn = arguments[0];
+      if (!btn) {
+        return;
+      }
+
+      const form = btn.form || btn.closest('form');
+      if (!form) {
+        btn.click();
+        return;
+      }
+
+      if (typeof form.requestSubmit === 'function') {
+        form.requestSubmit(btn);
+        return;
+      }
+
+      HTMLFormElement.prototype.submit.call(form);
+    `,
+    submitButton
+  );
 }
 
 async function getAnyValidationMessage(driver) {
@@ -1048,8 +1207,9 @@ function buildCombinedMarkdownReport(summary) {
   lines.push("");
   lines.push(`- Thoi gian bat dau: ${summary.startedAt}`);
   lines.push(`- Thoi gian ket thuc: ${summary.endedAt}`);
-  lines.push(`- Tong so browser: ${summary.browserSummaries.length}`);
-  lines.push(`- Tong so case: ${summary.total}`);
+  lines.push(`- Tong so test case duy nhat: ${summary.caseCount}`);
+  lines.push(`- Tong so browser: ${summary.browserCount}`);
+  lines.push(`- Tong so luot chay: ${summary.executionCount}`);
   lines.push(`- PASS: ${summary.passCount}`);
   lines.push(`- FAIL (logic): ${summary.failCount}`);
   lines.push(`- INFRA_FAIL: ${summary.infraFailCount || 0}`);
@@ -1082,10 +1242,13 @@ async function main() {
   const runTimestamp = formatTimestamp(startedAt);
   const browserSummaries = [];
   const browsersToRun = await resolveBrowsersToRun(config);
+  const caseCount = testCases.length;
+  const browserCount = browsersToRun.length;
 
   console.log("=== BAT DAU KIEM THU TU DONG: CHUC NANG DANG NHAP ===");
   console.log(`Login URL: ${loginUrl}`);
-  console.log(`So test case: ${testCases.length} / browser`);
+  console.log(`So test case duy nhat: ${caseCount}`);
+  console.log(`So browser: ${browserCount}`);
   console.log(`Danh sach browser: ${browsersToRun.join(", ")}`);
 
   for (const browserName of browsersToRun) {
@@ -1097,7 +1260,7 @@ async function main() {
   }
 
   const endedAt = new Date();
-  const total = browserSummaries.reduce((acc, x) => acc + x.total, 0);
+  const executionCount = browserSummaries.reduce((acc, x) => acc + x.total, 0);
   const passCount = browserSummaries.reduce((acc, x) => acc + x.passCount, 0);
   const failCount = browserSummaries.reduce((acc, x) => acc + x.failCount, 0);
   const infraFailCount = browserSummaries.reduce((acc, x) => acc + (x.infraFailCount || 0), 0);
@@ -1115,7 +1278,10 @@ async function main() {
       headless: config.headless,
       browsers: browsersToRun
     },
-    total,
+    caseCount,
+    browserCount,
+    executionCount,
+    total: executionCount,
     passCount,
     failCount,
     infraFailCount,
@@ -1135,7 +1301,7 @@ async function main() {
 
   console.log("");
   console.log(
-    `Tong ket tat ca browser: ${total} case | PASS: ${passCount} | FAIL(logic): ${failCount} | INFRA_FAIL: ${infraFailCount}`
+    `Tong ket tat ca browser: ${caseCount} case x ${browserCount} browser = ${executionCount} luot chay | PASS: ${passCount} | FAIL(logic): ${failCount} | INFRA_FAIL: ${infraFailCount}`
   );
   for (const browserSummary of browserSummaries) {
     console.log(

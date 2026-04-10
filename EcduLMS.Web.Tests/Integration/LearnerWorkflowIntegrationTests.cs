@@ -16,6 +16,7 @@ namespace EcduLMS.Web.Tests.Integration;
 
 public class LearnerWorkflowIntegrationTests
 {
+// TEST 1: Kiểm tra việc chặn bài học và bài tập khi chưa đủ điều kiện
     [Fact]
     public async Task LearningPath_WhenPrerequisiteIncomplete_ShouldLockLessonAndBlockAssignment()
     {
@@ -54,6 +55,7 @@ public class LearnerWorkflowIntegrationTests
         Assert.False(string.IsNullOrWhiteSpace(blockedGradeAssignment.StartBlockedReason));
     }
 
+// TEST 2: Kiểm tra việc mở khóa bài học và bài tập khi hoàn thành điều kiện
     [Fact]
     public async Task LearningPath_WhenLearnerCompletesLessons_ShouldUnlockAssignmentInTrainingAndGrades()
     {
@@ -104,13 +106,13 @@ public class LearnerWorkflowIntegrationTests
         Assert.True(startableGradeAssignment.CanStartAssignment);
         Assert.Equal(0, startableGradeAssignment.SubmissionId);
     }
-
+// TEST 3: Kiểm tra việc hoàn thành bài tập và hiển thị kết quả trên trang điểm
     [Fact]
     public async Task AssignmentFlow_SubmitThenGrade_ShouldAppearAsPassInLearnerGrades()
     {
         await using var db = TestInfrastructure.CreateDbContext();
         var seed = await SeedLearnerWorkflowAsync(db);
-
+// Hoàn thành tất cả bài học để mở khóa bài tập
         var lessonController = new LessonController(
             db,
             TestInfrastructure.CreateUserManagerMock(seed.LearnerId).Object);
@@ -118,31 +120,31 @@ public class LearnerWorkflowIntegrationTests
 
         await lessonController.MarkComplete(seed.Lesson1Id);
         await lessonController.MarkComplete(seed.Lesson2Id);
-
+// Nộp bài tập
         var envMock = new Mock<IWebHostEnvironment>();
         envMock.SetupGet(x => x.WebRootPath).Returns("/tmp");
-
+// Sử dụng AssignmentController để nộp bài tập
         var assignmentController = new AssignmentController(
             db,
             TestInfrastructure.CreateUserManagerMock(seed.LearnerId).Object,
             envMock.Object);
         TestInfrastructure.AttachAuthenticatedUser(assignmentController, seed.LearnerId);
-
+// Nộp bài tập tích hợp
         var submitResult = await assignmentController.SubmitFinal(
             assignmentId: seed.AssignmentId,
             content: "Bai lam tich hop",
             file: null);
         Assert.IsType<RedirectToActionResult>(submitResult);
-
+// Kiểm tra bài tập đã được nộp và có trạng thái Submitted
         var submission = await db.AssignmentSubmissions
             .SingleAsync(x => x.AssignmentId == seed.AssignmentId && x.UserId == seed.LearnerId);
         Assert.Equal(SubmissionStatus.Submitted, submission.Status);
-
+// Chấm điểm bài tập
         var gradingController = new GradingController(
             db,
             TestInfrastructure.CreateUserManagerMock(seed.InstructorId).Object);
         TestInfrastructure.AttachAuthenticatedUser(gradingController, seed.InstructorId);
-
+// Chấm điểm tích hợp
         var gradeResult = await gradingController.SubmitGrade(new SubmitGradeRequest
         {
             SubmissionId = submission.Id,
@@ -151,7 +153,7 @@ public class LearnerWorkflowIntegrationTests
             Comment = "Tot"
         });
         Assert.IsType<OkObjectResult>(gradeResult);
-
+// Kiểm tra bài tập đã được chấm điểm và có trạng thái
         var gradesController = new GradesController(
             db,
             TestInfrastructure.CreateUserManagerMock(seed.LearnerId).Object);
@@ -160,7 +162,7 @@ public class LearnerWorkflowIntegrationTests
         var courseDetailResult = await gradesController.CourseDetail(seed.CourseId);
         var courseDetailView = Assert.IsType<ViewResult>(courseDetailResult);
         var courseDetailModel = Assert.IsType<GradeCourseDetailViewModel>(courseDetailView.Model);
-
+// Kiểm tra bài tập hiển thị điểm và trạng thái Pass
         var gradedAssignment = Assert.Single(courseDetailModel.Assignments, x => x.AssignmentId == seed.AssignmentId);
         Assert.Equal("Pass", gradedAssignment.Status);
         Assert.Equal(9m, gradedAssignment.Score);

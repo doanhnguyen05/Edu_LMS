@@ -370,3 +370,4 @@
 /Users/doanhnguyen/Documents/tài liệu/phầm mềm/WEB nâng cao/EcduLMS.Web/obj/Debug/net9.0/EduLMS.Web.pdb
 /Users/doanhnguyen/Documents/tài liệu/phầm mềm/WEB nâng cao/EcduLMS.Web/obj/Debug/net9.0/EduLMS.Web.genruntimeconfig.cache
 /Users/doanhnguyen/Documents/tài liệu/phầm mềm/WEB nâng cao/EcduLMS.Web/obj/Debug/net9.0/ref/EduLMS.Web.dll
+/Users/doanhnguyen/Documents/tài liệu/phầm mềm/WEB nâng cao/EcduLMS.Web/obj/Debug/net9.0/EduLMS.Web.sourcelink.json

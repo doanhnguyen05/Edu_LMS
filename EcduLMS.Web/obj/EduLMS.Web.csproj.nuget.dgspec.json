@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "/Users/doanhnguyen/Documents/tài liệu/phầm mềm/WEB nâng cao/EcduLMS.Web/EduLMS.Web.csproj": {}
+    "/Users/doanhnguyen/Documents/tài liệu/phầm mềm/WEB nâng cao/EcduLMS.Web/EduLMS.Web.csproj": {}
   },
   "projects": {
-    "/Users/doanhnguyen/Documents/tài liệu/phầm mềm/WEB nâng cao/EcduLMS.Web/EduLMS.Web.csproj": {
+    "/Users/doanhnguyen/Documents/tài liệu/phầm mềm/WEB nâng cao/EcduLMS.Web/EduLMS.Web.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/doanhnguyen/Documents/tài liệu/phầm mềm/WEB nâng cao/EcduLMS.Web/EduLMS.Web.csproj",
+        "projectUniqueName": "/Users/doanhnguyen/Documents/tài liệu/phầm mềm/WEB nâng cao/EcduLMS.Web/EduLMS.Web.csproj",
         "projectName": "EduLMS.Web",
-        "projectPath": "/Users/doanhnguyen/Documents/tài liệu/phầm mềm/WEB nâng cao/EcduLMS.Web/EduLMS.Web.csproj",
+        "projectPath": "/Users/doanhnguyen/Documents/tài liệu/phầm mềm/WEB nâng cao/EcduLMS.Web/EduLMS.Web.csproj",
         "packagesPath": "/Users/doanhnguyen/.nuget/packages/",
-        "outputPath": "/Users/doanhnguyen/Documents/tài liệu/phầm mềm/WEB nâng cao/EcduLMS.Web/obj/",
+        "outputPath": "/Users/doanhnguyen/Documents/tài liệu/phầm mềm/WEB nâng cao/EcduLMS.Web/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/Users/doanhnguyen/.nuget/NuGet/NuGet.Config"

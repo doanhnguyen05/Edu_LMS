@@ -12,6 +12,7 @@ namespace EcduLMS.Web.Tests.Instructor;
 
 public class GradingControllerScoreValidationTests
 {
+    // Test case: Điểm số vượt quá max score của bài tập
     [Fact]
     public async Task SubmitGrade_WhenScoreOutOfRange_ShouldReturnBadRequestAndNotPersistGrade()
     {
@@ -39,7 +40,7 @@ public class GradingControllerScoreValidationTests
         Assert.Equal(SubmissionStatus.Submitted, submission.Status);
         Assert.Null(submission.Grade);
     }
-
+    // Test case: Điểm số âm
     [Fact]
     public async Task SubmitGrade_WhenScoreValid_ShouldPersistGradeAndMarkSubmissionAsGraded()
     {
@@ -69,7 +70,7 @@ public class GradingControllerScoreValidationTests
         Assert.Equal(PassStatus.Fail, submission.Grade.PassStatus);
         Assert.Equal(seed.InstructorId, submission.Grade.GradedById);
     }
-
+// Các test case khác như điểm số âm, điểm số đúng, v.v. có thể được thêm tương tự
     private static async Task<GradingSeedData> SeedSubmissionAsync(ApplicationDbContext db)
     {
         var instructor = new ApplicationUser

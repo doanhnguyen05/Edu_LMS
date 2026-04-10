@@ -132,3 +132,4 @@
 /Users/doanhnguyen/Documents/tài liệu/phầm mềm/WEB nâng cao/EcduLMS.Web.Tests/obj/Debug/net9.0/EcduLMS.Web.Tests.pdb
 /Users/doanhnguyen/Documents/tài liệu/phầm mềm/WEB nâng cao/EcduLMS.Web.Tests/obj/Debug/net9.0/EcduLMS.Web.Tests.genruntimeconfig.cache
 /Users/doanhnguyen/Documents/tài liệu/phầm mềm/WEB nâng cao/EcduLMS.Web.Tests/obj/Debug/net9.0/ref/EcduLMS.Web.Tests.dll
+/Users/doanhnguyen/Documents/tài liệu/phầm mềm/WEB nâng cao/EcduLMS.Web.Tests/obj/Debug/net9.0/EcduLMS.Web.Tests.sourcelink.json

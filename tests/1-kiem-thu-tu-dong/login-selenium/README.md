@@ -133,7 +133,12 @@ Y nghia:
 
 - `PASS`: Dat ky vong theo `expectedType` (bao gom ca case ky vong that bai dang nhap).
 - `FAIL`: Fail logic test case (khong dat expected nghiep vu).
-- `INFRA_FAIL`: Loi ha tang/moi truong browser (vi du Safari remote automation chua bat).
+- `INFRA_FAIL`: Loi ha tang/moi truong browser (vi du Safari remote automation chua bat, Selenium Manager/driver download fail, browser binary missing).
+
+Luu y:
+
+- Bao cao tong hop `latest-summary.md` dem theo `luot chay` = `so test case duy nhat x so browser`.
+- Bao cao chi tiet tung browser van dung `Tong case` cho moi browser rieng le.
 
 ## 8. Loi thuong gap
 1. Coc Coc khong mo:
@@ -141,9 +146,12 @@ Y nghia:
 2. Safari bao loi remote automation:
    - Chay lai `safaridriver --enable`.
    - Bat `Develop > Allow Remote Automation`.
-3. URL sai:
+3. Chrome khong tim duoc driver:
+   - Kiem tra `CHROMEDRIVER_PATH` neu may ban khong co Selenium Manager hoac bi chan download.
+   - Kiem tra co quyen mang neu Selenium Manager can tai `chromedriver`.
+4. URL sai:
    - Kiem tra `BASE_URL`, `LOGIN_PATH`.
-4. Case pass bi fail:
+5. Case pass bi fail:
    - Kiem tra tai khoan trong `.env` co dung voi database seed.
-5. He thong tra HTTP 500:
+6. He thong tra HTTP 500:
    - Kiem tra DB/MySQL dang chay va app ket noi duoc DB truoc khi chay Selenium.

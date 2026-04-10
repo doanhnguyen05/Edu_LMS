@@ -20,6 +20,8 @@ Bo test C# nam tai:
 
 ## Lenh chay
 
+Luu y: cac lenh sau day duoc chay tu thu muc goc repo `WEB nang cao/`.
+
 ### Chay dung Unit test (khong gom Integration)
 
 ```bash

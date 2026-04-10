@@ -48,6 +48,20 @@ public class LoginViewModelTests
     }
 
     [Fact]
+    public void LoginViewModel_WithScriptInEmail_ShouldContainEmailFormatError()
+    {
+        var model = new LoginViewModel
+        {
+            Email = "<script>alert(1)</script>@mail.com",
+            Password = "Learner@123"
+        };
+
+        var results = Validate(model);
+
+        Assert.Contains(results, r => r.ErrorMessage == "Email không hợp lệ");
+    }
+
+    [Fact]
     public void LoginViewModel_WithEmptyPassword_ShouldContainRequiredError()
     {
         var model = new LoginViewModel

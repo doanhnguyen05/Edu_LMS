@@ -9,6 +9,8 @@ Thu muc `tests/` duoc chia thanh 4 nhom de de quan ly:
 
 ## Phan biet ro Unit test va Integration test (tranh nham lan)
 
+Luu y: cac lenh `dotnet test` ben duoi duoc viet theo duong dan tu thu muc goc repo `WEB nang cao/`.
+
 | Noi dung | Unit test | Kiem thu tich hop |
 |---|---|---|
 | Muc tieu | Kiem tra tung ham/lop nho, quy tac xu ly rieng le | Kiem tra luong nghiep vu lien module (Controller -> DB -> module khac) |

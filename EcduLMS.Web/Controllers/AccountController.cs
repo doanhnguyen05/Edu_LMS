@@ -37,7 +37,10 @@ namespace EduLMS.Web.Controllers
         {
             ViewData["ReturnUrl"] = returnUrl;
 
-            if (!ModelState.IsValid)
+            model.Email = model.Email?.Trim() ?? string.Empty;
+
+            ModelState.Clear();
+            if (!TryValidateModel(model))
                 return View(model);
 
             var user = await _userManager.FindByEmailAsync(model.Email);

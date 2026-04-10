@@ -24,6 +24,8 @@ Muc tieu:
 
 ## Lenh chay nhanh
 
+Luu y: cac lenh sau day duoc chay tu thu muc goc repo `WEB nang cao/`.
+
 1. Chi chay integration:
 
 ```bash
