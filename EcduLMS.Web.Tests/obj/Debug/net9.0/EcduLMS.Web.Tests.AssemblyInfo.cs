@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("EcduLMS.Web.Tests")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+36ee78db8155d0d8feccfff8ffa5eb741641b53c")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+4ba2fcb4c466c4b2523718c890742e45eeadc6cd")]
 [assembly: System.Reflection.AssemblyProductAttribute("EcduLMS.Web.Tests")]
 [assembly: System.Reflection.AssemblyTitleAttribute("EcduLMS.Web.Tests")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

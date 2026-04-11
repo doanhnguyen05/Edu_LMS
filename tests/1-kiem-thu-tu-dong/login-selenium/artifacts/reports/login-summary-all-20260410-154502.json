@@ -1,0 +1,360 @@
+{
+  "startedAt": "2026-04-10T08:45:02.122Z",
+  "endedAt": "2026-04-10T08:46:08.295Z",
+  "durationMs": 66173,
+  "config": {
+    "baseUrl": "http://localhost:5000",
+    "loginPath": "/Account/Login",
+    "loginUrl": "http://localhost:5000/Account/Login",
+    "timeoutMs": 15000,
+    "headless": false,
+    "browsers": [
+      "safari"
+    ]
+  },
+  "caseCount": 15,
+  "browserCount": 1,
+  "executionCount": 15,
+  "total": 15,
+  "passCount": 15,
+  "failCount": 0,
+  "infraFailCount": 0,
+  "nonPassCount": 0,
+  "browserSummaries": [
+    {
+      "browser": "safari",
+      "startedAt": "2026-04-10T08:45:10.965Z",
+      "endedAt": "2026-04-10T08:46:08.286Z",
+      "durationMs": 57321,
+      "total": 15,
+      "passCount": 15,
+      "nonPassCount": 0,
+      "failCount": 0,
+      "infraFailCount": 0,
+      "results": [
+        {
+          "id": "AT_LOGIN_01",
+          "group": "PASS - role learner",
+          "name": "Dang nhap thanh cong voi learner",
+          "browser": "safari",
+          "status": "PASS",
+          "durationMs": 9018,
+          "observedUrl": "http://localhost:5000/Learner",
+          "expectedType": "success",
+          "expectedTexts": [],
+          "expectedUrlContains": "/Learner/Dashboard",
+          "expectedUrlContainsAny": [
+            "/Learner/Dashboard",
+            "/Learner"
+          ],
+          "expectedValidationField": "",
+          "observedValidationMessage": "",
+          "observedBodySnippet": "",
+          "screenshotFile": "/Users/doanhnguyen/Documents/tài liệu/phầm mềm/WEB nâng cao/tests/1-kiem-thu-tu-dong/login-selenium/artifacts/screenshots/20260410-154515_safari_AT_LOGIN_01_PASS.png",
+          "errorType": "",
+          "errorMessage": ""
+        },
+        {
+          "id": "AT_LOGIN_02",
+          "group": "PASS - role admin",
+          "name": "Dang nhap thanh cong voi admin",
+          "browser": "safari",
+          "status": "PASS",
+          "durationMs": 4436,
+          "observedUrl": "http://localhost:5000/Admin",
+          "expectedType": "success",
+          "expectedTexts": [],
+          "expectedUrlContains": "/Admin/Dashboard",
+          "expectedUrlContainsAny": [
+            "/Admin/Dashboard",
+            "/Admin"
+          ],
+          "expectedValidationField": "",
+          "observedValidationMessage": "",
+          "observedBodySnippet": "",
+          "screenshotFile": "/Users/doanhnguyen/Documents/tài liệu/phầm mềm/WEB nâng cao/tests/1-kiem-thu-tu-dong/login-selenium/artifacts/screenshots/20260410-154524_safari_AT_LOGIN_02_PASS.png",
+          "errorType": "",
+          "errorMessage": ""
+        },
+        {
+          "id": "AT_LOGIN_03",
+          "group": "PASS - role instructor",
+          "name": "Dang nhap thanh cong voi instructor",
+          "browser": "safari",
+          "status": "PASS",
+          "durationMs": 4473,
+          "observedUrl": "http://localhost:5000/Instructor",
+          "expectedType": "success",
+          "expectedTexts": [],
+          "expectedUrlContains": "/Instructor/Dashboard",
+          "expectedUrlContainsAny": [
+            "/Instructor/Dashboard",
+            "/Instructor"
+          ],
+          "expectedValidationField": "",
+          "observedValidationMessage": "",
+          "observedBodySnippet": "",
+          "screenshotFile": "/Users/doanhnguyen/Documents/tài liệu/phầm mềm/WEB nâng cao/tests/1-kiem-thu-tu-dong/login-selenium/artifacts/screenshots/20260410-154527_safari_AT_LOGIN_03_PASS.png",
+          "errorType": "",
+          "errorMessage": ""
+        },
+        {
+          "id": "AT_LOGIN_04",
+          "group": "PASS - data variation",
+          "name": "Dang nhap thanh cong voi learner email viet hoa",
+          "browser": "safari",
+          "status": "PASS",
+          "durationMs": 4322,
+          "observedUrl": "http://localhost:5000/Learner",
+          "expectedType": "success",
+          "expectedTexts": [],
+          "expectedUrlContains": "/Learner/Dashboard",
+          "expectedUrlContainsAny": [
+            "/Learner/Dashboard",
+            "/Learner"
+          ],
+          "expectedValidationField": "",
+          "observedValidationMessage": "",
+          "observedBodySnippet": "",
+          "screenshotFile": "/Users/doanhnguyen/Documents/tài liệu/phầm mềm/WEB nâng cao/tests/1-kiem-thu-tu-dong/login-selenium/artifacts/screenshots/20260410-154532_safari_AT_LOGIN_04_PASS.png",
+          "errorType": "",
+          "errorMessage": ""
+        },
+        {
+          "id": "AT_LOGIN_05",
+          "group": "PASS - data variation",
+          "name": "Dang nhap thanh cong voi tai khoan learner thu 2",
+          "browser": "safari",
+          "status": "PASS",
+          "durationMs": 3602,
+          "observedUrl": "http://localhost:5000/Learner",
+          "expectedType": "success",
+          "expectedTexts": [],
+          "expectedUrlContains": "/Learner/Dashboard",
+          "expectedUrlContainsAny": [
+            "/Learner/Dashboard",
+            "/Learner"
+          ],
+          "expectedValidationField": "",
+          "observedValidationMessage": "",
+          "observedBodySnippet": "",
+          "screenshotFile": "/Users/doanhnguyen/Documents/tài liệu/phầm mềm/WEB nâng cao/tests/1-kiem-thu-tu-dong/login-selenium/artifacts/screenshots/20260410-154536_safari_AT_LOGIN_05_PASS.png",
+          "errorType": "",
+          "errorMessage": ""
+        },
+        {
+          "id": "AT_LOGIN_06",
+          "group": "FAIL - auth",
+          "name": "Dang nhap that bai khi sai mat khau",
+          "browser": "safari",
+          "status": "PASS",
+          "durationMs": 2718,
+          "observedUrl": "http://localhost:5000/Account/Login",
+          "expectedType": "error",
+          "expectedTexts": [
+            "Email hoặc mật khẩu không đúng."
+          ],
+          "expectedUrlContains": "",
+          "expectedUrlContainsAny": [],
+          "expectedValidationField": "",
+          "observedValidationMessage": "",
+          "observedBodySnippet": " EduLMS\nĐăng nhập vào hệ thống\nChưa có tài khoản? Đăng ký ngay\nEmail hoặc mật khẩu không đúng.\nĐịa chỉ Email\n\nMật khẩu\n\nQuên mật khẩu?\nĐăng nhập \n Mẹo: Đăng nhập với email có chứa 'admin' hoặc 'instructor' để xem các dashboard khác nhau.",
+          "screenshotFile": "/Users/doanhnguyen/Documents/tài liệu/phầm mềm/WEB nâng cao/tests/1-kiem-thu-tu-dong/login-selenium/artifacts/screenshots/20260410-154540_safari_AT_LOGIN_06_PASS.png",
+          "errorType": "",
+          "errorMessage": ""
+        },
+        {
+          "id": "AT_LOGIN_07",
+          "group": "FAIL - auth",
+          "name": "Dang nhap that bai voi email khong ton tai",
+          "browser": "safari",
+          "status": "PASS",
+          "durationMs": 2915,
+          "observedUrl": "http://localhost:5000/Account/Login",
+          "expectedType": "error",
+          "expectedTexts": [
+            "Email hoặc mật khẩu không đúng."
+          ],
+          "expectedUrlContains": "",
+          "expectedUrlContainsAny": [],
+          "expectedValidationField": "",
+          "observedValidationMessage": "",
+          "observedBodySnippet": " EduLMS\nĐăng nhập vào hệ thống\nChưa có tài khoản? Đăng ký ngay\nEmail hoặc mật khẩu không đúng.\nĐịa chỉ Email\n\nMật khẩu\n\nQuên mật khẩu?\nĐăng nhập \n Mẹo: Đăng nhập với email có chứa 'admin' hoặc 'instructor' để xem các dashboard khác nhau.",
+          "screenshotFile": "/Users/doanhnguyen/Documents/tài liệu/phầm mềm/WEB nâng cao/tests/1-kiem-thu-tu-dong/login-selenium/artifacts/screenshots/20260410-154543_safari_AT_LOGIN_07_PASS.png",
+          "errorType": "",
+          "errorMessage": ""
+        },
+        {
+          "id": "AT_LOGIN_08",
+          "group": "FAIL - validation",
+          "name": "Dang nhap that bai khi bo trong email",
+          "browser": "safari",
+          "status": "PASS",
+          "durationMs": 3575,
+          "observedUrl": "http://localhost:5000/Account/Login",
+          "expectedType": "error",
+          "expectedTexts": [
+            "Vui lòng nhập email"
+          ],
+          "expectedUrlContains": "",
+          "expectedUrlContainsAny": [],
+          "expectedValidationField": "",
+          "observedValidationMessage": "",
+          "observedBodySnippet": " EduLMS\nĐăng nhập vào hệ thống\nChưa có tài khoản? Đăng ký ngay\nĐịa chỉ Email\n\nVui lòng nhập email\nMật khẩu\n\nQuên mật khẩu?\nĐăng nhập \n Mẹo: Đăng nhập với email có chứa 'admin' hoặc 'instructor' để xem các dashboard khác nhau.",
+          "screenshotFile": "/Users/doanhnguyen/Documents/tài liệu/phầm mềm/WEB nâng cao/tests/1-kiem-thu-tu-dong/login-selenium/artifacts/screenshots/20260410-154546_safari_AT_LOGIN_08_PASS.png",
+          "errorType": "",
+          "errorMessage": ""
+        },
+        {
+          "id": "AT_LOGIN_09",
+          "group": "FAIL - validation",
+          "name": "Dang nhap that bai khi bo trong mat khau",
+          "browser": "safari",
+          "status": "PASS",
+          "durationMs": 2491,
+          "observedUrl": "http://localhost:5000/Account/Login",
+          "expectedType": "error",
+          "expectedTexts": [
+            "Vui lòng nhập mật khẩu"
+          ],
+          "expectedUrlContains": "",
+          "expectedUrlContainsAny": [],
+          "expectedValidationField": "",
+          "observedValidationMessage": "",
+          "observedBodySnippet": " EduLMS\nĐăng nhập vào hệ thống\nChưa có tài khoản? Đăng ký ngay\nĐịa chỉ Email\n\nMật khẩu\n\nVui lòng nhập mật khẩu\nQuên mật khẩu?\nĐăng nhập \n Mẹo: Đăng nhập với email có chứa 'admin' hoặc 'instructor' để xem các dashboard khác nhau.",
+          "screenshotFile": "/Users/doanhnguyen/Documents/tài liệu/phầm mềm/WEB nâng cao/tests/1-kiem-thu-tu-dong/login-selenium/artifacts/screenshots/20260410-154549_safari_AT_LOGIN_09_PASS.png",
+          "errorType": "",
+          "errorMessage": ""
+        },
+        {
+          "id": "AT_LOGIN_10",
+          "group": "FAIL - validation",
+          "name": "Dang nhap that bai khi bo trong ca email va mat khau",
+          "browser": "safari",
+          "status": "PASS",
+          "durationMs": 2867,
+          "observedUrl": "http://localhost:5000/Account/Login",
+          "expectedType": "error",
+          "expectedTexts": [
+            "Vui lòng nhập email",
+            "Vui lòng nhập mật khẩu"
+          ],
+          "expectedUrlContains": "",
+          "expectedUrlContainsAny": [],
+          "expectedValidationField": "",
+          "observedValidationMessage": "",
+          "observedBodySnippet": " EduLMS\nĐăng nhập vào hệ thống\nChưa có tài khoản? Đăng ký ngay\nĐịa chỉ Email\n\nVui lòng nhập email\nMật khẩu\n\nVui lòng nhập mật khẩu\nQuên mật khẩu?\nĐăng nhập \n Mẹo: Đăng nhập với email có chứa 'admin' hoặc 'instructor' để xem các dashboard kh",
+          "screenshotFile": "/Users/doanhnguyen/Documents/tài liệu/phầm mềm/WEB nâng cao/tests/1-kiem-thu-tu-dong/login-selenium/artifacts/screenshots/20260410-154552_safari_AT_LOGIN_10_PASS.png",
+          "errorType": "",
+          "errorMessage": ""
+        },
+        {
+          "id": "AT_LOGIN_11",
+          "group": "FAIL - validation",
+          "name": "Dang nhap that bai khi email sai dinh dang",
+          "browser": "safari",
+          "status": "PASS",
+          "durationMs": 2592,
+          "observedUrl": "http://localhost:5000/Account/Login",
+          "expectedType": "error",
+          "expectedTexts": [
+            "Email không hợp lệ"
+          ],
+          "expectedUrlContains": "",
+          "expectedUrlContainsAny": [],
+          "expectedValidationField": "",
+          "observedValidationMessage": "",
+          "observedBodySnippet": " EduLMS\nĐăng nhập vào hệ thống\nChưa có tài khoản? Đăng ký ngay\nĐịa chỉ Email\n\nEmail không hợp lệ\nMật khẩu\n\nQuên mật khẩu?\nĐăng nhập \n Mẹo: Đăng nhập với email có chứa 'admin' hoặc 'instructor' để xem các dashboard khác nhau.",
+          "screenshotFile": "/Users/doanhnguyen/Documents/tài liệu/phầm mềm/WEB nâng cao/tests/1-kiem-thu-tu-dong/login-selenium/artifacts/screenshots/20260410-154554_safari_AT_LOGIN_11_PASS.png",
+          "errorType": "",
+          "errorMessage": ""
+        },
+        {
+          "id": "AT_LOGIN_12",
+          "group": "PASS - data variation",
+          "name": "Dang nhap thanh cong khi email co khoang trang dau/cuoi",
+          "browser": "safari",
+          "status": "PASS",
+          "durationMs": 3684,
+          "observedUrl": "http://localhost:5000/Learner",
+          "expectedType": "success",
+          "expectedTexts": [],
+          "expectedUrlContains": "/Learner/Dashboard",
+          "expectedUrlContainsAny": [
+            "/Learner/Dashboard",
+            "/Learner"
+          ],
+          "expectedValidationField": "",
+          "observedValidationMessage": "",
+          "observedBodySnippet": "",
+          "screenshotFile": "/Users/doanhnguyen/Documents/tài liệu/phầm mềm/WEB nâng cao/tests/1-kiem-thu-tu-dong/login-selenium/artifacts/screenshots/20260410-154557_safari_AT_LOGIN_12_PASS.png",
+          "errorType": "",
+          "errorMessage": ""
+        },
+        {
+          "id": "AT_LOGIN_13",
+          "group": "FAIL - security",
+          "name": "Dang nhap that bai voi chuoi SQL injection o email",
+          "browser": "safari",
+          "status": "PASS",
+          "durationMs": 3274,
+          "observedUrl": "http://localhost:5000/Account/Login",
+          "expectedType": "error",
+          "expectedTexts": [
+            "Email không hợp lệ"
+          ],
+          "expectedUrlContains": "",
+          "expectedUrlContainsAny": [],
+          "expectedValidationField": "",
+          "observedValidationMessage": "",
+          "observedBodySnippet": " EduLMS\nĐăng nhập vào hệ thống\nChưa có tài khoản? Đăng ký ngay\nĐịa chỉ Email\n\nEmail không hợp lệ\nMật khẩu\n\nQuên mật khẩu?\nĐăng nhập \n Mẹo: Đăng nhập với email có chứa 'admin' hoặc 'instructor' để xem các dashboard khác nhau.",
+          "screenshotFile": "/Users/doanhnguyen/Documents/tài liệu/phầm mềm/WEB nâng cao/tests/1-kiem-thu-tu-dong/login-selenium/artifacts/screenshots/20260410-154601_safari_AT_LOGIN_13_PASS.png",
+          "errorType": "",
+          "errorMessage": ""
+        },
+        {
+          "id": "AT_LOGIN_14",
+          "group": "FAIL - security",
+          "name": "Dang nhap that bai voi chuoi SQL injection o mat khau",
+          "browser": "safari",
+          "status": "PASS",
+          "durationMs": 3014,
+          "observedUrl": "http://localhost:5000/Account/Login",
+          "expectedType": "error",
+          "expectedTexts": [
+            "Email hoặc mật khẩu không đúng."
+          ],
+          "expectedUrlContains": "",
+          "expectedUrlContainsAny": [],
+          "expectedValidationField": "",
+          "observedValidationMessage": "",
+          "observedBodySnippet": " EduLMS\nĐăng nhập vào hệ thống\nChưa có tài khoản? Đăng ký ngay\nEmail hoặc mật khẩu không đúng.\nĐịa chỉ Email\n\nMật khẩu\n\nQuên mật khẩu?\nĐăng nhập \n Mẹo: Đăng nhập với email có chứa 'admin' hoặc 'instructor' để xem các dashboard khác nhau.",
+          "screenshotFile": "/Users/doanhnguyen/Documents/tài liệu/phầm mềm/WEB nâng cao/tests/1-kiem-thu-tu-dong/login-selenium/artifacts/screenshots/20260410-154604_safari_AT_LOGIN_14_PASS.png",
+          "errorType": "",
+          "errorMessage": ""
+        },
+        {
+          "id": "AT_LOGIN_15",
+          "group": "FAIL - security",
+          "name": "Dang nhap that bai voi email chua script",
+          "browser": "safari",
+          "status": "PASS",
+          "durationMs": 3328,
+          "observedUrl": "http://localhost:5000/Account/Login",
+          "expectedType": "error",
+          "expectedTexts": [
+            "Email không hợp lệ"
+          ],
+          "expectedUrlContains": "",
+          "expectedUrlContainsAny": [],
+          "expectedValidationField": "",
+          "observedValidationMessage": "",
+          "observedBodySnippet": " EduLMS\nĐăng nhập vào hệ thống\nChưa có tài khoản? Đăng ký ngay\nĐịa chỉ Email\n\nEmail không hợp lệ\nMật khẩu\n\nQuên mật khẩu?\nĐăng nhập \n Mẹo: Đăng nhập với email có chứa 'admin' hoặc 'instructor' để xem các dashboard khác nhau.",
+          "screenshotFile": "/Users/doanhnguyen/Documents/tài liệu/phầm mềm/WEB nâng cao/tests/1-kiem-thu-tu-dong/login-selenium/artifacts/screenshots/20260410-154607_safari_AT_LOGIN_15_PASS.png",
+          "errorType": "",
+          "errorMessage": ""
+        }
+      ]
+    }
+  ]
+}
