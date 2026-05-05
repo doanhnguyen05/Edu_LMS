@@ -1,5 +1,6 @@
 using ClosedXML.Excel;
 using EduLMS.Web.Data;
+using EduLMS.Web.Models.Enums;
 using EduLMS.Web.Models.Identity;
 using EduLMS.Web.ViewModels.Admin;
 using Microsoft.AspNetCore.Authorization;
@@ -24,61 +25,16 @@ namespace EduLMS.Web.Areas.Admin.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var totalUsers = await _userManager.Users.CountAsync();
-            var totalCourses = await _context.Courses.CountAsync();
-            var totalEnrollments = await _context.Enrollments.CountAsync();
-            var completedEnrollments = await _context.Enrollments
-                .CountAsync(e => e.Status == Models.Enums.EnrollmentStatus.Completed);
-            var totalStudyHours = await _context.Courses.SumAsync(c => c.DurationHours);
-
-            var recentLogs = await _context.ActivityLogs
-                .OrderByDescending(a => a.CreatedAt)
-                .Take(10)
-                .Select(a => new AdminDashboardViewModel.ActivityLogItem
-                {
-                    Icon = a.Action.Contains("Login") ? "bi-box-arrow-in-right" :
-                           a.Action.Contains("Create") ? "bi-plus-circle" :
-                           a.Action.Contains("Enroll") ? "bi-person-plus" :
-                           a.Action.Contains("Complete") ? "bi-check-circle" :
-                           "bi-activity",
-                    IconColor = a.Action.Contains("Login") ? "#2563EB" :
-                                a.Action.Contains("Create") ? "#16A34A" :
-                                a.Action.Contains("Enroll") ? "#7C3AED" :
-                                a.Action.Contains("Complete") ? "#059669" :
-                                "#64748B",
-                    Description = a.Description ?? a.Action,
-                    Time = FormatTimeAgo(a.CreatedAt)
-                })
-                .ToListAsync();
-
-            // Build last-7-days access chart data from activity logs
-            var today = DateTime.UtcNow.Date;
-            var last7 = Enumerable.Range(0, 7).Select(i => today.AddDays(-6 + i)).ToList();
-            var cutoff = last7.First();
-
-            var allLogDates = await _context.ActivityLogs
-                .Where(a => a.CreatedAt >= cutoff)
-                .Select(a => a.CreatedAt.Date)
-                .ToListAsync();
-
-            var accessByDay = last7.Select(d => allLogDates.Count(l => l == d)).ToArray();
-            var accessLabels = last7.Select(d => VnDayName(d.DayOfWeek)).ToArray();
-
-            var vm = new AdminDashboardViewModel
-            {
-                TotalUsers = totalUsers,
-                TotalCourses = totalCourses,
-                TotalGroups = await _context.Enrollments.Select(e => e.UserId).Distinct().CountAsync(),
-                TotalStudyHours = totalStudyHours,
-                CompletionRate = totalEnrollments > 0
-                    ? Math.Round((decimal)completedEnrollments / totalEnrollments * 100, 1)
-                    : 0,
-                RecentActivities = recentLogs,
-                AccessChartLabels = accessLabels,
-                AccessChartData = accessByDay
-            };
-
+            var vm = await BuildDashboardViewModelAsync();
             return View(vm);
+        }
+
+        [HttpGet]
+        [ResponseCache(Location = ResponseCacheLocation.None, NoStore = true)]
+        public async Task<IActionResult> LiveData()
+        {
+            var vm = await BuildDashboardViewModelAsync();
+            return Json(vm);
         }
 
         private static string VnDayName(DayOfWeek d) => d switch
@@ -91,6 +47,175 @@ namespace EduLMS.Web.Areas.Admin.Controllers
             DayOfWeek.Saturday => "T7",
             _ => "CN"
         };
+
+        private async Task<AdminDashboardViewModel> BuildDashboardViewModelAsync()
+        {
+            var totalUsers = await _userManager.Users.CountAsync();
+            var activeUsers = await _userManager.Users.CountAsync(u => u.IsActive);
+            var totalCourses = await _context.Courses.CountAsync();
+            var publishedCourses = await _context.Courses.CountAsync(c => c.Status == CourseStatus.Published);
+            var totalStudyHours = await _context.Courses
+                .Where(c => c.Status == CourseStatus.Published)
+                .SumAsync(c => (decimal?)c.DurationHours) ?? 0m;
+            var totalSchedules = await _context.Schedules.CountAsync();
+
+            var instructorUsers = from user in _context.Users
+                                  join userRole in _context.UserRoles on user.Id equals userRole.UserId
+                                  join role in _context.Roles on userRole.RoleId equals role.Id
+                                  where role.Name == "Instructor"
+                                  select user;
+
+            var totalInstructors = await instructorUsers
+                .Select(u => u.Id)
+                .Distinct()
+                .CountAsync();
+
+            var activeInstructors = await instructorUsers
+                .Where(u => u.IsActive)
+                .Select(u => u.Id)
+                .Distinct()
+                .CountAsync();
+
+            var trackedEnrollmentsQuery = _context.Enrollments
+                .Where(e => e.Status != EnrollmentStatus.Dropped);
+
+            var trackedEnrollments = await trackedEnrollmentsQuery.CountAsync();
+            var averageProgressRate = trackedEnrollments > 0
+                ? Math.Round(await trackedEnrollmentsQuery.AverageAsync(e => e.ProgressPercent), 1)
+                : 0m;
+
+            var recentLogs = await _context.ActivityLogs
+                .AsNoTracking()
+                .OrderByDescending(a => a.CreatedAt)
+                .Take(10)
+                .Select(a => new
+                {
+                    a.Action,
+                    a.Description,
+                    a.CreatedAt
+                })
+                .ToListAsync();
+
+            var recentActivities = recentLogs
+                .Select(a => new AdminDashboardViewModel.ActivityLogItem
+                {
+                    Icon = ResolveActivityIcon(a.Action),
+                    IconColor = ResolveActivityColor(a.Action),
+                    Description = a.Description ?? a.Action,
+                    Time = FormatTimeAgo(a.CreatedAt)
+                })
+                .ToList();
+
+            var today = DateTime.UtcNow.Date;
+            var last7 = Enumerable.Range(0, 7).Select(i => today.AddDays(-6 + i)).ToList();
+            var cutoff = last7.First();
+
+            var accessLogDates = await _context.ActivityLogs
+                .AsNoTracking()
+                .Where(a => a.CreatedAt >= cutoff && a.Action == "Login")
+                .Select(a => a.CreatedAt.Date)
+                .ToListAsync();
+
+            var accessByDay = last7.Select(d => accessLogDates.Count(l => l == d)).ToArray();
+            var accessLabels = last7.Select(d => VnDayName(d.DayOfWeek)).ToArray();
+
+            return new AdminDashboardViewModel
+            {
+                TotalUsers = totalUsers,
+                ActiveUsers = activeUsers,
+                TotalCourses = totalCourses,
+                PublishedCourses = publishedCourses,
+                TotalInstructors = totalInstructors,
+                ActiveInstructors = activeInstructors,
+                TotalStudyHours = totalStudyHours,
+                TotalSchedules = totalSchedules,
+                TrackedEnrollments = trackedEnrollments,
+                AverageProgressRate = averageProgressRate,
+                RecentActivities = recentActivities,
+                AccessChartLabels = accessLabels,
+                AccessChartData = accessByDay
+            };
+        }
+
+        private static string ResolveActivityIcon(string action)
+        {
+            if (action.Contains("Logout", StringComparison.OrdinalIgnoreCase))
+            {
+                return "bi-box-arrow-right";
+            }
+
+            if (action.Contains("Login", StringComparison.OrdinalIgnoreCase))
+            {
+                return "bi-box-arrow-in-right";
+            }
+
+            if (action.Contains("Notification", StringComparison.OrdinalIgnoreCase))
+            {
+                return "bi-bell";
+            }
+
+            if (action.Contains("Create", StringComparison.OrdinalIgnoreCase))
+            {
+                return "bi-plus-circle";
+            }
+
+            if (action.Contains("Enroll", StringComparison.OrdinalIgnoreCase))
+            {
+                return "bi-person-plus";
+            }
+
+            if (action.Contains("Submit", StringComparison.OrdinalIgnoreCase))
+            {
+                return "bi-file-earmark-arrow-up";
+            }
+
+            if (action.Contains("Complete", StringComparison.OrdinalIgnoreCase))
+            {
+                return "bi-check-circle";
+            }
+
+            return "bi-activity";
+        }
+
+        private static string ResolveActivityColor(string action)
+        {
+            if (action.Contains("Logout", StringComparison.OrdinalIgnoreCase))
+            {
+                return "#F59E0B";
+            }
+
+            if (action.Contains("Login", StringComparison.OrdinalIgnoreCase))
+            {
+                return "#2563EB";
+            }
+
+            if (action.Contains("Notification", StringComparison.OrdinalIgnoreCase))
+            {
+                return "#0EA5E9";
+            }
+
+            if (action.Contains("Create", StringComparison.OrdinalIgnoreCase))
+            {
+                return "#16A34A";
+            }
+
+            if (action.Contains("Enroll", StringComparison.OrdinalIgnoreCase))
+            {
+                return "#7C3AED";
+            }
+
+            if (action.Contains("Submit", StringComparison.OrdinalIgnoreCase))
+            {
+                return "#F97316";
+            }
+
+            if (action.Contains("Complete", StringComparison.OrdinalIgnoreCase))
+            {
+                return "#059669";
+            }
+
+            return "#64748B";
+        }
 
         // === BÁO CÁO NGƯỜI DÙNG ===
         public async Task<IActionResult> ExportUsersReport()

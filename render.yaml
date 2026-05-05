@@ -1,0 +1,31 @@
+services:
+  - type: web
+    name: edulms-web
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: ConnectionStrings__DefaultConnection
+        sync: false
+      - key: VietQR__BankBIN
+        sync: false
+      - key: VietQR__AccountNo
+        sync: false
+      - key: VietQR__AccountName
+        sync: false
+      - key: VietQR__Template
+        value: compact
+      - key: SePay__ApiKey
+        sync: false
+      - key: Smtp__Host
+        value: smtp.gmail.com
+      - key: Smtp__Port
+        value: "587"
+      - key: Smtp__Username
+        sync: false
+      - key: Smtp__Password
+        sync: false
+      - key: Smtp__FromName
+        value: EduLMS

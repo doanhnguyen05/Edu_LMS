@@ -1,9 +1,13 @@
 using EduLMS.Web.Data;
 using EduLMS.Web.Models.Identity;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
+var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 
 // Database
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
@@ -38,12 +42,22 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 // Services
 builder.Services.AddScoped<EduLMS.Web.Services.ConflictDetectionService>();
+builder.Services.AddScoped<EduLMS.Web.Services.IActivityLogService, EduLMS.Web.Services.ActivityLogService>();
 builder.Services.AddTransient<Microsoft.AspNetCore.Identity.UI.Services.IEmailSender, EduLMS.Web.Services.EmailService>();
 
 // MVC
 builder.Services.AddControllersWithViews();
 
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
+});
+
 var app = builder.Build();
+
+app.UseForwardedHeaders();
 
 // Configure the HTTP request pipeline
 if (!app.Environment.IsDevelopment())

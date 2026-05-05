@@ -1,0 +1,13 @@
+.git
+.vercel
+.DS_Store
+**/.DS_Store
+**/bin/
+**/obj/
+**/node_modules/
+**/artifacts/
+tests/1-kiem-thu-tu-dong/login-selenium/artifacts/
+docs/
+*.md
+*.docx
+*.pdf

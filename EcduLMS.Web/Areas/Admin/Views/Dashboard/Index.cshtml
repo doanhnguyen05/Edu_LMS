@@ -34,6 +34,11 @@
         color: #94A3B8;
         margin-top: 2px;
     }
+    .stat-meta {
+        font-size: 12px;
+        color: #64748B;
+        margin-top: 4px;
+    }
     .card-panel {
         background: #fff;
         border-radius: 12px;
@@ -85,6 +90,11 @@
         margin-top: 8px;
     }
     .view-all-link:hover { background: #F8FAFC; }
+    .activity-empty {
+        text-align: center;
+        padding: 24px 0;
+        color: #64748B;
+    }
 </style>
 
 <!-- Stat Cards -->
@@ -95,8 +105,9 @@
                 <i class="bi bi-people-fill"></i>
             </div>
             <div>
-                <div class="stat-value">@(Model.TotalUsers >= 1000 ? $"{Model.TotalUsers / 1000.0:0.#}k" : Model.TotalUsers.ToString())</div>
+                <div class="stat-value" id="totalUsersValue">@(Model.TotalUsers >= 1000 ? $"{Model.TotalUsers / 1000.0:0.#}k" : Model.TotalUsers.ToString())</div>
                 <div class="stat-label">Tổng User</div>
+                <div class="stat-meta" id="totalUsersMeta">@Model.ActiveUsers đang hoạt động</div>
             </div>
         </div>
     </div>
@@ -106,19 +117,21 @@
                 <i class="bi bi-book-fill"></i>
             </div>
             <div>
-                <div class="stat-value">@Model.TotalCourses</div>
+                <div class="stat-value" id="totalCoursesValue">@Model.TotalCourses</div>
                 <div class="stat-label">Khóa học</div>
+                <div class="stat-meta" id="totalCoursesMeta">@Model.PublishedCourses đã công bố</div>
             </div>
         </div>
     </div>
     <div class="col">
         <div class="stat-card">
             <div class="stat-icon" style="background: #FDF4FF; color: #A855F7;">
-                <i class="bi bi-collection-fill"></i>
+                <i class="bi bi-person-workspace"></i>
             </div>
             <div>
-                <div class="stat-value">@Model.TotalGroups</div>
-                <div class="stat-label">Nhóm</div>
+                <div class="stat-value" id="totalInstructorsValue">@Model.TotalInstructors</div>
+                <div class="stat-label">Giảng viên</div>
+                <div class="stat-meta" id="totalInstructorsMeta">@Model.ActiveInstructors đang hoạt động</div>
             </div>
         </div>
     </div>
@@ -128,8 +141,9 @@
                 <i class="bi bi-clock-fill"></i>
             </div>
             <div>
-                <div class="stat-value">@(Model.TotalStudyHours >= 1000 ? $"{Model.TotalStudyHours / 1000.0m:0.#}k" : Model.TotalStudyHours.ToString("0.#"))</div>
-                <div class="stat-label">Giờ học</div>
+                <div class="stat-value" id="totalStudyHoursValue">@(Model.TotalStudyHours >= 1000 ? $"{Model.TotalStudyHours / 1000.0m:0.#}k" : Model.TotalStudyHours.ToString("0.#"))</div>
+                <div class="stat-label">Giờ học công bố</div>
+                <div class="stat-meta" id="totalStudyHoursMeta">@Model.TotalSchedules buổi học đã lên lịch</div>
             </div>
         </div>
     </div>
@@ -139,8 +153,9 @@
                 <i class="bi bi-check-circle-fill"></i>
             </div>
             <div>
-                <div class="stat-value">@Model.CompletionRate%</div>
-                <div class="stat-label">Tỷ lệ hoàn thành</div>
+                <div class="stat-value" id="averageProgressRateValue">@Model.AverageProgressRate.ToString("0.#")%</div>
+                <div class="stat-label">Tiến độ trung bình</div>
+                <div class="stat-meta" id="averageProgressRateMeta">@Model.TrackedEnrollments ghi danh đang theo dõi</div>
             </div>
         </div>
     </div>
@@ -161,28 +176,30 @@
     <div class="col-lg-4">
         <div class="card-panel" style="padding-bottom: 0;">
             <div class="card-panel-title">Dòng thời gian hoạt động</div>
-            @if (Model.RecentActivities.Any())
-            {
-                @foreach (var activity in Model.RecentActivities)
+            <div id="activityTimelineList">
+                @if (Model.RecentActivities.Any())
                 {
-                    <div class="activity-item">
-                        <div class="activity-icon" style="background: @(activity.IconColor)1A; color: @activity.IconColor;">
-                            <i class="bi @activity.Icon"></i>
+                    @foreach (var activity in Model.RecentActivities)
+                    {
+                        <div class="activity-item">
+                            <div class="activity-icon" style="background: @(activity.IconColor)1A; color: @activity.IconColor;">
+                                <i class="bi @activity.Icon"></i>
+                            </div>
+                            <div>
+                                <div class="activity-desc">@activity.Description</div>
+                                <div class="activity-time">@activity.Time</div>
+                            </div>
                         </div>
-                        <div>
-                            <div class="activity-desc">@activity.Description</div>
-                            <div class="activity-time">@activity.Time</div>
-                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="activity-empty">
+                        <i class="bi bi-inbox" style="font-size: 32px;"></i>
+                        <p class="mt-2 mb-0">Chưa có hoạt động nào</p>
                     </div>
                 }
-            }
-            else
-            {
-                <div class="text-center py-4 text-muted">
-                    <i class="bi bi-inbox" style="font-size: 32px;"></i>
-                    <p class="mt-2 mb-0">Chưa có hoạt động nào</p>
-                </div>
-            }
+            </div>
             <a href="#" class="view-all-link">
                 <i class="bi bi-arrow-right"></i> Xem tất cả log hệ thống
             </a>
@@ -192,8 +209,9 @@
 
 @section Scripts {
 <script>
+    const dashboardRefreshUrl = '@Url.Action("LiveData", "Dashboard", new { area = "Admin" })';
     const ctx = document.getElementById('accessChart').getContext('2d');
-    new Chart(ctx, {
+    const accessChart = new Chart(ctx, {
         type: 'line',
         data: {
             labels: @Json.Serialize(Model.AccessChartLabels),
@@ -227,6 +245,155 @@
                 }
             }
         }
+    });
+
+    function formatCompactNumber(value) {
+        if (value >= 1000) {
+            return `${(value / 1000).toFixed(1).replace(/\.0$/, '')}k`;
+        }
+
+        return `${value}`;
+    }
+
+    function formatStudyHours(value) {
+        if (value >= 1000) {
+            return `${(value / 1000).toFixed(1).replace(/\.0$/, '')}k`;
+        }
+
+        return Number(value).toFixed(1).replace(/\.0$/, '');
+    }
+
+    function formatPercent(value) {
+        return `${Number(value).toFixed(1).replace(/\.0$/, '')}%`;
+    }
+
+    function setText(id, text) {
+        const element = document.getElementById(id);
+        if (element) {
+            element.textContent = text;
+        }
+    }
+
+    function createEmptyActivityState() {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'activity-empty';
+        wrapper.innerHTML = `
+            <i class="bi bi-inbox" style="font-size: 32px;"></i>
+            <p class="mt-2 mb-0">Chưa có hoạt động nào</p>
+        `;
+        return wrapper;
+    }
+
+    function createActivityItem(activity) {
+        const item = document.createElement('div');
+        item.className = 'activity-item';
+
+        const icon = document.createElement('div');
+        icon.className = 'activity-icon';
+        icon.style.background = `${activity.iconColor}1A`;
+        icon.style.color = activity.iconColor;
+
+        const iconInner = document.createElement('i');
+        iconInner.className = `bi ${activity.icon}`;
+        icon.appendChild(iconInner);
+
+        const content = document.createElement('div');
+
+        const description = document.createElement('div');
+        description.className = 'activity-desc';
+        description.textContent = activity.description;
+
+        const time = document.createElement('div');
+        time.className = 'activity-time';
+        time.textContent = activity.time;
+
+        content.appendChild(description);
+        content.appendChild(time);
+
+        item.appendChild(icon);
+        item.appendChild(content);
+
+        return item;
+    }
+
+    function renderActivities(activities) {
+        const container = document.getElementById('activityTimelineList');
+        if (!container) {
+            return;
+        }
+
+        container.innerHTML = '';
+
+        if (!activities || activities.length === 0) {
+            container.appendChild(createEmptyActivityState());
+            return;
+        }
+
+        activities.forEach(activity => {
+            container.appendChild(createActivityItem(activity));
+        });
+    }
+
+    function updateDashboard(data) {
+        setText('totalUsersValue', formatCompactNumber(data.totalUsers));
+        setText('totalUsersMeta', `${data.activeUsers} đang hoạt động`);
+        setText('totalCoursesValue', data.totalCourses);
+        setText('totalCoursesMeta', `${data.publishedCourses} đã công bố`);
+        setText('totalInstructorsValue', data.totalInstructors);
+        setText('totalInstructorsMeta', `${data.activeInstructors} đang hoạt động`);
+        setText('totalStudyHoursValue', formatStudyHours(data.totalStudyHours));
+        setText('totalStudyHoursMeta', `${data.totalSchedules} buổi học đã lên lịch`);
+        setText('averageProgressRateValue', formatPercent(data.averageProgressRate));
+        setText('averageProgressRateMeta', `${data.trackedEnrollments} ghi danh đang theo dõi`);
+
+        accessChart.data.labels = data.accessChartLabels;
+        accessChart.data.datasets[0].data = data.accessChartData;
+        accessChart.update();
+
+        renderActivities(data.recentActivities);
+    }
+
+    let isRefreshingDashboard = false;
+
+    async function refreshDashboard() {
+        if (isRefreshingDashboard || document.visibilityState === 'hidden') {
+            return;
+        }
+
+        isRefreshingDashboard = true;
+
+        try {
+            const response = await fetch(dashboardRefreshUrl, {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                cache: 'no-store'
+            });
+
+            if (!response.ok) {
+                throw new Error(`Dashboard refresh failed with status ${response.status}`);
+            }
+
+            const data = await response.json();
+            updateDashboard(data);
+        } catch (error) {
+            console.error('Unable to refresh admin dashboard.', error);
+        } finally {
+            isRefreshingDashboard = false;
+        }
+    }
+
+    const dashboardIntervalId = window.setInterval(refreshDashboard, 10000);
+
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+            refreshDashboard();
+        }
+    });
+
+    window.addEventListener('beforeunload', () => {
+        window.clearInterval(dashboardIntervalId);
     });
 </script>
 }

@@ -1,4 +1,5 @@
 using EduLMS.Web.Models.Identity;
+using EduLMS.Web.Services;
 using EduLMS.Web.ViewModels.Account;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
@@ -11,15 +12,21 @@ namespace EduLMS.Web.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IEmailSender _emailSender;
+        private readonly IActivityLogService _activityLogService;
+        private readonly ILogger<AccountController> _logger;
 
         public AccountController(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
-            IEmailSender emailSender)
+            IEmailSender emailSender,
+            IActivityLogService activityLogService,
+            ILogger<AccountController> logger)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _emailSender = emailSender;
+            _activityLogService = activityLogService;
+            _logger = logger;
         }
 
         // GET: /Account/Login
@@ -62,6 +69,7 @@ namespace EduLMS.Web.Controllers
             if (result.Succeeded)
             {
                 var roles = await _userManager.GetRolesAsync(user);
+                await TryWriteActivityLogAsync(user, roles, "Login");
 
                 if (roles.Contains("Admin"))
                     return RedirectToAction("Index", "Dashboard", new { area = "Admin" });
@@ -199,6 +207,13 @@ namespace EduLMS.Web.Controllers
         [HttpPost]
         public async Task<IActionResult> Logout()
         {
+            var user = await _userManager.GetUserAsync(User);
+            if (user != null)
+            {
+                var roles = await _userManager.GetRolesAsync(user);
+                await TryWriteActivityLogAsync(user, roles, "Logout");
+            }
+
             await _signInManager.SignOutAsync();
             return RedirectToAction("Index", "Home");
         }
@@ -208,6 +223,55 @@ namespace EduLMS.Web.Controllers
         public IActionResult AccessDenied()
         {
             return View();
+        }
+
+        private async Task TryWriteActivityLogAsync(
+            ApplicationUser user,
+            IEnumerable<string> roles,
+            string action)
+        {
+            try
+            {
+                await _activityLogService.LogAsync(
+                    action,
+                    BuildActivityDescription(user, roles, action),
+                    user.Id,
+                    HttpContext.Connection.RemoteIpAddress?.ToString());
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(
+                    ex,
+                    "Unable to create activity log for user {UserId} and action {Action}.",
+                    user.Id,
+                    action);
+            }
+        }
+
+        private static string BuildActivityDescription(
+            ApplicationUser user,
+            IEnumerable<string> roles,
+            string action)
+        {
+            var roleSet = roles.ToHashSet(StringComparer.OrdinalIgnoreCase);
+            var displayName = string.IsNullOrWhiteSpace(user.FullName)
+                ? user.Email ?? user.UserName ?? "Nguoi dung"
+                : user.FullName;
+            var actionText = string.Equals(action, "Logout", StringComparison.OrdinalIgnoreCase)
+                ? "dang xuat he thong"
+                : "dang nhap he thong";
+
+            if (roleSet.Contains("Admin"))
+            {
+                return $"Admin {actionText}";
+            }
+
+            if (roleSet.Contains("Instructor"))
+            {
+                return $"Giang vien {displayName} {actionText}";
+            }
+
+            return $"{displayName} {actionText}";
         }
     }
 }
