@@ -7,6 +7,10 @@ using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 
 var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+var isRender = string.Equals(
+    Environment.GetEnvironmentVariable("RENDER"),
+    "true",
+    StringComparison.OrdinalIgnoreCase);
 builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 
 // Database
@@ -64,7 +68,11 @@ if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
-    app.UseHttpsRedirection();
+
+    if (!isRender)
+    {
+        app.UseHttpsRedirection();
+    }
 }
 app.UseStaticFiles();
 
