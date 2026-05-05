@@ -34,30 +34,65 @@ namespace EduLMS.Web.Controllers
         /// SePay sends transaction data when a bank transfer is received.
         /// Must respond with {"success": true} within 5 seconds.
         /// </summary>
+        [HttpGet("sepay")]
+        public IActionResult SePayHealth()
+        {
+            return Ok(new
+            {
+                success = true,
+                endpoint = "/api/webhook/sepay",
+                method = "POST",
+                status = "ready"
+            });
+        }
+
         [HttpPost("sepay")]
         public async Task<IActionResult> SePay([FromBody] SePayWebhookPayload payload)
         {
-            _logger.LogInformation("SePay webhook received: Content={Content}, Amount={Amount}",
-                payload?.Content, payload?.TransferAmount);
+            _logger.LogInformation(
+                "SePay webhook received: Content={Content}, Description={Description}, ReferenceCode={ReferenceCode}, Amount={Amount}, Account={AccountNumber}, Type={TransferType}",
+                payload?.Content,
+                payload?.Description,
+                payload?.ReferenceCode,
+                payload?.TransferAmount,
+                payload?.AccountNumber,
+                payload?.TransferType);
 
-            if (payload == null || string.IsNullOrEmpty(payload.Content))
+            if (payload == null)
+            {
+                _logger.LogWarning("SePay webhook payload is null.");
                 return Ok(new { success = true });
+            }
 
             // Extract order code from transfer content (e.g., "EDLMS250318143521123")
             // SePay sends the transfer description which should contain our order code
-            var content = payload.Content.ToUpper().Trim();
+            var searchableContent = string.Join(" ", new[]
+                {
+                    payload.Content,
+                    payload.Description,
+                    payload.ReferenceCode
+                }
+                .Where(value => !string.IsNullOrWhiteSpace(value)))
+                .ToUpperInvariant()
+                .Trim();
+
+            if (string.IsNullOrWhiteSpace(searchableContent))
+            {
+                _logger.LogWarning("SePay webhook does not contain content/description/referenceCode.");
+                return Ok(new { success = true });
+            }
 
             // Find payment by transaction code in the transfer content
             var payment = await _db.Payments
                 .Include(p => p.Course)
                 .Where(p => p.Status == PaymentStatus.Pending
                     && p.TransactionCode != null
-                    && content.Contains(p.TransactionCode.ToUpper()))
+                    && searchableContent.Contains(p.TransactionCode.ToUpper()))
                 .FirstOrDefaultAsync();
 
             if (payment == null)
             {
-                _logger.LogWarning("No matching pending payment found for content: {Content}", content);
+                _logger.LogWarning("No matching pending payment found for webhook searchable content: {Content}", searchableContent);
                 return Ok(new { success = true });
             }
 
