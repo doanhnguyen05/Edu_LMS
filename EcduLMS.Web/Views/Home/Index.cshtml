@@ -167,7 +167,11 @@
                                             @course.OriginalPrice.ToString("N0") <text>₫</text>
                                         }
                                     </span>
-                                    <a href="#" class="btn btn-sm btn-outline-primary">Xem chi tiết</a>
+                                    <button type="button"
+                                            class="btn btn-sm btn-outline-primary"
+                                            data-course-detail-id="@course.Id">
+                                        Xem chi tiết
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -200,7 +204,7 @@
                                 <p class="course-instructor"><i class="bi bi-person me-1"></i>@placeholderInstructors[c]</p>
                                 <div class="d-flex justify-content-between align-items-center">
                                     <span class="course-price">@placeholderPrices[c]</span>
-                                    <a href="#" class="btn btn-sm btn-outline-primary">Xem chi tiết</a>
+                                    <a asp-controller="Courses" asp-action="Index" class="btn btn-sm btn-outline-primary">Xem chi tiết</a>
                                 </div>
                             </div>
                         </div>
@@ -210,6 +214,158 @@
         </div>
     </div>
 </section>
+
+<!-- Public Course Detail Modal -->
+<div class="modal fade" id="homeCourseDetailModal" tabindex="-1" aria-labelledby="homeCourseDetailTitle" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header border-0 pb-0">
+                <div>
+                    <span class="badge bg-primary mb-2" id="homeCourseDetailCategory"></span>
+                    <h5 class="modal-title fw-bold" id="homeCourseDetailTitle">Đang tải...</h5>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-4">
+                    <div class="col-md-5">
+                        <div class="ratio ratio-16x9 rounded overflow-hidden bg-light">
+                            <img id="homeCourseDetailImage" src="" alt="" class="w-100 h-100" style="object-fit: cover; display: none;" />
+                            <div id="homeCourseDetailImageFallback" class="d-flex align-items-center justify-content-center text-secondary">
+                                <i class="bi bi-journal-code" style="font-size: 42px;"></i>
+                            </div>
+                        </div>
+                        <div class="mt-3 small text-muted">
+                            <div><i class="bi bi-person me-1"></i><span id="homeCourseDetailInstructor"></span></div>
+                            <div><i class="bi bi-clock me-1"></i><span id="homeCourseDetailDuration"></span> giờ học</div>
+                            <div><i class="bi bi-star-fill me-1 text-warning"></i><span id="homeCourseDetailRating"></span> (<span id="homeCourseDetailRatingCount"></span> đánh giá)</div>
+                        </div>
+                    </div>
+                    <div class="col-md-7">
+                        <h6 class="fw-bold mb-2">Giới thiệu khóa học</h6>
+                        <p class="text-muted" id="homeCourseDetailDescription">Đang tải thông tin khóa học...</p>
+
+                        <h6 class="fw-bold mb-2">Nội dung chính</h6>
+                        <ul class="list-unstyled mb-0" id="homeCourseDetailChapters">
+                            <li class="text-muted">Đang tải nội dung...</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="small text-muted">Giá đăng ký</div>
+                    <div class="fs-4 fw-bold text-primary" id="homeCourseDetailPrice"></div>
+                </div>
+                <a href="#" class="btn btn-primary px-4" id="homeCourseDetailAction">
+                    <i class="bi bi-box-arrow-in-right me-1"></i>Đăng nhập để đăng ký
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        (() => {
+            const detailUrl = '@Url.Action("GetDetail", "Courses")';
+            const modalEl = document.getElementById('homeCourseDetailModal');
+            const modal = new bootstrap.Modal(modalEl);
+
+            const setText = (id, value) => {
+                document.getElementById(id).textContent = value ?? '';
+            };
+
+            const escapeHtml = value => (value ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+
+            const setLoadingState = () => {
+                setText('homeCourseDetailCategory', '');
+                setText('homeCourseDetailTitle', 'Đang tải...');
+                setText('homeCourseDetailInstructor', '');
+                setText('homeCourseDetailDuration', '');
+                setText('homeCourseDetailRating', '');
+                setText('homeCourseDetailRatingCount', '');
+                setText('homeCourseDetailDescription', 'Đang tải thông tin khóa học...');
+                setText('homeCourseDetailPrice', '');
+                document.getElementById('homeCourseDetailChapters').innerHTML = '<li class="text-muted">Đang tải nội dung...</li>';
+                document.getElementById('homeCourseDetailAction').href = '#';
+                document.getElementById('homeCourseDetailAction').innerHTML = '<i class="bi bi-box-arrow-in-right me-1"></i>Đăng nhập để đăng ký';
+
+                const image = document.getElementById('homeCourseDetailImage');
+                image.removeAttribute('src');
+                image.style.display = 'none';
+                document.getElementById('homeCourseDetailImageFallback').style.display = 'flex';
+            };
+
+            const renderCourseDetail = data => {
+                const image = document.getElementById('homeCourseDetailImage');
+                const fallback = document.getElementById('homeCourseDetailImageFallback');
+                if (data.coverImageUrl) {
+                    image.src = data.coverImageUrl;
+                    image.alt = data.name;
+                    image.style.display = 'block';
+                    fallback.style.display = 'none';
+                } else {
+                    image.style.display = 'none';
+                    fallback.style.display = 'flex';
+                }
+
+                setText('homeCourseDetailCategory', data.categoryName);
+                setText('homeCourseDetailTitle', data.name);
+                setText('homeCourseDetailInstructor', data.instructorName);
+                setText('homeCourseDetailDuration', data.durationHours);
+                setText('homeCourseDetailRating', data.rating);
+                setText('homeCourseDetailRatingCount', data.ratingCount);
+                setText('homeCourseDetailDescription', data.description);
+                setText('homeCourseDetailPrice', data.price);
+
+                const chapters = document.getElementById('homeCourseDetailChapters');
+                if (data.chapters?.length) {
+                    chapters.innerHTML = data.chapters
+                        .map(chapter => `<li class="mb-2"><i class="bi bi-play-circle text-primary me-2"></i>${escapeHtml(chapter)}</li>`)
+                        .join('');
+
+                    if (data.totalChapters > data.chapters.length) {
+                        chapters.innerHTML += `<li class="text-muted fst-italic"><i class="bi bi-three-dots me-2"></i>và ${data.totalChapters - data.chapters.length} chương khác</li>`;
+                    }
+                } else {
+                    chapters.innerHTML = '<li class="text-muted">Chưa có nội dung</li>';
+                }
+
+                const action = document.getElementById('homeCourseDetailAction');
+                action.href = data.isEnrolled ? data.trainingUrl : data.actionUrl;
+                action.className = data.isEnrolled ? 'btn btn-success px-4' : 'btn btn-primary px-4';
+                action.innerHTML = data.isEnrolled
+                    ? '<i class="bi bi-play-fill me-1"></i>Tiếp tục học'
+                    : (data.isAnonymous
+                        ? '<i class="bi bi-box-arrow-in-right me-1"></i>Đăng nhập để đăng ký'
+                        : '<i class="bi bi-lightning-charge-fill me-1"></i>Đăng ký ngay');
+            };
+
+            document.querySelectorAll('[data-course-detail-id]').forEach(button => {
+                button.addEventListener('click', async () => {
+                    setLoadingState();
+                    modal.show();
+
+                    try {
+                        const response = await fetch(`${detailUrl}?id=${button.dataset.courseDetailId}`);
+                        if (!response.ok) throw new Error('Cannot load course detail');
+                        renderCourseDetail(await response.json());
+                    } catch {
+                        setText('homeCourseDetailTitle', 'Không thể tải thông tin khóa học');
+                        setText('homeCourseDetailDescription', 'Vui lòng thử lại sau hoặc mở trang khám phá khóa học.');
+                        document.getElementById('homeCourseDetailChapters').innerHTML = '';
+                    }
+                });
+            });
+        })();
+    </script>
+}
 
 <!-- Instructors -->
 <section class="section-light">

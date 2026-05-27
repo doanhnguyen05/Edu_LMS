@@ -87,33 +87,60 @@ namespace EduLMS.Web.Controllers
             if (avatarFile != null && avatarFile.Length > 0)
             {
                 var allowedTypes = new[] { "image/jpeg", "image/png", "image/webp" };
+                var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp" };
                 if (!allowedTypes.Contains(avatarFile.ContentType))
                 {
                     ModelState.AddModelError("", "Chỉ chấp nhận file ảnh JPG, PNG hoặc WebP.");
+                    model.AvatarUrl = user.AvatarUrl;
                     return View(model);
                 }
                 if (avatarFile.Length > 2 * 1024 * 1024)
                 {
                     ModelState.AddModelError("", "File ảnh không được vượt quá 2MB.");
+                    model.AvatarUrl = user.AvatarUrl;
+                    return View(model);
+                }
+
+                var ext = Path.GetExtension(avatarFile.FileName).ToLowerInvariant();
+                if (!allowedExtensions.Contains(ext))
+                {
+                    ModelState.AddModelError("", "Định dạng ảnh không hợp lệ.");
+                    model.AvatarUrl = user.AvatarUrl;
                     return View(model);
                 }
 
                 var uploadsDir = Path.Combine(_env.WebRootPath, "uploads", "avatars");
                 Directory.CreateDirectory(uploadsDir);
 
-                var ext = Path.GetExtension(avatarFile.FileName);
-                var fileName = $"{user.Id}{ext}";
+                var oldAvatarPath = ResolveLocalAvatarPath(user.AvatarUrl);
+                var fileName = $"{user.Id}-{Guid.NewGuid():N}{ext}";
                 var filePath = Path.Combine(uploadsDir, fileName);
 
                 using var stream = new FileStream(filePath, FileMode.Create);
                 await avatarFile.CopyToAsync(stream);
 
                 user.AvatarUrl = $"/uploads/avatars/{fileName}";
+
+                if (oldAvatarPath != null && System.IO.File.Exists(oldAvatarPath))
+                    System.IO.File.Delete(oldAvatarPath);
             }
 
+            user.UpdatedAt = DateTime.UtcNow;
             await _userManager.UpdateAsync(user);
             TempData["SuccessMessage"] = "Cập nhật hồ sơ thành công!";
             return RedirectToAction(nameof(Index));
+        }
+
+        private string? ResolveLocalAvatarPath(string? avatarUrl)
+        {
+            if (string.IsNullOrWhiteSpace(avatarUrl) || !avatarUrl.StartsWith("/uploads/avatars/"))
+                return null;
+
+            var fileName = Path.GetFileName(avatarUrl);
+            if (string.IsNullOrWhiteSpace(fileName))
+                return null;
+
+            return Path.Combine(_env.WebRootPath, "uploads", "avatars", fileName);
         }
 
         private void SetLayout()

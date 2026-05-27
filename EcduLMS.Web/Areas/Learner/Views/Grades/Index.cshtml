@@ -68,6 +68,13 @@
     <h4><i class="bi bi-award me-2"></i>Kết quả học tập</h4>
 </div>
 
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-warning" role="alert">
+        <i class="bi bi-exclamation-triangle me-2"></i>@TempData["ErrorMessage"]
+    </div>
+}
+
 <div class="row">
     @foreach (var grade in Model.CourseGrades)
     {

@@ -154,7 +154,20 @@ namespace EduLMS.Web.Controllers
                     <p>Liên kết này sẽ hết hạn sau 24 giờ.</p>
                     <p>Nếu bạn không yêu cầu điều này, hãy bỏ qua email này.</p>";
 
-                await _emailSender.SendEmailAsync(user.Email!, "Đặt lại mật khẩu - EduLMS", body);
+                try
+                {
+                    await _emailSender.SendEmailAsync(user.Email!, "Đặt lại mật khẩu - EduLMS", body);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(
+                        ex,
+                        "Unable to send password reset email to {Email}.",
+                        user.Email);
+
+                    TempData["ErrorMessage"] = "Hiện chưa thể gửi email khôi phục mật khẩu. Vui lòng thử lại sau hoặc liên hệ quản trị viên.";
+                    return View(model);
+                }
             }
 
             // Always show success to prevent email enumeration

@@ -6,12 +6,21 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+var port = Environment.GetEnvironmentVariable("PORT");
+var aspNetCoreUrls = Environment.GetEnvironmentVariable("ASPNETCORE_URLS");
 var isRender = string.Equals(
     Environment.GetEnvironmentVariable("RENDER"),
     "true",
     StringComparison.OrdinalIgnoreCase);
-builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
+
+if (!string.IsNullOrWhiteSpace(port))
+{
+    builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
+}
+else if (string.IsNullOrWhiteSpace(aspNetCoreUrls))
+{
+    builder.WebHost.UseUrls("http://localhost:5000");
+}
 
 // Database
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
@@ -32,6 +41,7 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
     options.SignIn.RequireConfirmedEmail = false;
 })
 .AddEntityFrameworkStores<ApplicationDbContext>()
+.AddErrorDescriber<EduLMS.Web.Services.VietnameseIdentityErrorDescriber>()
 .AddDefaultTokenProviders();
 
 // Cookie configuration
@@ -69,7 +79,12 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 
-    if (!isRender)
+    var hasHttpsEndpoint =
+        !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("ASPNETCORE_HTTPS_PORT")) ||
+        !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("HTTPS_PORT")) ||
+        (aspNetCoreUrls?.Contains("https://", StringComparison.OrdinalIgnoreCase) ?? false);
+
+    if (!isRender && hasHttpsEndpoint)
     {
         app.UseHttpsRedirection();
     }

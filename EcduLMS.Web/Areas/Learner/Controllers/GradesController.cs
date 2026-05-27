@@ -60,18 +60,6 @@ namespace EduLMS.Web.Areas.Learner.Controllers
                 };
             }).ToList();
 
-            // Demo data if empty
-            if (!courseGrades.Any())
-            {
-                courseGrades = new List<CourseGradeItem>
-                {
-                    new() { CourseId = 1, CourseName = "Lập trình Python từ cơ bản đến nâng cao", AverageScore = 8.5m, GradedProgress = "3/5", Status = "Đang học" },
-                    new() { CourseId = 2, CourseName = "React & Redux Masterclass", AverageScore = 7.2m, GradedProgress = "2/4", Status = "Đang học" },
-                    new() { CourseId = 3, CourseName = "HTML & CSS cho người mới bắt đầu", AverageScore = 9.1m, GradedProgress = "4/4", Status = "Hoàn thành" },
-                    new() { CourseId = 4, CourseName = "JavaScript Fundamentals", AverageScore = null, GradedProgress = "0/3", Status = "Chưa bắt đầu" }
-                };
-            }
-
             var model = new GradesOverviewViewModel
             {
                 CourseGrades = courseGrades
@@ -90,26 +78,15 @@ namespace EduLMS.Web.Areas.Learner.Controllers
                         .ThenInclude(ch => ch.Assignments)
                             .ThenInclude(a => a.Submissions.Where(s => s.UserId == userId))
                                 .ThenInclude(s => s.Grade)
+                .Include(e => e.Course)
+                    .ThenInclude(c => c.Chapters)
+                        .ThenInclude(ch => ch.Lessons)
                 .FirstOrDefaultAsync(e => e.CourseId == id && e.UserId == userId);
 
             if (enrollment == null)
             {
-                // Demo data
-                var demoModel = new GradeCourseDetailViewModel
-                {
-                    CourseId = id,
-                    CourseName = "Lập trình Python từ cơ bản đến nâng cao",
-                    AverageScore = 8.5m,
-                    Assignments = new List<GradeAssignmentItem>
-                    {
-                        new() { AssignmentId = 1, SubmissionId = 1, Title = "Bài tập: Xây dựng máy tính đơn giản", Type = "Assignment", Score = 8.0m, MaxScore = 10, Status = "Pass" },
-                        new() { AssignmentId = 2, SubmissionId = 2, Title = "Quiz: Kiểm tra vòng lặp", Type = "Quiz", Score = 9.5m, MaxScore = 10, Status = "Pass" },
-                        new() { AssignmentId = 3, SubmissionId = 3, Title = "Project: Ứng dụng quản lý danh bạ", Type = "Project", Score = 8.0m, MaxScore = 10, Status = "Pass" },
-                        new() { AssignmentId = 4, SubmissionId = 0, Title = "Bài tập: Xử lý file nâng cao", Type = "Assignment", Score = null, MaxScore = 10, Status = "Chưa chấm" },
-                        new() { AssignmentId = 5, SubmissionId = 0, Title = "Final Project: Web Scraping", Type = "Project", Score = null, MaxScore = 10, Status = "Chưa nộp", CanStartAssignment = true }
-                    }
-                };
-                return View(demoModel);
+                TempData["ErrorMessage"] = "Bạn chưa đăng ký khóa học này hoặc khóa học không tồn tại.";
+                return RedirectToAction(nameof(Index));
             }
 
             var orderedLessons = BuildOrderedLessons(enrollment.Course);
@@ -246,18 +223,8 @@ namespace EduLMS.Web.Areas.Learner.Controllers
 
             if (submission?.Grade == null)
             {
-                // Demo data
-                var demoModel = new GradeDetailViewModel
-                {
-                    AssignmentTitle = "Bài tập: Xây dựng máy tính đơn giản",
-                    Type = "Assignment",
-                    Score = 8.0m,
-                    MaxScore = 10,
-                    PassStatus = "Pass",
-                    Comment = "Bài làm tốt! Code sạch và có xử lý ngoại lệ đầy đủ. Cần cải thiện thêm phần giao diện người dùng và thêm tính năng lưu lịch sử.",
-                    CourseId = 1
-                };
-                return View(demoModel);
+                TempData["ErrorMessage"] = "Không tìm thấy kết quả chấm điểm cho bài làm này.";
+                return RedirectToAction(nameof(Index));
             }
 
             var model = new GradeDetailViewModel

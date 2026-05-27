@@ -22,8 +22,11 @@ namespace EduLMS.Web.Services
             var host = smtpConfig["Host"] ?? "smtp.gmail.com";
             var port = int.Parse(smtpConfig["Port"] ?? "587");
             var username = smtpConfig["Username"] ?? "";
-            var password = smtpConfig["Password"] ?? "";
+            var password = (smtpConfig["Password"] ?? "").Replace(" ", "");
             var fromName = smtpConfig["FromName"] ?? "EduLMS";
+
+            if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
+                throw new InvalidOperationException("Chưa cấu hình tài khoản SMTP để gửi email.");
 
             var message = new MimeMessage();
             message.From.Add(new MailboxAddress(fromName, username));
